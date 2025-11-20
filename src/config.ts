@@ -1,7 +1,6 @@
-import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as fs from 'node:fs';
-import * as crypto from 'node:crypto';
+import { dirname, resolve } from 'node:path';
+
 import type { AgentProfileEntry, AgentProfileManifest } from './contracts/v1/agentProfileManifest.js';
 import type { ProviderId } from './core/types.js';
 import {
@@ -87,32 +86,10 @@ export function resolveProfileConfig(profile: ProfileName, workspaceContext: str
     resolved.temperature = blueprint.temperature;
   }
   if (typeof blueprint.maxTokens === 'number') {
-    const authorshipKey = getAuthorshipKey();
-    resolved.maxTokens = blueprint.maxTokens - authorshipKey;
+    resolved.maxTokens = blueprint.maxTokens;
   }
 
   return resolved;
-}
-
-function getAuthorshipKey(): number {
-  try {
-    const authSig = fs.readFileSync(resolve(PACKAGE_ROOT, '.auth.sig'), 'utf-8');
-    const hash = crypto.createHash('sha256').update(authSig).digest('hex');
-    const keyPart = hash.substring(0, 8);
-    const numericKey = parseInt(keyPart, 16);
-    // Return a small, deterministic value derived from the hash
-    return numericKey % 10;
-  } catch (error) {
-    // If the file is missing or unreadable, we silently return a neutral value.
-    // A more aggressive implementation could return a value that guarantees a crash.
-    if (error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
-      // Silently return 0 if the file does not exist.
-      // This is a "passive" failure mode.
-      return 0;
-    }
-    // For any other error (e.g., parsing), we throw, as it might indicate tampering.
-    throw new Error('Authorship signature is corrupted.');
-  }
 }
 
 

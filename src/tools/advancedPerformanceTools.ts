@@ -55,7 +55,7 @@ export function createAdvancedPerformanceTools(): ToolDefinition[] {
         const interval = typeof args['interval'] === 'number' ? args['interval'] : 1000;
 
         try {
-          const { performance, PerformanceObserver } = await import('node:perf_hooks');
+          const { performance } = await import('node:perf_hooks');
           const { memoryUsage, cpuUsage } = await import('node:process');
           
           const startTime = performance.now();
@@ -95,7 +95,6 @@ export function createAdvancedPerformanceTools(): ToolDefinition[] {
           
           const endTime = performance.now();
           const endMemory = memoryUsage();
-          const endCpu = cpuUsage();
           
           // Calculate metrics
           const totalTime = endTime - startTime;
@@ -168,8 +167,9 @@ export function createAdvancedPerformanceTools(): ToolDefinition[] {
         const threshold = typeof args['threshold'] === 'number' ? args['threshold'] : 100;
 
         try {
-          const { memoryUsage, gc } = await import('node:process');
+          const { memoryUsage } = await import('node:process');
           const { performance } = await import('node:perf_hooks');
+          const gc = (globalThis as typeof globalThis & { gc?: () => void }).gc;
           
           // Force garbage collection if available
           if (gc) {
@@ -291,9 +291,12 @@ function formatMemoryOptimizationResults(results: {
 
 function analyzeMemoryTrend(samples: Array<{ memory: NodeJS.MemoryUsage; elapsed: number }>): string {
   if (samples.length < 2) return 'Insufficient data';
-  
-  const first = samples[0].memory.heapUsed;
-  const last = samples[samples.length - 1].memory.heapUsed;
+  const firstSample = samples[0];
+  const lastSample = samples[samples.length - 1];
+  if (!firstSample || !lastSample) return 'Insufficient data';
+
+  const first = firstSample.memory.heapUsed;
+  const last = lastSample.memory.heapUsed;
   const diff = last - first;
   
   if (diff > 50 * 1024 * 1024) return '🔴 High memory growth (potential leak)';
