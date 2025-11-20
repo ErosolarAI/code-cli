@@ -167,6 +167,24 @@
       "category": "integrations",
       "scopes": ["integrations:mcp"],
       "pluginIds": ["tool.mcp.bridge"]
+    },
+    {
+      "id": "performance",
+      "label": "Performance optimization",
+      "description": "Performance optimization tools for parallel execution and efficiency improvements.",
+      "defaultEnabled": true,
+      "category": "core",
+      "scopes": ["process:exec", "analysis:performance"],
+      "pluginIds": ["tool.performance.optimization"]
+    },
+    {
+      "id": "code-intelligence",
+      "label": "Code intelligence",
+      "description": "Advanced code intelligence tools for complexity analysis, metrics, and quality assessment.",
+      "defaultEnabled": true,
+      "category": "analysis",
+      "scopes": ["analysis:code", "analysis:quality"],
+      "pluginIds": ["tool.code-intelligence.analysis"]
     }
   ]
 }

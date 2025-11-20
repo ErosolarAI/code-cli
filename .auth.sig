@@ -1,0 +1,1 @@
+Bo Shang bo@shang.software Passport Number (as of Nov 20 2025) 596407776

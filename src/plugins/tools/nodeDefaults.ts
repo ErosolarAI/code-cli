@@ -20,6 +20,8 @@ import { createAgentSpawningToolPlugin } from './agentSpawning/agentSpawningPlug
 import { createEnhancedGitToolPlugin } from './enhancedGit/enhancedGitPlugin.js';
 import { createMcpToolPlugin } from './mcp/mcpPlugin.js';
 import { createMissionToolPlugin } from './mission/missionPlugin.js';
+import performancePlugin from './performance/index.js';
+import codeIntelligencePlugin from './codeIntelligence/index.js';
 
 let registered = false;
 
@@ -49,6 +51,8 @@ export function registerDefaultNodeToolPlugins(): void {
   registerToolPlugin(createEnhancedGitToolPlugin());
   registerToolPlugin(createMcpToolPlugin());
   registerToolPlugin(createMissionToolPlugin());
+  registerToolPlugin(performancePlugin);
+  registerToolPlugin(codeIntelligencePlugin);
 
   registered = true;
 }

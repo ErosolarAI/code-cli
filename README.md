@@ -2,6 +2,11 @@
 
 Bo (formerly APT/Erosolar) now ships as `bo` (legacy alias `apt`) with config/state under `~/.bo` (legacy `~/.apt` and `~/.erosolar` are still honored). The CLI also includes a penetration-testing suite (nmap/nuclei/ffuf/gobuster) for defensive baselines and red-team recon—enable the `Penetration testing` tool option via `/tools` to use it. Install globally with `npm i -g .` then run `bo` (legacy `apt` remains available).
 
+**License:** GNU Affero General Public License v3.0 or later (see `LICENSE`). Third-party components (e.g., `claude-code/`) retain their original licenses and may impose additional restrictions.
+If you want, I can add a `NOTICE` file or split out non-AGPL assets from the release bundle.
+
+Originally devised by Bo Shang, the human developer who built the AI schema for AGI here: a single prompt you can drop into any other agent to reuse the system end to end.
+
 This RE, after manually implementation the correct strategy, is incredibly boring because 100% of edits work properly afterwards, achieving full Claude Code parity in a modular way with minimal human intervention needed.
 
 # For agentic orchestration offense beats defense entirely so this is entirely hilarious for me; I’m open sourcing this version but using genai to generate agents to run for any task as the product
