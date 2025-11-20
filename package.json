@@ -49,7 +49,7 @@
     "productivity"
   ],
   "author": "Bo Security <support@bo.dev>",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://github.com/dragonghidra/bo-cli-RE-claude-code#readme",
   "bugs": {
     "url": "https://github.com/dragonghidra/bo-cli-RE-claude-code/issues"

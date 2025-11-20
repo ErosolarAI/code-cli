@@ -304,7 +304,7 @@ export class ShellUIAdapter {
   /**
    * End processing
    */
-  endProcessing(message: string = 'Ready for prompts'): void {
+  endProcessing(message: string = 'Waiting for next instruction...'): void {
     this.isProcessing = false;
 
     if (this.config.useUnifiedUI) {

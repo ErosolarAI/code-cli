@@ -30,3 +30,15 @@ export {
 } from './testingCapability.js';
 export { McpCapabilityModule } from './mcpCapability.js';
 export { PentestCapabilityModule, type PentestCapabilityOptions } from './pentestCapability.js';
+export {
+  TaskManagementCapabilityModule,
+  type TaskManagementCapabilityOptions,
+} from './taskManagementCapability.js';
+export {
+  PerformanceCapabilityModule,
+  type PerformanceCapabilityOptions,
+} from './performanceCapability.js';
+export {
+  CodeIntelligenceCapabilityModule,
+  type CodeIntelligenceCapabilityOptions,
+} from './codeIntelligenceCapability.js';

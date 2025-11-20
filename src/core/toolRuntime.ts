@@ -43,6 +43,7 @@ export interface ToolDefinition {
   parameters?: JSONSchemaObject;
   handler: ToolHandler;
   cacheable?: boolean; // Whether results can be cached
+  normalizeArguments?: (args: Record<string, unknown>) => Record<string, unknown>;
 }
 
 export interface ToolSuite {
@@ -152,7 +153,16 @@ export class ToolRuntime {
       arguments: normalizeToolArguments(call.arguments),
     };
 
-    const policyDecision = this.evaluatePolicy(normalizedCall, record.definition);
+    const coercedArgs = record.definition.normalizeArguments
+      ? record.definition.normalizeArguments(normalizedCall.arguments)
+      : normalizedCall.arguments;
+
+    const normalizedExecutionCall: ToolCallRequest = {
+      ...normalizedCall,
+      arguments: coercedArgs,
+    };
+
+    const policyDecision = this.evaluatePolicy(normalizedExecutionCall, record.definition);
     if (policyDecision?.action === 'block') {
       const message = policyDecision.reason ?? `Tool "${call.name}" blocked by policy.`;
       this.timeline?.record({
@@ -162,12 +172,12 @@ export class ToolRuntime {
         message,
         metadata: { toolCallId: call.id },
       });
-      this.observer?.onToolError?.(normalizedCall, message);
+      this.observer?.onToolError?.(normalizedExecutionCall, message);
       return message;
     }
 
     const callArgs = {
-      ...normalizedCall.arguments,
+      ...normalizedExecutionCall.arguments,
       ...(policyDecision?.sanitizedArguments ?? {}),
     };
 
@@ -176,22 +186,22 @@ export class ToolRuntime {
 
     // Try to get from cache
     if (this.enableCache && isCacheable) {
-      const cacheKey = this.getCacheKey({ ...normalizedCall, arguments: callArgs });
+      const cacheKey = this.getCacheKey({ ...normalizedExecutionCall, arguments: callArgs });
       const cached = this.cache.get(cacheKey);
 
       if (cached && Date.now() - cached.timestamp < this.cacheTTLMs) {
-        this.observer?.onCacheHit?.(normalizedCall);
-        this.observer?.onToolResult?.(normalizedCall, cached.result);
+        this.observer?.onCacheHit?.(normalizedExecutionCall);
+        this.observer?.onToolResult?.(normalizedExecutionCall, cached.result);
         return cached.result;
       }
     }
 
-    this.observer?.onToolStart?.(normalizedCall);
+    this.observer?.onToolStart?.(normalizedExecutionCall);
     this.timeline?.record({
       action: 'tool_execution',
       status: 'started',
-      tool: normalizedCall.name,
-      metadata: { toolCallId: normalizedCall.id, arguments: callArgs },
+      tool: normalizedExecutionCall.name,
+      metadata: { toolCallId: normalizedExecutionCall.id, arguments: callArgs },
     });
 
     if (policyDecision?.action === 'dry-run') {
@@ -199,11 +209,11 @@ export class ToolRuntime {
       this.timeline?.record({
         action: 'tool_execution',
         status: 'skipped',
-        tool: normalizedCall.name,
+        tool: normalizedExecutionCall.name,
         message: preview,
-        metadata: { toolCallId: normalizedCall.id },
+        metadata: { toolCallId: normalizedExecutionCall.id },
       });
-      this.observer?.onToolResult?.(normalizedCall, preview);
+      this.observer?.onToolResult?.(normalizedExecutionCall, preview);
       return preview;
     }
 
@@ -228,7 +238,7 @@ export class ToolRuntime {
 
       // Cache the result if cacheable
       if (this.enableCache && isCacheable) {
-        const cacheKey = this.getCacheKey({ ...normalizedCall, arguments: callArgs });
+        const cacheKey = this.getCacheKey({ ...normalizedExecutionCall, arguments: callArgs });
         this.cache.set(cacheKey, {
           result: output,
           timestamp: Date.now(),
@@ -238,11 +248,11 @@ export class ToolRuntime {
       this.timeline?.record({
         action: 'tool_execution',
         status: 'succeeded',
-        tool: normalizedCall.name,
+        tool: normalizedExecutionCall.name,
         message: 'completed',
-        metadata: { toolCallId: normalizedCall.id },
+        metadata: { toolCallId: normalizedExecutionCall.id },
       });
-      this.observer?.onToolResult?.(normalizedCall, output);
+      this.observer?.onToolResult?.(normalizedExecutionCall, output);
       return output;
     } catch (error) {
       let formatted: string;
@@ -255,11 +265,11 @@ export class ToolRuntime {
       this.timeline?.record({
         action: 'tool_execution',
         status: 'failed',
-        tool: normalizedCall.name,
+        tool: normalizedExecutionCall.name,
         message: formatted,
-        metadata: { toolCallId: normalizedCall.id },
+        metadata: { toolCallId: normalizedExecutionCall.id },
       });
-      this.observer?.onToolError?.(normalizedCall, formatted);
+      this.observer?.onToolError?.(normalizedExecutionCall, formatted);
       return formatted;
     }
   }

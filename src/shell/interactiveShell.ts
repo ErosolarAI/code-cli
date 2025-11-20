@@ -178,6 +178,7 @@ const CONTEXT_CLEANUP_SYSTEM_PROMPT = `You condense earlier IDE collaboration lo
 - Clearly distinguish resolved work from outstanding follow-ups.
 - Keep the response under roughly 200 words, prefer short bullet lists.
 - Never call tools or run shell commands; respond with plain Markdown text only.`;
+const IDLE_PROMPT_MESSAGE = 'Waiting for next instruction...';
 
 export class InteractiveShell {
   private readonly rl: readline.Interface;
@@ -576,7 +577,7 @@ export class InteractiveShell {
   }
 
   private setIdleStatus(detail?: string): void {
-    this.statusTracker.setBase('Ready for prompts', {
+    this.statusTracker.setBase(IDLE_PROMPT_MESSAGE, {
       detail: detail ?? this.describeModelDetail(),
       tone: 'success',
     });
@@ -1920,10 +1921,10 @@ export class InteractiveShell {
         display.showError(error instanceof Error ? error.message : String(error));
       }
     } finally {
-      display.stopThinking();
+      display.stopThinking(IDLE_PROMPT_MESSAGE);
       this.isProcessing = false;
       this.promptSkin.setOverlayVisible(true);
-      this.uiAdapter.endProcessing('Ready for prompts');
+      this.uiAdapter.endProcessing(IDLE_PROMPT_MESSAGE);
       this.setIdleStatus();
       display.newLine();
     }

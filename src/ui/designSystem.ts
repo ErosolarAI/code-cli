@@ -113,12 +113,21 @@ export function renderCallout(message: string, options: CalloutOptions = {}): st
     }
   }
 
+  const tagline =
+    tone === 'danger'
+      ? 'priority channel • failsafe engaged'
+      : tone === 'warning'
+        ? 'caution lane • heightened awareness'
+        : 'signal lane • neon overlay';
+
   return renderPanel(paragraphs, {
     icon,
     title,
+    tagline,
     accentColor: accent,
     borderColor: accent,
     width,
+    halo: true,
   });
 }
 

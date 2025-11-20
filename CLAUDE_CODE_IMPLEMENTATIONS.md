@@ -801,4 +801,4 @@ The Bo CLI is now positioned as a **fully-featured alternative to Claude Code** 
 **Version:** 1.0.0
 **Last Updated:** November 18, 2025
 **Author:** Claude Code Implementation Team
-**License:** MIT
+**License:** GNU Affero General Public License v3.0 or later

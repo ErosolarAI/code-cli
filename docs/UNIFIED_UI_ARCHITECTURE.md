@@ -208,7 +208,7 @@ const observer = adapter.createToolObserver();
 // Processing lifecycle
 adapter.startProcessing('Working on your request');
 // ... process request ...
-adapter.endProcessing('Ready for prompts');
+adapter.endProcessing('Waiting for next instruction...');
 
 // Context updates
 adapter.updateContextUsage(75); // 75% used
@@ -251,7 +251,7 @@ uiAdapter.startProcessing('Working on your request');
 uiAdapter.updateContextUsage(percentageUsed);
 
 // When complete
-uiAdapter.endProcessing('Ready for prompts');
+uiAdapter.endProcessing('Waiting for next instruction...');
 ```
 
 ### Step 4: Handle Interrupts

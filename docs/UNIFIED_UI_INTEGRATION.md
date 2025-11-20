@@ -109,7 +109,7 @@ The unified UI now provides real-time status updates for:
 
 ### 1. **Processing States**
 - Shows "Working on your request" when processing begins
-- Updates to "Ready for prompts" when complete
+- Updates to "Waiting for next instruction..." when complete
 - Includes elapsed time tracking
 
 ### 2. **Tool Execution**

@@ -19,10 +19,12 @@ export type Colorize = (value: string) => string;
 
 export interface PanelOptions {
   title?: string;
+  tagline?: string;
   icon?: string;
   accentColor?: Colorize;
   borderColor?: Colorize;
   width?: number;
+  halo?: boolean;
 }
 
 export function getContentWidth(): number {
@@ -95,16 +97,39 @@ export function renderPanel(lines: string[], options: PanelOptions = {}): string
   ) as Colorize;
   const iconSegment = options.icon ? `${options.icon} ` : '';
   const titleText = options.title ? `${iconSegment}${options.title}` : '';
+  const taglineText = options.tagline?.trim() ?? '';
   const contentWidth = width + 2;
   const leftEdge = edge('┃');
   const rightEdge = edge('┃');
-  const padding = theme.ui.background ? theme.ui.background(' ') : ' ';
+  const surface =
+    (theme.ui.glass as Colorize | undefined) ??
+    (theme.ui.surface as Colorize | undefined) ??
+    (theme.ui.background as Colorize | undefined);
+  const padding = surface ? surface(' ') : ' ';
   const top = horizontal(`╔${'═'.repeat(contentWidth)}╗`);
-  const output: string[] = [top];
+  const haloLine =
+    options.halo === false
+      ? null
+      : (
+          (theme.gradient?.aurora as Colorize | undefined) ??
+          (theme.gradient?.primary as Colorize | undefined) ??
+          accent
+        )(`╭${'┈'.repeat(contentWidth)}╮`);
+  const output: string[] = [];
+
+  if (haloLine) {
+    output.push(haloLine);
+  }
+
+  output.push(top);
 
   if (titleText) {
     const paddedTitle = padLine(accent(truncate(titleText, width)), width);
     output.push(`${leftEdge}${padding}${paddedTitle}${padding}${rightEdge}`);
+    if (taglineText) {
+      const paddedTagline = padLine(theme.ui.muted(truncate(taglineText, width)), width);
+      output.push(`${leftEdge}${padding}${paddedTagline}${padding}${rightEdge}`);
+    }
     output.push(horizontal(`╞${'═'.repeat(contentWidth)}╡`));
   }
 
@@ -114,10 +139,20 @@ export function renderPanel(lines: string[], options: PanelOptions = {}): string
 
   for (const line of lines) {
     const padded = padLine(line, width);
-    output.push(`${leftEdge}${padding}${padded}${padding}${rightEdge}`);
+    const tinted = surface ? surface(theme.ui.text(padded)) : theme.ui.text(padded);
+    output.push(`${leftEdge}${padding}${tinted}${padding}${rightEdge}`);
   }
 
   output.push(horizontal(`╚${'═'.repeat(contentWidth)}╝`));
+  if (haloLine) {
+    const lowerHalo =
+      (
+        (theme.gradient?.aurora as Colorize | undefined) ??
+        (theme.gradient?.primary as Colorize | undefined) ??
+        accent
+      )(`╰${'┈'.repeat(contentWidth)}╯`);
+    output.push(lowerHalo);
+  }
   return output.join('\n');
 }
 

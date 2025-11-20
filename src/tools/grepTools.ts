@@ -24,6 +24,7 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
     {
       name: 'Grep',
       description: 'A powerful search tool built on ripgrep patterns. Supports full regex syntax, multiple output modes, and context lines. Use for searching file contents.',
+      normalizeArguments: normalizeGrepArguments,
       parameters: {
         type: 'object',
         properties: {
@@ -160,6 +161,109 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
       },
     },
   ];
+}
+
+const GREP_ALLOWED_KEYS = new Set([
+  'pattern',
+  'path',
+  'output_mode',
+  '-i',
+  '-n',
+  '-A',
+  '-B',
+  '-C',
+  'glob',
+  'type',
+  'multiline',
+  'head_limit',
+  'offset',
+]);
+
+const GREP_FLAG_ALIASES: Record<string, string> = {
+  n: '-n',
+  i: '-i',
+  A: '-A',
+  B: '-B',
+  C: '-C',
+};
+
+function normalizeGrepArguments(args: Record<string, unknown>): Record<string, unknown> {
+  const normalized: Record<string, unknown> = {};
+
+  for (const [rawKey, rawValue] of Object.entries(args ?? {})) {
+    const canonicalKey = GREP_FLAG_ALIASES[rawKey] ?? rawKey;
+    if (!GREP_ALLOWED_KEYS.has(canonicalKey)) {
+      continue;
+    }
+
+    // If canonical already set (e.g., both -n and n provided), prefer the canonical entry
+    if (Object.hasOwn(normalized, canonicalKey)) {
+      continue;
+    }
+
+    normalized[canonicalKey] = rawValue;
+  }
+
+  for (const key of ['pattern', 'path', 'output_mode', 'glob', 'type']) {
+    if (Object.hasOwn(normalized, key)) {
+      const value = coerceString(normalized[key]);
+      if (value === undefined) {
+        delete normalized[key];
+      } else {
+        normalized[key] = value;
+      }
+    }
+  }
+
+  for (const key of ['-i', '-n', 'multiline']) {
+    if (Object.hasOwn(normalized, key)) {
+      const value = coerceBoolean(normalized[key]);
+      if (value === undefined) {
+        delete normalized[key];
+      } else {
+        normalized[key] = value;
+      }
+    }
+  }
+
+  for (const key of ['-A', '-B', '-C', 'head_limit', 'offset']) {
+    if (Object.hasOwn(normalized, key)) {
+      const value = coerceNumber(normalized[key]);
+      if (value === undefined) {
+        delete normalized[key];
+      } else {
+        normalized[key] = value;
+      }
+    }
+  }
+
+  return normalized;
+}
+
+function coerceString(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return undefined;
+}
+
+function coerceBoolean(value: unknown): boolean | undefined {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true' || normalized === '1') return true;
+    if (normalized === 'false' || normalized === '0') return false;
+  }
+  return undefined;
+}
+
+function coerceNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && !Number.isNaN(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return undefined;
 }
 
 interface SearchMatch {

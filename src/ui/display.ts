@@ -361,10 +361,19 @@ export class Display {
     }
   }
 
-  stopThinking() {
+  stopThinking(message?: string) {
     if (this.activeSpinner) {
-      this.activeSpinner.clear();
+      if (message?.trim()) {
+        this.activeSpinner.success({ text: theme.info(message.trim()) });
+      } else {
+        this.activeSpinner.clear();
+      }
       this.activeSpinner = null;
+      return;
+    }
+
+    if (message?.trim()) {
+      this.showAction(message.trim(), 'info');
     }
   }
 
@@ -725,16 +734,22 @@ export class Display {
     const providerAccent = this.bannerState ? pickProviderAccent(this.bannerState.provider) : null;
     const accent =
       providerAccent?.panel ??
+      (theme.gradient?.aurora as ((value: string) => string) | undefined) ??
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.assistant ??
       theme.primary;
     const width = this.resolveMessageWidth();
+    const tagline = this.bannerState
+      ? `${this.formatModelLabel(this.bannerState.model)} • ${this.bannerState.provider}`
+      : 'neon response stream';
     const panel = renderMessagePanel(normalized, {
       width,
       title: 'Assistant',
       icon: icons.assistant,
+      tagline,
       accentColor: accent,
       borderColor: providerAccent?.edge ?? theme.ui.panelEdge ?? theme.ui.border,
+      halo: true,
     });
     const telemetry = this.formatTelemetryLine(metadata);
     if (!telemetry) {
@@ -854,15 +869,25 @@ export class Display {
     const parts: string[] = [];
     const elapsed = this.formatElapsed(metadata.elapsedMs);
     if (elapsed) {
-      const elapsedLabel = theme.metrics?.elapsedLabel ?? theme.accent;
+      const elapsedLabel = theme.metrics?.elapsedLabel ?? theme.ui.muted;
       const elapsedValue = theme.metrics?.elapsedValue ?? theme.secondary;
       parts.push(`${elapsedLabel('elapsed')} ${elapsedValue(elapsed)}`);
     }
+    const usageChunk = this.formatUsage(metadata.usage);
+    if (usageChunk) {
+      parts.push(usageChunk);
+    }
+
+    const contextChunk = this.formatContextUsage(metadata.usage, metadata.contextWindowTokens);
+    if (contextChunk) {
+      parts.push(contextChunk);
+    }
+
     if (!parts.length) {
       return '';
     }
     const separator = theme.ui.muted(' • ');
-    const prefix = theme.ui.muted('⟐ ');
+    const prefix = theme.ui.muted('⟡ ');
     return `  ${prefix}${parts.join(separator)}`;
   }
 
@@ -879,6 +904,108 @@ export class Display {
     return `${seconds}s`;
   }
 
+  private formatUsage(usage?: ProviderUsage | null): string | null {
+    if (!usage) {
+      return null;
+    }
+
+    const totalTokens = this.resolveTotalTokens(usage);
+    const segments: string[] = [];
+
+    if (typeof usage.inputTokens === 'number' && Number.isFinite(usage.inputTokens)) {
+      segments.push(`in ${this.formatNumber(usage.inputTokens) ?? usage.inputTokens.toString()}`);
+    }
+
+    if (typeof usage.outputTokens === 'number' && Number.isFinite(usage.outputTokens)) {
+      segments.push(`out ${this.formatNumber(usage.outputTokens) ?? usage.outputTokens.toString()}`);
+    }
+
+    const totalLabel = totalTokens !== null ? this.formatNumber(totalTokens) : null;
+    const label = theme.ui.muted('usage');
+    const accent = theme.metrics?.elapsedValue ?? theme.secondary;
+    const detail = segments.length ? theme.ui.muted(` (${segments.join(' / ')})`) : '';
+
+    if (totalLabel) {
+      return `${label} ${accent(totalLabel)}${detail}`;
+    }
+
+    if (detail) {
+      return `${label}${detail}`;
+    }
+
+    return null;
+  }
+
+  private formatContextUsage(
+    usage: ProviderUsage | null | undefined,
+    contextWindowTokens?: number | null
+  ): string | null {
+    const total = this.resolveTotalTokens(usage);
+    const limit =
+      typeof contextWindowTokens === 'number' && Number.isFinite(contextWindowTokens)
+        ? contextWindowTokens
+        : null;
+
+    if (!limit || limit <= 0 || total === null) {
+      return null;
+    }
+
+    const ratio = Math.max(0, Math.min(1, total / limit));
+    const bar = this.renderUtilizationBar(ratio, 14);
+    const percent = Math.round(ratio * 100);
+    return `${theme.ui.muted('context')} ${bar} ${theme.ui.muted(`${percent}%`)}`;
+  }
+
+  private renderUtilizationBar(value: number, width: number): string {
+    const length = Math.max(8, Math.min(18, Math.floor(width)));
+    const clamped = Math.max(0, Math.min(1, value));
+    const filled = Math.max(1, Math.round(length * clamped));
+    const ramp = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+    const cool = (theme.gradient?.cool as ((v: string) => string) | undefined) ?? theme.info;
+    const warm = (theme.gradient?.warm as ((v: string) => string) | undefined) ?? theme.warning;
+    const hot = (theme.gradient?.ember as ((v: string) => string) | undefined) ?? theme.error;
+    const activeColor = clamped > 0.82 ? hot : clamped > 0.6 ? warm : cool;
+    const muted = theme.ui.muted;
+    let bar = '';
+
+    for (let index = 0; index < length; index += 1) {
+      const glyphIndex = Math.min(ramp.length - 1, Math.floor((index / length) * ramp.length));
+      const glyph = ramp[glyphIndex] ?? ramp[ramp.length - 1] ?? '▁';
+      bar += index < filled ? activeColor(glyph) : muted(glyph);
+    }
+
+    return `${muted('[')}${bar}${muted(']')}`;
+  }
+
+  private resolveTotalTokens(usage?: ProviderUsage | null): number | null {
+    if (!usage) {
+      return null;
+    }
+
+    if (typeof usage.totalTokens === 'number' && Number.isFinite(usage.totalTokens)) {
+      const normalized = Math.max(0, Math.round(usage.totalTokens));
+      return normalized === 0 ? null : normalized;
+    }
+
+    const input =
+      typeof usage.inputTokens === 'number' && Number.isFinite(usage.inputTokens)
+        ? usage.inputTokens
+        : 0;
+    const output =
+      typeof usage.outputTokens === 'number' && Number.isFinite(usage.outputTokens)
+        ? usage.outputTokens
+        : 0;
+    const total = Math.round(input + output);
+    return total > 0 ? total : null;
+  }
+
+  private formatNumber(value?: number | null): string | null {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return null;
+    }
+    return value.toLocaleString();
+  }
+
   private buildClaudeStyleBanner(
     profileLabel: string,
     model: string,
@@ -893,35 +1020,75 @@ export class Display {
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.primary;
     const dim = theme.ui.muted;
-    const fill = theme.ui.background ? theme.ui.background(' '.repeat(width)) : ' '.repeat(width);
-    const lines: string[] = [];
-    const crest = `${theme.bold(theme.primary('BO'))} ${theme.secondary('CODE')}`;
+    const fillSurface =
+      (theme.ui.haze as ((value: string) => string) | undefined) ??
+      (theme.ui.background as ((value: string) => string) | undefined) ??
+      ((value: string) => value);
+    const glass =
+      (theme.ui.glass as ((value: string) => string) | undefined) ??
+      (theme.ui.surface as ((value: string) => string) | undefined);
+    const crestColor =
+      (theme.gradient?.aurora as ((value: string) => string) | undefined) ?? border;
+    const crestBase = 'BO';
+    const crest = `${theme.bold(crestColor(crestBase))} ${theme.secondary('CODE')}`;
     const ritual = `${dim('craft')} ${dim('•')} ${dim('debug')} ${dim('•')} ${dim('ship')}`;
-    const providerLabel = (providerAccent.text ?? theme.secondary)(provider);
-    const modelLine = `${theme.info(this.formatModelLabel(model))}${dim(' • ')}${providerLabel}`;
-    const profileLine = profileLabel?.trim()
-      ? theme.secondary(profileLabel.trim())
+    const modelChip = this.decorateChip(this.formatModelLabel(model), theme.info, glass);
+    const providerChip = this.decorateChip(provider, providerAccent.text ?? theme.secondary, glass);
+    const profileChip = profileLabel?.trim()
+      ? this.decorateChip(profileLabel.trim(), theme.secondary, glass)
       : dim('No profile loaded');
-    const shortPath = this.abbreviatePath(workingDir, width - 8);
+    const shortPath = this.decorateChip(this.abbreviatePath(workingDir, width - 10), dim, glass);
     const motifColor =
       providerAccent.motif ??
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.secondary;
-    const motif = motifColor('∴  ε  ✻  ε  ∴');
+    const motif = motifColor('✶   ✦   ✶   ✦   ✶');
+    const signal = this.buildSignalBar(width - 6, motifColor);
+    const fill = fillSurface(' '.repeat(width));
+    const halo = motifColor(`╭${'┈'.repeat(width)}╮`);
+    const lowerHalo = motifColor(`╰${'┈'.repeat(width)}╯`);
+    const lines: string[] = [];
 
+    lines.push(halo);
     lines.push(border(`╔${'═'.repeat(width)}╗`));
     lines.push(border('║') + fill + border('║'));
     lines.push(this.centerLine(crest, width, border));
     lines.push(this.centerLine(ritual, width, border, dim));
-    lines.push(border(`╟${'─'.repeat(width)}╢`));
-    lines.push(this.centerLine(modelLine, width, border));
-    lines.push(this.centerLine(profileLine, width, border));
-    lines.push(this.centerLine(dim(shortPath), width, border));
-    lines.push(border('║') + fill + border('║'));
+    lines.push(border(`╟${'═'.repeat(width)}╢`));
+    lines.push(this.centerLine(`${modelChip}${dim('  ⟡  ')}${providerChip}`, width, border));
+    lines.push(this.centerLine(profileChip, width, border));
+    lines.push(this.centerLine(`${theme.ui.muted('↳')} ${shortPath}`, width, border));
+    lines.push(border(`╟${'┄'.repeat(width)}╢`));
+    lines.push(this.centerLine(signal, width, border));
     lines.push(this.centerLine(motif, width, border));
     lines.push(border(`╚${'═'.repeat(width)}╝`));
+    lines.push(lowerHalo);
 
     return lines.join('\n');
+  }
+
+  private decorateChip(
+    value: string,
+    tint: (val: string) => string,
+    surface?: (val: string) => string
+  ): string {
+    const clean = value.trim();
+    if (!clean) {
+      return '';
+    }
+    const framed = ` ${clean} `;
+    const highlighted = tint(theme.bold(framed));
+    return surface ? surface(highlighted) : highlighted;
+  }
+
+  private buildSignalBar(width: number, colorize: (value: string) => string): string {
+    const ramp = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▇', '▆', '▅', '▄', '▃', '▂'];
+    const target = Math.max(16, Math.min(width, DISPLAY_CONSTANTS.MAX_BANNER_WIDTH));
+    let bar = '';
+    for (let index = 0; index < target; index += 1) {
+      bar += ramp[index % ramp.length];
+    }
+    return colorize(bar);
   }
 
   private centerLine(
