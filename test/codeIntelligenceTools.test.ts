@@ -12,6 +12,9 @@ test('AnalyzeCodeComplexity handles files with no functions gracefully', async (
 
   try {
     const [tool] = createCodeIntelligenceTools();
+    if (!tool) {
+      throw new Error('AnalyzeCodeComplexity tool is not registered');
+    }
     const output = await tool.handler({ path: file });
 
     assert.match(output, /Files analyzed: 1/);
@@ -47,6 +50,9 @@ function hard(value: number) {
 
   try {
     const [tool] = createCodeIntelligenceTools();
+    if (!tool) {
+      throw new Error('AnalyzeCodeComplexity tool is not registered');
+    }
     const output = await tool.handler({ path: file, threshold: 2 });
 
     assert.match(output, /High complexity functions: 1/);

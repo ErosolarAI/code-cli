@@ -4,6 +4,11 @@
 
 Successfully implemented comprehensive software engineering capabilities and efficiency improvements in the Bo CLI repository. The enhancements bring the CLI to parity with advanced coding assistants like Claude Code while maintaining the existing security and reliability standards.
 
+## Recent Updates
+- Complexity analysis now uses TypeScript AST traversal for accurate metrics and safe output when files contain no functions.
+- Parallel execution has concurrency limits, fail-fast skipping, and richer diagnostics (exit codes, signals, stdout/stderr capture).
+- New automated tests cover the complexity analyzer and parallel executor to prevent regressions.
+
 ## 🎯 Key Achievements
 
 ### 1. **Advanced Task Management System**

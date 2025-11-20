@@ -4,6 +4,9 @@ import { createPerformanceTools } from '../src/tools/performanceTools.js';
 
 test('ParallelExecute summarizes successful commands', async () => {
   const [tool] = createPerformanceTools();
+  if (!tool) {
+    throw new Error('ParallelExecute tool is not registered');
+  }
   const output = await tool.handler({
     commands: [
       `node -e "console.log('one')"`,
@@ -20,6 +23,9 @@ test('ParallelExecute summarizes successful commands', async () => {
 
 test('ParallelExecute can fail fast and skip remaining commands', async () => {
   const [tool] = createPerformanceTools();
+  if (!tool) {
+    throw new Error('ParallelExecute tool is not registered');
+  }
   const output = await tool.handler({
     commands: [
       `node -e "console.error('fail'); process.exit(1)"`,

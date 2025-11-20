@@ -4,6 +4,11 @@
 
 This document summarizes the significant software engineering capabilities and efficiency improvements implemented in the Bo CLI repository. The enhancements focus on advanced tooling, performance optimization, and code intelligence features inspired by Claude Code's capabilities.
 
+## Latest Engineering Upgrades
+- Code complexity analysis now relies on the TypeScript AST with accurate cyclomatic/cognitive scoring, safer zero-function handling, and clearer hotspot output.
+- Parallel execution tooling gained concurrency limits, fail-fast skipping, working directory validation, and richer error context (exit codes, signals, stdout/stderr capture).
+- Added automated tests around the complexity analyzer and parallel executor to guard regressions and document expected behaviors.
+
 ## New Capabilities Added
 
 ### 1. Task Management & Todo System
