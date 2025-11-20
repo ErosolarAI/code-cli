@@ -1,0 +1,105 @@
+<form class="chat-input" (submit)="handleSubmit($event)" novalidate>
+  <div class="chat-input__bar">
+    <div class="chat-input__pill">
+      <span class="status-dot" [class.status-dot--sending]="sending()"></span>
+      <span>{{ sending() ? 'sending to bo' : 'ready for your next command' }}</span>
+    </div>
+    <div class="chat-input__hint">
+      <span>enter to send</span>
+      <span class="dot">•</span>
+      <span>shift + enter for newline</span>
+    </div>
+  </div>
+
+  <div
+    class="chat-input__attachments"
+    *ngIf="pastedBlocks().length"
+  >
+    <div class="attachments-head">
+      <p class="attachments-label">
+        saved paste {{ pastedBlocks().length === 1 ? 'block' : 'blocks' }}
+      </p>
+      <span class="attachments-count">{{ pastedBlocks().length }}</span>
+    </div>
+    <div class="attachments-list">
+      <details
+        class="attachment"
+        *ngFor="let block of pastedBlocks()"
+      >
+        <summary>
+          <div class="attachment-meta">
+            <span class="attachment-title">{{ block.lines }} lines • {{ block.characters }} chars</span>
+            <p class="attachment-preview">{{ block.preview }}</p>
+          </div>
+          <div class="attachment-actions">
+            <button
+              class="chip-button"
+              type="button"
+              (click)="explodePastedBlockToDraft(block.id); $event.stopPropagation()"
+            >
+              drop into draft
+            </button>
+            <button
+              class="chip-button chip-button--danger"
+              type="button"
+              (click)="removePastedBlock(block.id); $event.stopPropagation()"
+            >
+              remove
+            </button>
+          </div>
+        </summary>
+        <pre>{{ block.content }}</pre>
+      </details>
+    </div>
+  </div>
+
+  <div class="chat-input__field">
+    <span class="prompt-user">you</span>
+    <span class="prompt-symbol">$</span>
+    <textarea
+      #inputField
+      name="command"
+      [value]="draft()"
+      placeholder="Type here to talk to Bo CLI..."
+      (input)="onInput($event)"
+      (keydown)="onKeydown($event)"
+      (paste)="onPaste($event)"
+      [disabled]="sending()"
+      rows="1"
+      aria-label="Message for Bo CLI"
+    ></textarea>
+  </div>
+
+  <div class="chat-input__actions">
+    <div class="chat-input__statusline">
+      <ng-container *ngIf="pastedBlocks().length; else draftStatus">
+        Large pasted text is saved above and will be sent with your next message.
+      </ng-container>
+      <ng-template #draftStatus>
+        <ng-container *ngIf="draft().trim().length; else readyCopy">
+          Draft autosaved locally for this session.
+        </ng-container>
+      </ng-template>
+      <ng-template #readyCopy>Drafts persist per profile in this browser.</ng-template>
+    </div>
+    <div class="chat-input__buttons">
+      <button
+        class="chat-button chat-button--ghost"
+        type="button"
+        (click)="clearDraft()"
+        [disabled]="!draft().length || sending()"
+      >
+        clear
+      </button>
+      <button
+        class="chat-button chat-button--primary"
+        type="submit"
+        [disabled]="sending() || !canSend()"
+      >
+        {{ sending() ? 'sending...' : 'send' }}
+      </button>
+    </div>
+  </div>
+
+  <p class="input-error" *ngIf="error() as cmdError">{{ cmdError }}</p>
+</form>
