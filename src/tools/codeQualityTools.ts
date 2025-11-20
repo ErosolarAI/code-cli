@@ -4,7 +4,10 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import type { ToolDefinition } from '../core/toolRuntime.js';
-import { analyzeTypeScriptFile, performAdvancedAstAnalysis } from './codeAnalysisTools.js';
+import {
+  analyzeTypeScriptFile,
+  performAdvancedAstAnalysis,
+} from './codeAnalysisTools.js';
 
 const execAsync = promisify(exec);
 
@@ -30,7 +33,8 @@ export function createCodeQualityTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'run_lint_checks',
-      description: 'Run ESLint (or npm run lint) with optional pattern targeting and auto-fix support.',
+      description:
+        'Run ESLint (or npm run lint) with optional pattern targeting and auto-fix support.',
       parameters: {
         type: 'object',
         properties: {
@@ -51,10 +55,15 @@ export function createCodeQualityTools(workingDir: string): ToolDefinition[] {
       },
       handler: async (args) => {
         const rawPattern = args['pattern'];
-        const pattern = typeof rawPattern === 'string' && rawPattern.trim() ? rawPattern.trim() : null;
+        const pattern =
+          typeof rawPattern === 'string' && rawPattern.trim()
+            ? rawPattern.trim()
+            : null;
         const fix = args['fix'] === true;
         const timeout =
-          typeof args['timeout'] === 'number' && Number.isFinite(args['timeout']) && args['timeout'] > 0
+          typeof args['timeout'] === 'number' &&
+          Number.isFinite(args['timeout']) &&
+          args['timeout'] > 0
             ? (args['timeout'] as number)
             : 120000;
 
@@ -64,7 +73,9 @@ export function createCodeQualityTools(workingDir: string): ToolDefinition[] {
             return 'Error: package.json not found. Cannot determine lint command.';
           }
 
-          const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
+          const pkg = JSON.parse(
+            readFileSync(packageJsonPath, 'utf-8'),
+          ) as PackageJson;
           let command: string;
 
           if (pkg.scripts?.['lint']) {
@@ -109,7 +120,8 @@ export function createCodeQualityTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'inspect_code_quality',
-      description: 'Generate a maintainability report (function complexity, TODO density, comment coverage) for a file.',
+      description:
+        'Generate a maintainability report (function complexity, TODO density, comment coverage) for a file.',
       parameters: {
         type: 'object',
         properties: {
@@ -190,7 +202,9 @@ async function loadLintConfig(
 ): Promise<{ config: unknown; source: string } | null> {
   const packageJsonPath = join(workingDir, 'package.json');
   if (existsSync(packageJsonPath)) {
-    const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
+    const pkg = JSON.parse(
+      readFileSync(packageJsonPath, 'utf-8'),
+    ) as PackageJson;
     if (pkg.eslintConfig) {
       return {
         config: pkg.eslintConfig,
@@ -210,7 +224,11 @@ async function loadLintConfig(
       return { config, source: relativePath };
     }
 
-    if (relativePath.endsWith('.js') || relativePath.endsWith('.cjs') || relativePath.endsWith('.mjs')) {
+    if (
+      relativePath.endsWith('.js') ||
+      relativePath.endsWith('.cjs') ||
+      relativePath.endsWith('.mjs')
+    ) {
       const module = await import(pathToFileURL(absolute).href);
       const config = module.default ?? module;
       return { config, source: relativePath };
@@ -226,22 +244,37 @@ function extractLintRules(config: unknown): Record<string, unknown> {
   }
 
   if (Array.isArray(config)) {
-    return config.reduce((acc, entry) => {
-      if (entry && typeof entry === 'object' && 'rules' in entry && typeof (entry as any).rules === 'object') {
-        Object.assign(acc, (entry as any).rules);
-      }
-      return acc;
-    }, {} as Record<string, unknown>);
+    return config.reduce(
+      (acc, entry) => {
+        if (
+          entry &&
+          typeof entry === 'object' &&
+          'rules' in entry &&
+          typeof (entry as any).rules === 'object'
+        ) {
+          Object.assign(acc, (entry as any).rules);
+        }
+        return acc;
+      },
+      {} as Record<string, unknown>,
+    );
   }
 
-  if (typeof config === 'object' && 'rules' in (config as any) && typeof (config as any).rules === 'object') {
+  if (
+    typeof config === 'object' &&
+    'rules' in (config as any) &&
+    typeof (config as any).rules === 'object'
+  ) {
     return { ...(config as any).rules };
   }
 
   return {};
 }
 
-function formatLintRules(source: string, rules: Record<string, unknown>): string {
+function formatLintRules(
+  source: string,
+  rules: Record<string, unknown>,
+): string {
   const output: string[] = [];
   output.push(`# ESLint rules (${source})`);
   output.push('');
@@ -249,15 +282,18 @@ function formatLintRules(source: string, rules: Record<string, unknown>): string
   const entries = Object.entries(rules).sort(([a], [b]) => a.localeCompare(b));
   for (const [rule, setting] of entries) {
     const normalized = normalizeRuleSetting(setting);
-    output.push(`- **${rule}** → ${normalized.level}${normalized.details ? ` (${normalized.details})` : ''}`);
+    output.push(
+      `- **${rule}** → ${normalized.level}${normalized.details ? ` (${normalized.details})` : ''}`,
+    );
   }
 
   return output.join('\n');
 }
 
-function normalizeRuleSetting(
-  setting: unknown,
-): { level: string; details?: string } {
+function normalizeRuleSetting(setting: unknown): {
+  level: string;
+  details?: string;
+} {
   if (typeof setting === 'string') {
     return { level: setting };
   }
@@ -266,7 +302,10 @@ function normalizeRuleSetting(
   }
   if (Array.isArray(setting) && setting.length > 0) {
     const [levelRaw, ...rest] = setting;
-    const level = typeof levelRaw === 'number' ? severityFromNumber(levelRaw) : String(levelRaw);
+    const level =
+      typeof levelRaw === 'number'
+        ? severityFromNumber(levelRaw)
+        : String(levelRaw);
     return {
       level,
       details: rest.length > 0 ? JSON.stringify(rest) : undefined,
@@ -302,11 +341,16 @@ function formatQualityReport(
   const lines = content.split('\n');
   const totalLines = lines.length;
   const todoCount = lines.filter((line) => /TODO|FIXME|HACK/.test(line)).length;
-  const commentLines = lines.filter((line) => line.trim().startsWith('//') || line.trim().startsWith('/*')).length;
-  const commentCoverage = totalLines === 0 ? 0 : (commentLines / totalLines) * 100;
+  const commentLines = lines.filter(
+    (line) => line.trim().startsWith('//') || line.trim().startsWith('/*'),
+  ).length;
+  const commentCoverage =
+    totalLines === 0 ? 0 : (commentLines / totalLines) * 100;
 
   const longStructures = ast.symbols.filter(
-    (symbol) => symbol.kind !== 'class' && (symbol.statementCount > 40 || symbol.cyclomaticComplexity > 12),
+    (symbol) =>
+      symbol.kind !== 'class' &&
+      (symbol.statementCount > 40 || symbol.cyclomaticComplexity > 12),
   );
 
   const maintainabilityScore = Math.max(
@@ -327,7 +371,9 @@ function formatQualityReport(
   output.push(`- Comment coverage: ${commentCoverage.toFixed(1)}%`);
   output.push(`- TODO/FIXME occurrences: ${todoCount}`);
   output.push(`- Named exports: ${structural.exports.length}`);
-  output.push(`- Maintainability score (heuristic): ${maintainabilityScore}/100`);
+  output.push(
+    `- Maintainability score (heuristic): ${maintainabilityScore}/100`,
+  );
   output.push('');
   output.push('## Hotspots');
   if (longStructures.length === 0) {

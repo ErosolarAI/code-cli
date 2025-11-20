@@ -17,9 +17,9 @@ export const mockChatMessages: ChatMessage[] = [
     body: [
       'request: replace the placeholder marketing layout with the actual CLI chat feed.',
       'the browser view should feel identical to a Bo CLI session (general + bo-code).',
-      'show live diffs, command cues, and the dual-profile log so reviewers trust it.'
+      'show live diffs, command cues, and the dual-profile log so reviewers trust it.',
     ],
-    status: 'command dispatched'
+    status: 'command dispatched',
   },
   {
     id: 'bo-plan',
@@ -30,7 +30,7 @@ export const mockChatMessages: ChatMessage[] = [
     body: [
       '- scanning workspace and tailwind config...',
       '- ripping out hero gradient panes...',
-      '- composing CLI chrome + mirrored chat feed for bo.'
+      '- composing CLI chrome + mirrored chat feed for bo.',
     ],
     status: 'thinking 1.3k tok/s',
     tokens: 'buffer 72%',
@@ -44,11 +44,11 @@ export const mockChatMessages: ChatMessage[] = [
         data: {
           graph: [
             { tool: 'repo.scan', durationMs: 2200 },
-            { tool: 'tailwind.audit', durationMs: 940 }
-          ]
-        }
-      }
-    ]
+            { tool: 'tailwind.audit', durationMs: 940 },
+          ],
+        },
+      },
+    ],
   },
   {
     id: 'bo-code-diff',
@@ -59,7 +59,7 @@ export const mockChatMessages: ChatMessage[] = [
     body: [
       'patched component data model into chatMessages + meters.',
       'rewired template so both bo profiles render like the terminal.',
-      'poured new terminal/tmux styling into the Tailwind layer.'
+      'poured new terminal/tmux styling into the Tailwind layer.',
     ],
     status: 'diff streaming',
     tokens: '980 tok/s · 54ms',
@@ -68,9 +68,9 @@ export const mockChatMessages: ChatMessage[] = [
       { kind: 'context', text: '@@ -1,34 +1,74 @@' },
       { kind: 'remove', text: '-  protected readonly streams: StreamChannel[] = [' },
       { kind: 'add', text: '+  protected readonly chatMessages: ChatMessage[] = [' },
-      { kind: 'context', text: '  ...' }
+      { kind: 'context', text: '  ...' },
     ],
-    footer: 'applied patch to workspace · ready for sync'
+    footer: 'applied patch to workspace · ready for sync',
   },
   {
     id: 'bo-verify',
@@ -81,12 +81,12 @@ export const mockChatMessages: ChatMessage[] = [
     body: [
       '- viewport now mirrors CLI chrome with shared scrollback.',
       '- keyboard map + telemetry panes wired to live data.',
-      '- ready to share using bo share --live.'
+      '- ready to share using bo share --live.',
     ],
     status: 'tests pass',
     tokens: 'signal 98%',
-    footer: 'sync contexts to keep bo general + code aligned.'
-  }
+    footer: 'sync contexts to keep bo general + code aligned.',
+  },
 ];
 
 export const mockStreamMeters: StreamMeter[] = [
@@ -94,26 +94,26 @@ export const mockStreamMeters: StreamMeter[] = [
     label: 'Bo (general)',
     value: 'streaming',
     detail: '1.2k tok/s · latency 72ms',
-    tone: 'success'
+    tone: 'success',
   },
   {
     label: 'Bo Code',
     value: 'diffing',
     detail: '980 tok/s · tmux :2',
-    tone: 'info'
+    tone: 'info',
   },
   {
     label: 'Workspace sync',
     value: 'clean',
     detail: '/Users/bo/GitHub/angular-tailwind',
-    tone: 'success'
+    tone: 'success',
   },
   {
     label: 'Merge risk',
     value: '12%',
     detail: 'watching dependency drift',
-    tone: 'warn'
-  }
+    tone: 'warn',
+  },
 ];
 
 export const mockOpsEvents: OpsEvent[] = [
@@ -121,27 +121,27 @@ export const mockOpsEvents: OpsEvent[] = [
     label: 'npm run start',
     detail: 'dev server watch · port 4200',
     meta: '00:03:11 · ok',
-    tone: 'info'
+    tone: 'info',
   },
   {
     label: 'ng test --watch',
     detail: '18 suites · 96% coverage',
     meta: 'pass',
-    tone: 'success'
+    tone: 'success',
   },
   {
     label: 'git status',
     detail: 'working tree clean',
     meta: 'ready for share',
-    tone: 'success'
-  }
+    tone: 'success',
+  },
 ];
 
 export const mockShortcuts: Shortcut[] = [
   { keys: 'Shift+Enter', description: 'Send to Bo CLI' },
   { keys: 'Cmd+.', description: 'Interrupt streaming response' },
   { keys: 'Ctrl+K', description: 'Merge Bo general + code buffers' },
-  { keys: 'Esc', description: 'Jump back to terminal input' }
+  { keys: 'Esc', description: 'Jump back to terminal input' },
 ];
 
 export const mockSnapshot: SessionSnapshot = {
@@ -154,6 +154,6 @@ export const mockSnapshot: SessionSnapshot = {
   status: {
     label: 'bo-cli://mock',
     detail: 'dual-profile mirror (sample data)',
-    tone: 'info'
-  }
+    tone: 'info',
+  },
 };

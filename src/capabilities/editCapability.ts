@@ -1,4 +1,8 @@
-import type { CapabilityModule, CapabilityContext, CapabilityContribution } from '../runtime/agentHost.js';
+import type {
+  CapabilityModule,
+  CapabilityContext,
+  CapabilityContribution,
+} from '../runtime/agentHost.js';
 import { createEditTools } from '../tools/editTools.js';
 
 /**

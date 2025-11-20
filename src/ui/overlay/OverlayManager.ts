@@ -3,7 +3,6 @@
  * Provides sophisticated overlay composition and rendering capabilities
  */
 
-
 import { stripAnsi } from '../layout.js';
 
 export interface OverlayRegion {
@@ -48,7 +47,7 @@ export class OverlayManager {
 
   constructor(
     writeStream: NodeJS.WriteStream,
-    options: Partial<OverlayOptions> = {}
+    options: Partial<OverlayOptions> = {},
   ) {
     this.writeStream = writeStream;
     this.options = {
@@ -140,7 +139,7 @@ export class OverlayManager {
    */
   updateRegion(
     regionName: keyof OverlayLayout['regions'],
-    region: OverlayRegion | undefined
+    region: OverlayRegion | undefined,
   ): void {
     if (!this.currentLayout) {
       this.currentLayout = {

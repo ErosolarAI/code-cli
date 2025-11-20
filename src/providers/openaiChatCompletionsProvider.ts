@@ -23,7 +23,9 @@ interface OpenAIChatCompletionsOptions {
   baseURL?: string;
 }
 
-type ChatCompletionsResult = Awaited<ReturnType<OpenAI['chat']['completions']['create']>>;
+type ChatCompletionsResult = Awaited<
+  ReturnType<OpenAI['chat']['completions']['create']>
+>;
 
 export class OpenAIChatCompletionsProvider implements LLMProvider {
   readonly id: ProviderId;
@@ -44,7 +46,10 @@ export class OpenAIChatCompletionsProvider implements LLMProvider {
     this.model = options.model;
   }
 
-  async generate(messages: ConversationMessage[], tools: ProviderToolDefinition[]): Promise<ProviderResponse> {
+  async generate(
+    messages: ConversationMessage[],
+    tools: ProviderToolDefinition[],
+  ): Promise<ProviderResponse> {
     const request: Parameters<OpenAI['chat']['completions']['create']>[0] = {
       model: this.model,
       messages: mapMessages(messages),
@@ -85,7 +90,9 @@ export class OpenAIChatCompletionsProvider implements LLMProvider {
   }
 }
 
-function mapMessages(messages: ConversationMessage[]): ChatCompletionMessageParam[] {
+function mapMessages(
+  messages: ConversationMessage[],
+): ChatCompletionMessageParam[] {
   const params: ChatCompletionMessageParam[] = [];
 
   for (const message of messages) {
@@ -178,7 +185,9 @@ function mapToolCall(call: ChatCompletionMessageToolCall): ToolCallRequest {
   };
 }
 
-function mapUsage(usage?: ChatCompletion['usage'] | null): ProviderUsage | null {
+function mapUsage(
+  usage?: ChatCompletion['usage'] | null,
+): ProviderUsage | null {
   if (!usage) {
     return null;
   }
@@ -190,7 +199,9 @@ function mapUsage(usage?: ChatCompletion['usage'] | null): ProviderUsage | null 
   };
 }
 
-function assertHasChoices(result: ChatCompletionsResult): asserts result is ChatCompletion {
+function assertHasChoices(
+  result: ChatCompletionsResult,
+): asserts result is ChatCompletion {
   if (!('choices' in result)) {
     throw new Error('Streaming responses are not supported in this runtime.');
   }

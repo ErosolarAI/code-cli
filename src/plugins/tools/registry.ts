@@ -45,7 +45,7 @@ export function listRegisteredToolPlugins(): ToolPlugin[] {
 export async function instantiateToolPlugins(
   target: ToolPluginTarget,
   context: ToolPluginContext,
-  options: InstantiateOptions = {}
+  options: InstantiateOptions = {},
 ): Promise<CapabilityModule[]> {
   const modules: CapabilityModule[] = [];
 

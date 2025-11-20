@@ -8,7 +8,13 @@ import {
   measure,
 } from './layout.js';
 
-export type VisualTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'accent';
+export type VisualTone =
+  | 'neutral'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'accent';
 
 const toneColors: Record<VisualTone, Colorize> = {
   neutral: theme.ui.text,
@@ -44,14 +50,19 @@ export interface SectionHeadingOptions {
   width?: number;
 }
 
-export function renderStatusBar(segments: StatusSegment[], options: StatusBarOptions = {}): string {
+export function renderStatusBar(
+  segments: StatusSegment[],
+  options: StatusBarOptions = {},
+): string {
   if (!segments.length) {
     return '';
   }
   const width = clampWidth(options.width ?? getContentWidth());
   const divider = theme.ui.muted(` ${icons.bullet} `);
   const chunks = segments
-    .filter((segment) => Boolean(segment.label?.trim() && segment.value?.trim()))
+    .filter((segment) =>
+      Boolean(segment.label?.trim() && segment.value?.trim()),
+    )
     .map((segment) => formatStatusChunk(segment));
 
   if (!chunks.length) {
@@ -83,16 +94,21 @@ export function renderStatusBar(segments: StatusSegment[], options: StatusBarOpt
   return lines.join('\n');
 }
 
-export function renderCallout(message: string, options: CalloutOptions = {}): string {
+export function renderCallout(
+  message: string,
+  options: CalloutOptions = {},
+): string {
   const width = options.width ?? getContentWidth();
   const tone = options.tone ?? 'info';
   const icon = options.icon ?? icons.info;
   const title = options.title ?? capitalize(tone);
   const accent =
     ((tone === 'info' && (theme.gradient?.cool as Colorize | undefined)) ||
-      (tone === 'success' && (theme.gradient?.success as Colorize | undefined)) ||
+      (tone === 'success' &&
+        (theme.gradient?.success as Colorize | undefined)) ||
       (tone === 'warning' && (theme.gradient?.warm as Colorize | undefined)) ||
-      (tone === 'accent' && (theme.gradient?.primary as Colorize | undefined)) ||
+      (tone === 'accent' &&
+        (theme.gradient?.primary as Colorize | undefined)) ||
       toneColors[tone]) ??
     toneColors.info;
   const contentWidth = Math.max(24, normalizePanelWidth(width) - 4);
@@ -131,19 +147,28 @@ export function renderCallout(message: string, options: CalloutOptions = {}): st
   });
 }
 
-export function renderSectionHeading(title: string, options: SectionHeadingOptions = {}): string {
+export function renderSectionHeading(
+  title: string,
+  options: SectionHeadingOptions = {},
+): string {
   const width = clampWidth(options.width ?? getContentWidth());
   const accent = toneColors[options.tone ?? 'accent'] ?? toneColors.accent;
   const icon = options.icon ? `${options.icon} ` : '';
   const label = `${icon}${title}`.toUpperCase();
   const gradient =
-    (options.tone === 'info' && (theme.gradient?.cool as Colorize | undefined)) ||
-    (options.tone === 'success' && (theme.gradient?.success as Colorize | undefined)) ||
-    (options.tone === 'warning' && (theme.gradient?.warm as Colorize | undefined)) ||
-    (options.tone === 'danger' && (theme.gradient?.warm as Colorize | undefined)) ||
+    (options.tone === 'info' &&
+      (theme.gradient?.cool as Colorize | undefined)) ||
+    (options.tone === 'success' &&
+      (theme.gradient?.success as Colorize | undefined)) ||
+    (options.tone === 'warning' &&
+      (theme.gradient?.warm as Colorize | undefined)) ||
+    (options.tone === 'danger' &&
+      (theme.gradient?.warm as Colorize | undefined)) ||
     (theme.gradient?.primary as Colorize | undefined);
   const underline = (gradient ?? accent)('━'.repeat(width));
-  const subtitle = options.subtitle?.trim() ? `${theme.ui.muted(options.subtitle.trim())}` : '';
+  const subtitle = options.subtitle?.trim()
+    ? `${theme.ui.muted(options.subtitle.trim())}`
+    : '';
 
   const lines = [underline, accent(padLine(label, width))];
   if (subtitle) {

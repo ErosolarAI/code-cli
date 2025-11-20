@@ -6,9 +6,15 @@ import readline from 'node:readline';
 import { exit, stdin, stdout } from 'node:process';
 import type { ProfileName } from '../config.js';
 import { hasAgentProfile, listAgentProfiles } from '../core/agentProfiles.js';
-import type { AgentEventUnion, CapabilityManifest } from '../contracts/v1/agent.js';
+import type {
+  AgentEventUnion,
+  CapabilityManifest,
+} from '../contracts/v1/agent.js';
 import { createAgentController } from '../runtime/agentController.js';
-import { resolveWorkspaceCaptureOptions, buildWorkspaceContext } from '../workspace.js';
+import {
+  resolveWorkspaceCaptureOptions,
+  buildWorkspaceContext,
+} from '../workspace.js';
 import { BRAND_CODE_PROFILE, resolveProfileOverride } from '../core/brand.js';
 
 interface ParsedHeadlessArgs {
@@ -60,7 +66,9 @@ export interface HeadlessLaunchOptions {
   argv: string[];
 }
 
-export async function runHeadlessApp(options: HeadlessLaunchOptions): Promise<void> {
+export async function runHeadlessApp(
+  options: HeadlessLaunchOptions,
+): Promise<void> {
   const parsed = parseHeadlessArgs(options.argv);
   const profile = resolveProfile(parsed.profile);
   const sessionId = parsed.sessionId ?? randomUUID();
@@ -123,9 +131,21 @@ export async function runHeadlessApp(options: HeadlessLaunchOptions): Promise<vo
   };
 
   const handlePrompt = async (work: PromptWork): Promise<void> => {
-    emitEvent({ type: 'user-input', sessionId, profile, runId: work.id, content: work.prompt });
+    emitEvent({
+      type: 'user-input',
+      sessionId,
+      profile,
+      runId: work.id,
+      content: work.prompt,
+    });
     for await (const event of controller.send(work.prompt)) {
-      emitEvent({ type: 'agent-event', sessionId, profile, runId: work.id, event });
+      emitEvent({
+        type: 'agent-event',
+        sessionId,
+        profile,
+        runId: work.id,
+        event,
+      });
     }
     emitEvent({ type: 'run-complete', sessionId, profile, runId: work.id });
   };
@@ -213,7 +233,9 @@ function resolveProfile(candidate?: string): ProfileName {
     return desired as ProfileName;
   }
   const lower = desired.toLowerCase();
-  const match = listAgentProfiles().find((entry) => entry.name.toLowerCase() === lower);
+  const match = listAgentProfiles().find(
+    (entry) => entry.name.toLowerCase() === lower,
+  );
   if (match) {
     return match.name as ProfileName;
   }
@@ -228,7 +250,9 @@ function readPackageVersion(): string {
   try {
     const filePath = fileURLToPath(import.meta.url);
     const packagePath = resolve(dirname(filePath), '../../package.json');
-    const payload = JSON.parse(readFileSync(packagePath, 'utf8')) as { version?: string };
+    const payload = JSON.parse(readFileSync(packagePath, 'utf8')) as {
+      version?: string;
+    };
     return typeof payload.version === 'string' ? payload.version : '0.0.0';
   } catch {
     return '0.0.0';

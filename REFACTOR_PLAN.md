@@ -3,6 +3,7 @@
 ## Design Philosophy
 
 **Maximal reliability during interoperability** through:
+
 - **Interface contracts**: Versioned JSON schemas for all module boundaries
 - **Dependency injection**: Zero hard-coded dependencies between layers
 - **Platform abstraction**: Core logic never imports Node.js-specific APIs directly
@@ -58,14 +59,18 @@
 ## Key Principles
 
 ### 1. Interface Contracts (Stable Front-End)
+
 Every layer exposes versioned TypeScript interfaces that compile to JSON schemas:
+
 - `AgentController` v1.0: Core agent interaction
 - `ToolSuite` v1.0: Tool registration
 - `ProviderAdapter` v1.0: LLM provider integration
 - `ContextAdapter` v1.0: Workspace/environment access
 
 ### 2. Platform Abstraction
+
 Core modules never import platform-specific APIs:
+
 ```typescript
 // ❌ BAD: Core imports Node.js directly
 import { readFileSync } from 'node:fs';
@@ -78,19 +83,23 @@ interface FileSystemAdapter {
 ```
 
 ### 3. Dependency Injection
+
 All dependencies flow inward through constructors:
+
 ```typescript
 class AgentRuntime {
   constructor(
     private provider: LLMProvider,
     private toolRuntime: ToolRuntime,
-    private contextAdapter: ContextAdapter
+    private contextAdapter: ContextAdapter,
   ) {}
 }
 ```
 
 ### 4. Transport Agnostic Tools
+
 Tools communicate via serializable messages:
+
 ```typescript
 interface ToolExecutionRequest {
   toolId: string;
@@ -178,26 +187,31 @@ src/
 ## Implementation Phases
 
 ### Phase 1: Extract Contracts (Non-Breaking)
+
 1. Define versioned interfaces in `contracts/v1/`
 2. Make existing code implement these contracts
 3. Add JSON schema generation
 
 ### Phase 2: Abstract Platform APIs
+
 1. Create adapter interfaces
 2. Implement Node.js adapters
 3. Refactor core to use adapters
 
 ### Phase 3: Plugin System
+
 1. Extract tools into plugins
 2. Extract providers into plugins
 3. Create plugin loader
 
 ### Phase 4: Additional Frontends
+
 1. HTTP API server
 2. Browser runtime
 3. Cloud function wrapper
 
 ### Phase 5: Remote Execution
+
 1. RPC protocol for remote tools
 2. Distributed tool execution
 3. Cloud-native deployment
@@ -205,21 +219,25 @@ src/
 ## Benefits
 
 ### For Reliability
+
 - **Versioned contracts** prevent breaking changes
 - **Platform abstraction** isolates failure domains
 - **Dependency injection** enables comprehensive testing
 
 ### For Interoperability
+
 - **Transport agnostic** tools work anywhere
 - **Standard protocols** enable language-agnostic clients
 - **JSON schemas** provide machine-readable contracts
 
 ### For Extensibility
+
 - **Plugin system** allows third-party tools/providers
 - **Adapter pattern** supports new platforms
 - **Registry pattern** enables runtime composition
 
 ### For Deployment
+
 - **Browser compatible** core runs in WebAssembly
 - **Cloud native** adapters for serverless
 - **Edge deployable** with minimal dependencies

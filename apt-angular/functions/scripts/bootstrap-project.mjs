@@ -51,25 +51,27 @@ function defaultConnectors(projectId) {
       id: 'mock-gateway',
       name: 'Mock Gateway',
       kind: 'mock',
-      description: 'Streams deterministic demo transcripts so the Angular UI can be validated without live backends.',
+      description:
+        'Streams deterministic demo transcripts so the Angular UI can be validated without live backends.',
       status: 'ready',
       metadata: {
         sampleRuns: 3,
-        emitsArtifacts: false
-      }
+        emitsArtifacts: false,
+      },
     },
     {
       id: 'local-cli',
       name: 'Local APT CLI Bridge',
       kind: 'local-cli',
-      description: 'Spawns the APT CLI from this repo so you can mirror real workstation sessions into Firestore.',
+      description:
+        'Spawns the APT CLI from this repo so you can mirror real workstation sessions into Firestore.',
       status: 'ready',
       metadata: {
         command: 'npm run ui:cli -- apt --profile bo-code',
         cwd: process.env.LOCAL_CLI_CWD ?? '$REPO_ROOT',
         requiresSsh: false,
-        forwardsStdIn: true
-      }
+        forwardsStdIn: true,
+      },
     },
     {
       id: 'firebase-cloud-agent',
@@ -85,26 +87,34 @@ function defaultConnectors(projectId) {
         supportedPlaybooks: [
           {
             id: 'repo_health_audit',
-            description: 'Runs lint + unit tests via the APT CLI, writes summaries to projects/<id>/agentRuns events.',
-            actions: ['npm run lint', 'npm test', 'upload coverage diff artifact']
+            description:
+              'Runs lint + unit tests via the APT CLI, writes summaries to projects/<id>/agentRuns events.',
+            actions: ['npm run lint', 'npm test', 'upload coverage diff artifact'],
           },
           {
             id: 'deploy_hosting_bundle',
             description: 'Builds Angular SSR output and deploys to Firebase Hosting target "app".',
-            actions: ['npm run build --workspace apt-angular', 'firebase deploy --only hosting:app']
+            actions: [
+              'npm run build --workspace apt-angular',
+              'firebase deploy --only hosting:app',
+            ],
           },
           {
             id: 'functions_release',
             description: 'Compiles /functions (Node 22) and deploys callable APIs.',
-            actions: ['cd apt-angular/functions', 'npm run build', 'firebase deploy --only functions']
-          }
+            actions: [
+              'cd apt-angular/functions',
+              'npm run build',
+              'firebase deploy --only functions',
+            ],
+          },
         ],
         observability: {
           runEvents: true,
-          storageArtifacts: true
-        }
-      }
-    }
+          storageArtifacts: true,
+        },
+      },
+    },
   ];
 }
 
@@ -114,14 +124,17 @@ async function main() {
   const ownerUid = args.ownerUid;
 
   if (!projectId || !ownerUid) {
-    console.error('Usage: npm run bootstrap:project -- --projectId=<id> --ownerUid=<uid> [--member=<uid:role>]');
+    console.error(
+      'Usage: npm run bootstrap:project -- --projectId=<id> --ownerUid=<uid> [--member=<uid:role>]',
+    );
     process.exit(1);
   }
 
   if (admin.apps.length === 0) {
     admin.initializeApp({
       credential: admin.credential.applicationDefault(),
-      projectId: args.firebaseProject ?? process.env.GCLOUD_PROJECT ?? process.env.GOOGLE_CLOUD_PROJECT
+      projectId:
+        args.firebaseProject ?? process.env.GCLOUD_PROJECT ?? process.env.GOOGLE_CLOUD_PROJECT,
     });
   }
 
@@ -132,7 +145,7 @@ async function main() {
     ownerUid,
     members,
     status: 'active',
-    updatedAt: FieldValue.serverTimestamp()
+    updatedAt: FieldValue.serverTimestamp(),
   };
 
   if (args.projectName) {
@@ -143,7 +156,9 @@ async function main() {
   }
 
   await firestore.doc(`projects/${projectId}`).set(projectDoc, { merge: true });
-  console.log(`Ensured projects/${projectId} exists with ${Object.keys(members).length} member(s).`);
+  console.log(
+    `Ensured projects/${projectId} exists with ${Object.keys(members).length} member(s).`,
+  );
 
   if (args.seedConnectors !== 'false') {
     const connectors = defaultConnectors(projectId);
@@ -153,9 +168,9 @@ async function main() {
         {
           ...connector,
           updatedAt: FieldValue.serverTimestamp(),
-          createdAt: FieldValue.serverTimestamp()
+          createdAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
     }
     console.log(`Seeded ${connectors.length} connector definitions.`);

@@ -3,12 +3,22 @@
  * Tests overlay management, status orchestration, animations, interrupts, and telemetry
  */
 
-import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
 import { EventEmitter, Writable } from 'stream';
 import { OverlayManager } from '../overlay/OverlayManager.js';
 import { StatusOrchestrator } from '../orchestration/StatusOrchestrator.js';
 import { AnimationScheduler } from '../animation/AnimationScheduler.js';
-import { InterruptManager, InterruptPriority } from '../interrupts/InterruptManager.js';
+import {
+  InterruptManager,
+  InterruptPriority,
+} from '../interrupts/InterruptManager.js';
 import { UITelemetry } from '../telemetry/UITelemetry.js';
 import { UnifiedUIController } from '../UnifiedUIController.js';
 import { ShellUIAdapter } from '../ShellUIAdapter.js';
@@ -290,7 +300,7 @@ describe('InterruptManager', () => {
     // High priority should be processed first, so might already be active
     // Check order of remaining pending
     if (pending.length > 0) {
-      const priorities = pending.map(i => i.priority);
+      const priorities = pending.map((i) => i.priority);
       for (let i = 1; i < priorities.length; i++) {
         expect(priorities[i - 1]).toBeGreaterThanOrEqual(priorities[i]);
       }
@@ -406,7 +416,9 @@ describe('UITelemetry', () => {
 
   test('should detect performance thresholds', () => {
     const thresholdEvents: any[] = [];
-    telemetry.on('performance:threshold-exceeded', (e) => thresholdEvents.push(e));
+    telemetry.on('performance:threshold-exceeded', (e) =>
+      thresholdEvents.push(e),
+    );
 
     telemetry.recordRender('HeavyComponent', 50); // Above 16ms threshold
 
@@ -481,7 +493,7 @@ describe('UnifiedUIController', () => {
     const id = controller.queueInterrupt(
       'alert',
       'Important message',
-      InterruptPriority.HIGH
+      InterruptPriority.HIGH,
     );
 
     expect(id).toBeTruthy();

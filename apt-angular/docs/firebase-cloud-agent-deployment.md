@@ -25,6 +25,7 @@ npm run bootstrap:project -- --projectId=production --ownerUid=<uid> --member=<t
 ```
 
 `scripts/bootstrap-project.mjs` writes:
+
 - `projects/<id>` with `ownerUid`, `members`, `status: 'active'`, and timestamps.
 - Default connectors under `projects/<id>/connectors`:
   - `mock-gateway` for deterministic demo transcripts.
@@ -37,11 +38,11 @@ After seeding, the Angular Connector Gallery calls `listConnectors` to show each
 
 ## 3. Cloud agent responsibilities
 
-| Playbook | Trigger | What it does |
-| --- | --- | --- |
-| `repo_health_audit` | Manual or scheduled via Cloud Tasks | Launches the Bo CLI through the `local-cli` connector, runs `npm run lint`, `npm test`, and emits coverage/artifact summaries into `projects/<id>/agentRuns/<runId>/events`. |
-| `deploy_hosting_bundle` | Manual from Run Board (`createAgentRun`) or chained after a successful audit | Runs `ng build --configuration production` from `apt-angular`, uploads the SSR bundle to Firebase Hosting target `app`, and logs the deployment version + Hosting channel URL. |
-| `functions_release` | Manual or after merges that touch `functions/src/**` | Executes `npm run build` inside `apt-angular/functions` and calls `firebase deploy --only functions` so callable APIs (`createAgentRun`, `issueCommand`, `listConnectors`, demo executor) stay in sync with TypeScript sources. |
+| Playbook                | Trigger                                                                      | What it does                                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repo_health_audit`     | Manual or scheduled via Cloud Tasks                                          | Launches the Bo CLI through the `local-cli` connector, runs `npm run lint`, `npm test`, and emits coverage/artifact summaries into `projects/<id>/agentRuns/<runId>/events`.                                                    |
+| `deploy_hosting_bundle` | Manual from Run Board (`createAgentRun`) or chained after a successful audit | Runs `ng build --configuration production` from `apt-angular`, uploads the SSR bundle to Firebase Hosting target `app`, and logs the deployment version + Hosting channel URL.                                                  |
+| `functions_release`     | Manual or after merges that touch `functions/src/**`                         | Executes `npm run build` inside `apt-angular/functions` and calls `firebase deploy --only functions` so callable APIs (`createAgentRun`, `issueCommand`, `listConnectors`, demo executor) stay in sync with TypeScript sources. |
 
 Each playbook should be represented as a connector metadata entry (see `firebase-cloud-agent` in the bootstrap script) so the UI can surface which workflows exist and the backend can translate a run request into concrete steps.
 

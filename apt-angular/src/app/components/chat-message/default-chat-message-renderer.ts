@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ChatMessage } from '../../../shared/session-models';
-import { MessageRendererRegistryService, MessageRendererComponent } from '../../services/message-renderer-registry.service';
+import {
+  MessageRendererRegistryService,
+  MessageRendererComponent,
+} from '../../services/message-renderer-registry.service';
 import { ExtensionHostComponent } from '../extensions/extension-host';
-import { DefaultExtensionRendererComponent } from '../extensions/default-extension-renderer';
 
 @Component({
   selector: 'app-default-chat-message-renderer',
@@ -15,7 +17,7 @@ import { DefaultExtensionRendererComponent } from '../extensions/default-extensi
       [ngClass]="{
         'message--bo': message.agent === 'bo',
         'message--bo-code': message.agent === 'bo-code',
-        'message--user': message.agent === 'user'
+        'message--user': message.agent === 'user',
       }"
     >
       <div class="message-meta">
@@ -24,7 +26,7 @@ import { DefaultExtensionRendererComponent } from '../extensions/default-extensi
           [ngClass]="{
             'agent-chip--bo': message.agent === 'bo',
             'agent-chip--bo-code': message.agent === 'bo-code',
-            'agent-chip--user': message.agent === 'user'
+            'agent-chip--user': message.agent === 'user',
           }"
         >
           {{ message.title }}
@@ -51,7 +53,7 @@ import { DefaultExtensionRendererComponent } from '../extensions/default-extensi
           *ngFor="let diffLine of message.diff"
           [ngClass]="{
             'diff-line--add': diffLine.kind === 'add',
-            'diff-line--remove': diffLine.kind === 'remove'
+            'diff-line--remove': diffLine.kind === 'remove',
           }"
         >
           {{ diffLine.text }}
@@ -68,7 +70,7 @@ import { DefaultExtensionRendererComponent } from '../extensions/default-extensi
       <div class="message-footer" *ngIf="message.footer">{{ message.footer }}</div>
     </article>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DefaultChatMessageRendererComponent implements MessageRendererComponent {
   @Input({ required: true }) message!: ChatMessage;

@@ -11,8 +11,10 @@ if (argv.includes('--json')) {
     process.exit(1);
   });
 } else {
-  launchShell(BRAND_CODE_PROFILE, { enableProfileSelection: true }).catch((error) => {
-    console.error(error instanceof Error ? error.message : error);
-    process.exit(1);
-  });
+  launchShell(BRAND_CODE_PROFILE, { enableProfileSelection: true }).catch(
+    (error) => {
+      console.error(error instanceof Error ? error.message : error);
+      process.exit(1);
+    },
+  );
 }

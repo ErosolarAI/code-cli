@@ -29,20 +29,28 @@ export function getAgentProfileManifest(): AgentProfileManifest {
   return manifest;
 }
 
-function normalizeManifest(raw: Partial<RawProfileManifest>): AgentProfileManifest {
+function normalizeManifest(
+  raw: Partial<RawProfileManifest>,
+): AgentProfileManifest {
   if (!isRecord(raw)) {
     throw new Error('Agent profile manifest is malformed: expected an object.');
   }
 
-  const profiles = Array.isArray(raw.profiles) ? raw.profiles.map(normalizeProfileEntry) : null;
+  const profiles = Array.isArray(raw.profiles)
+    ? raw.profiles.map(normalizeProfileEntry)
+    : null;
   if (!profiles?.length) {
-    throw new Error('Agent profile manifest must include at least one profile entry.');
+    throw new Error(
+      'Agent profile manifest must include at least one profile entry.',
+    );
   }
 
   const seen = new Set<string>();
   for (const entry of profiles) {
     if (seen.has(entry.name)) {
-      throw new Error(`Agent profile manifest contains duplicate profile id "${entry.name}".`);
+      throw new Error(
+        `Agent profile manifest contains duplicate profile id "${entry.name}".`,
+      );
     }
     seen.add(entry.name);
   }
@@ -75,7 +83,10 @@ function normalizeProfileEntry(raw: AgentProfileEntry): AgentProfileEntry {
     name,
     label: requireString(raw.label, `profiles["${name}"].label`),
     defaultProvider: requireProvider(raw.defaultProvider, name),
-    defaultModel: requireString(raw.defaultModel, `profiles["${name}"].defaultModel`),
+    defaultModel: requireString(
+      raw.defaultModel,
+      `profiles["${name}"].defaultModel`,
+    ),
     systemPrompt: normalizePrompt(raw.systemPrompt, name),
     rulebook: normalizeRulebook(raw.rulebook, name),
   };
@@ -84,11 +95,17 @@ function normalizeProfileEntry(raw: AgentProfileEntry): AgentProfileEntry {
   if (description) {
     profile.description = description;
   }
-  const temperature = optionalNumber(raw.temperature, `profiles["${name}"].temperature`);
+  const temperature = optionalNumber(
+    raw.temperature,
+    `profiles["${name}"].temperature`,
+  );
   if (typeof temperature === 'number') {
     profile.temperature = temperature;
   }
-  const maxTokens = optionalInteger(raw.maxTokens, `profiles["${name}"].maxTokens`);
+  const maxTokens = optionalInteger(
+    raw.maxTokens,
+    `profiles["${name}"].maxTokens`,
+  );
   if (typeof maxTokens === 'number') {
     profile.maxTokens = maxTokens;
   }
@@ -100,9 +117,14 @@ function normalizeProfileEntry(raw: AgentProfileEntry): AgentProfileEntry {
   return profile;
 }
 
-function normalizePrompt(raw: AgentPromptConfig | undefined, profile: string): AgentPromptConfig {
+function normalizePrompt(
+  raw: AgentPromptConfig | undefined,
+  profile: string,
+): AgentPromptConfig {
   if (!isRecord(raw)) {
-    throw new Error(`Profile "${profile}" is missing a valid systemPrompt definition.`);
+    throw new Error(
+      `Profile "${profile}" is missing a valid systemPrompt definition.`,
+    );
   }
 
   if (raw.type === 'literal') {
@@ -116,10 +138,16 @@ function normalizePrompt(raw: AgentPromptConfig | undefined, profile: string): A
   throw new Error(`Profile "${profile}" has an unsupported systemPrompt type.`);
 }
 
-function normalizeLiteralPrompt(raw: LiteralPromptConfig, profile: string): LiteralPromptConfig {
+function normalizeLiteralPrompt(
+  raw: LiteralPromptConfig,
+  profile: string,
+): LiteralPromptConfig {
   const prompt: LiteralPromptConfig = {
     type: 'literal',
-    content: requireString(raw.content, `profiles["${profile}"].systemPrompt.content`),
+    content: requireString(
+      raw.content,
+      `profiles["${profile}"].systemPrompt.content`,
+    ),
   };
   const metadata = normalizeRecord(raw.metadata);
   if (metadata) {
@@ -128,7 +156,10 @@ function normalizeLiteralPrompt(raw: LiteralPromptConfig, profile: string): Lite
   return prompt;
 }
 
-function normalizeRulebookPrompt(raw: RulebookPromptConfig, _profile: string): RulebookPromptConfig {
+function normalizeRulebookPrompt(
+  raw: RulebookPromptConfig,
+  _profile: string,
+): RulebookPromptConfig {
   const prompt: RulebookPromptConfig = { type: 'rulebook' };
   const template = optionalString(raw.template);
   if (template) {
@@ -141,9 +172,14 @@ function normalizeRulebookPrompt(raw: RulebookPromptConfig, _profile: string): R
   return prompt;
 }
 
-function normalizeRulebook(raw: AgentRulebookReference | undefined, profile: string): AgentRulebookReference {
+function normalizeRulebook(
+  raw: AgentRulebookReference | undefined,
+  profile: string,
+): AgentRulebookReference {
   if (!isRecord(raw)) {
-    throw new Error(`Profile "${profile}" is missing a valid rulebook reference.`);
+    throw new Error(
+      `Profile "${profile}" is missing a valid rulebook reference.`,
+    );
   }
   const reference: AgentRulebookReference = {
     file: requireString(raw.file, `profiles["${profile}"].rulebook.file`),
@@ -168,13 +204,18 @@ function normalizeRulebook(raw: AgentRulebookReference | undefined, profile: str
 }
 
 function requireProvider(value: unknown, profile: string): ProviderId {
-  const resolved = requireString(value, `profiles["${profile}"].defaultProvider`);
+  const resolved = requireString(
+    value,
+    `profiles["${profile}"].defaultProvider`,
+  );
   return resolved as ProviderId;
 }
 
 function requireString(value: unknown, field: string): string {
   if (typeof value !== 'string') {
-    throw new Error(`Agent profile manifest is missing required field "${field}".`);
+    throw new Error(
+      `Agent profile manifest is missing required field "${field}".`,
+    );
   }
   const trimmed = value.trim();
   if (!trimmed) {
@@ -196,7 +237,9 @@ function optionalNumber(value: unknown, field: string): number | undefined {
     return undefined;
   }
   if (typeof value !== 'number' || !Number.isFinite(value)) {
-    throw new Error(`Agent profile manifest field "${field}" must be a finite number when provided.`);
+    throw new Error(
+      `Agent profile manifest field "${field}" must be a finite number when provided.`,
+    );
   }
   return value;
 }
@@ -206,7 +249,9 @@ function optionalInteger(value: unknown, field: string): number | undefined {
     return undefined;
   }
   if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0) {
-    throw new Error(`Agent profile manifest field "${field}" must be a positive integer when provided.`);
+    throw new Error(
+      `Agent profile manifest field "${field}" must be a positive integer when provided.`,
+    );
   }
   return value;
 }

@@ -1,6 +1,9 @@
 import type { ProfileName } from '../config.js';
 import { AgentSession, type AgentSessionOptions } from './agentSession.js';
-import { type ToolRuntimeObserver, type ToolSuite } from '../core/toolRuntime.js';
+import {
+  type ToolRuntimeObserver,
+  type ToolSuite,
+} from '../core/toolRuntime.js';
 import type { ToolPolicy } from '../core/policyEngine.js';
 import type { TimelineRecorder } from '../core/timeline.js';
 
@@ -24,8 +27,15 @@ export interface CapabilityModule {
   id: string;
   description?: string;
   create(
-    context: CapabilityContext
-  ): CapabilityContribution | CapabilityContribution[] | null | undefined | Promise<CapabilityContribution | CapabilityContribution[] | null | undefined>;
+    context: CapabilityContext,
+  ):
+    | CapabilityContribution
+    | CapabilityContribution[]
+    | null
+    | undefined
+    | Promise<
+        CapabilityContribution | CapabilityContribution[] | null | undefined
+      >;
 }
 
 export interface CapabilityManifestEntry {
@@ -103,7 +113,8 @@ export class AgentHost {
       this.validateContribution(contribution, module.id);
       this.contributions.push(contribution);
       this.contributionOwners.set(contribution.id, module.id);
-      const contributionSet = this.moduleContributions.get(module.id) ?? new Set<string>();
+      const contributionSet =
+        this.moduleContributions.get(module.id) ?? new Set<string>();
       contributionSet.add(contribution.id);
       this.moduleContributions.set(module.id, contributionSet);
     }
@@ -143,11 +154,15 @@ export class AgentHost {
     this.disposed = true;
     const tasks = this.contributions
       .map((contribution) => contribution.dispose)
-      .filter((fn): fn is NonNullable<CapabilityContribution['dispose']> => typeof fn === 'function')
+      .filter(
+        (fn): fn is NonNullable<CapabilityContribution['dispose']> =>
+          typeof fn === 'function',
+      )
       .map(async (dispose) => {
         try {
           await dispose();
         } catch {
+          // ignore errors
         }
       });
     await Promise.all(tasks);
@@ -162,7 +177,7 @@ export class AgentHost {
         if (seen.has(suite.id)) {
           throw new Error(
             `Duplicate tool suite id "${suite.id}" detected while composing capabilities. ` +
-              'Ensure every capability module emits unique suite identifiers.'
+              'Ensure every capability module emits unique suite identifiers.',
           );
         }
         suites.push(suite);
@@ -172,16 +187,21 @@ export class AgentHost {
     return suites;
   }
 
-  private validateContribution(contribution: CapabilityContribution, moduleId: string): void {
+  private validateContribution(
+    contribution: CapabilityContribution,
+    moduleId: string,
+  ): void {
     if (!contribution?.id?.trim()) {
-      throw new Error(`Capability module "${moduleId}" emitted a contribution without an id.`);
+      throw new Error(
+        `Capability module "${moduleId}" emitted a contribution without an id.`,
+      );
     }
     const suites = normalizeSuites(contribution);
     for (const suite of suites) {
       if (!suite?.id?.trim()) {
         throw new Error(
           `Capability contribution "${contribution.id}" from module "${moduleId}" ` +
-            'emitted a tool suite without an id.'
+            'emitted a tool suite without an id.',
         );
       }
     }
@@ -191,7 +211,7 @@ export class AgentHost {
     if (this.session) {
       throw new Error(
         'Cannot register an additional capability module after the runtime session has been created. ' +
-          'Instantiate AgentHost earlier in the boot sequence or create a new host instance.'
+          'Instantiate AgentHost earlier in the boot sequence or create a new host instance.',
       );
     }
   }
@@ -213,7 +233,7 @@ export class AgentHost {
 }
 
 function normalizeContributions(
-  value: CapabilityContribution | CapabilityContribution[] | null | undefined
+  value: CapabilityContribution | CapabilityContribution[] | null | undefined,
 ): CapabilityContribution[] {
   if (!value) {
     return [];

@@ -56,7 +56,7 @@ export class ContextManager {
     }
 
     // Intelligent truncation based on tool type
-    let truncated = this.intelligentTruncate(output, toolName);
+    const truncated = this.intelligentTruncate(output, toolName);
     const truncatedLength = truncated.length;
 
     return {
@@ -79,12 +79,20 @@ export class ContextManager {
     }
 
     // For search results, keep first N results
-    if (toolName === 'Grep' || toolName === 'grep_search' || toolName === 'Glob') {
+    if (
+      toolName === 'Grep' ||
+      toolName === 'grep_search' ||
+      toolName === 'Glob'
+    ) {
       return this.truncateSearchOutput(output, maxLength);
     }
 
     // For bash/command output, keep end (usually most relevant)
-    if (toolName === 'Bash' || toolName === 'bash' || toolName === 'execute_bash') {
+    if (
+      toolName === 'Bash' ||
+      toolName === 'bash' ||
+      toolName === 'execute_bash'
+    ) {
       return this.truncateBashOutput(output, maxLength);
     }
 
@@ -104,7 +112,7 @@ export class ContextManager {
     const headLines = lines.slice(0, keepLines);
     const tailLines = lines.slice(-keepLines);
 
-    const truncatedCount = lines.length - (keepLines * 2);
+    const truncatedCount = lines.length - keepLines * 2;
 
     return [
       ...headLines,
@@ -283,14 +291,22 @@ const DEFAULT_TARGET_RATIO = 0.75;
 /**
  * Derives a context manager configuration based on the active model's context window.
  */
-export function resolveContextManagerConfig(model: string | null | undefined): Partial<ContextManagerConfig> {
+export function resolveContextManagerConfig(
+  model: string | null | undefined,
+): Partial<ContextManagerConfig> {
   const windowTokens = getContextWindowTokens(model);
   if (!windowTokens) {
     return {};
   }
 
-  const maxTokens = Math.max(1000, Math.floor(windowTokens * DEFAULT_CONTEXT_HEADROOM));
-  const targetTokens = Math.max(500, Math.floor(maxTokens * DEFAULT_TARGET_RATIO));
+  const maxTokens = Math.max(
+    1000,
+    Math.floor(windowTokens * DEFAULT_CONTEXT_HEADROOM),
+  );
+  const targetTokens = Math.max(
+    500,
+    Math.floor(maxTokens * DEFAULT_TARGET_RATIO),
+  );
 
   return { maxTokens, targetTokens };
 }
@@ -299,7 +315,7 @@ export function resolveContextManagerConfig(model: string | null | undefined): P
  * Create a default context manager instance
  */
 export function createDefaultContextManager(
-  overrides: Partial<ContextManagerConfig> = {}
+  overrides: Partial<ContextManagerConfig> = {},
 ): ContextManager {
   return new ContextManager({
     maxTokens: 130000, // Safe limit below 131072

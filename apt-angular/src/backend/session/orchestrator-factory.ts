@@ -16,7 +16,7 @@ export interface OrchestratorBundle {
 }
 
 export const createSessionOrchestrator = async (
-  config: RuntimeConfig = loadRuntimeConfig()
+  config: RuntimeConfig = loadRuntimeConfig(),
 ): Promise<OrchestratorBundle> => {
   const gateway = buildGateway(config);
 
@@ -51,28 +51,28 @@ const buildGateway = (config: RuntimeConfig): AgentGateway => {
         throw new Error('JSONL store configuration missing');
       }
 
-      return new PersistentGateway(
-        new JsonlStoreAdapter(config.jsonlStore),
-        { label: config.jsonlStore.label ?? 'JSONL store', source: 'jsonl-store' }
-      );
+      return new PersistentGateway(new JsonlStoreAdapter(config.jsonlStore), {
+        label: config.jsonlStore.label ?? 'JSONL store',
+        source: 'jsonl-store',
+      });
     case 'redis-stream':
       if (!config.redisStream) {
         throw new Error('Redis stream configuration missing');
       }
 
-      return new PersistentGateway(
-        new RedisStreamAdapter(config.redisStream),
-        { label: config.redisStream.label ?? 'Redis stream', source: 'redis-stream' }
-      );
+      return new PersistentGateway(new RedisStreamAdapter(config.redisStream), {
+        label: config.redisStream.label ?? 'Redis stream',
+        source: 'redis-stream',
+      });
     case 'temporal-workflow':
       if (!config.temporal) {
         throw new Error('Temporal workflow configuration missing');
       }
 
-      return new PersistentGateway(
-        new TemporalWorkflowAdapter(config.temporal),
-        { label: config.temporal.label ?? 'Temporal workflow', source: 'temporal-workflow' }
-      );
+      return new PersistentGateway(new TemporalWorkflowAdapter(config.temporal), {
+        label: config.temporal.label ?? 'Temporal workflow',
+        source: 'temporal-workflow',
+      });
     case 'mock':
     default:
       return new MockGateway();

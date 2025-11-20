@@ -49,7 +49,7 @@ class BackgroundShell {
   constructor(
     public readonly id: string,
     private command: string,
-    private _workingDir: string
+    private _workingDir: string,
   ) {}
 
   start(): void {
@@ -74,7 +74,11 @@ class BackgroundShell {
     });
   }
 
-  getNewOutput(filter?: RegExp): { stdout: string; stderr: string; status: string } {
+  getNewOutput(filter?: RegExp): {
+    stdout: string;
+    stderr: string;
+    status: string;
+  } {
     const allOutput = this.outputBuffer.join('');
     const newOutput = allOutput.substring(this.lastReadPosition);
     this.lastReadPosition = allOutput.length;
@@ -84,7 +88,7 @@ class BackgroundShell {
     let stdout = newOutput;
     if (filter) {
       const lines = newOutput.split('\n');
-      const filtered = lines.filter(line => filter.test(line));
+      const filtered = lines.filter((line) => filter.test(line));
       stdout = filtered.join('\n');
     }
 
@@ -129,21 +133,26 @@ const shellManager = new BackgroundShellManager();
  * @param _workingDir - The working directory for commands (reserved for future use)
  * @returns Array of tool definitions
  */
-export function createBackgroundBashTools(_workingDir: string): ToolDefinition[] {
+export function createBackgroundBashTools(
+  _workingDir: string,
+): ToolDefinition[] {
   return [
     {
       name: 'BashOutput',
-      description: 'Retrieves output from a running or completed background bash shell. Always returns only new output since the last check.',
+      description:
+        'Retrieves output from a running or completed background bash shell. Always returns only new output since the last check.',
       parameters: {
         type: 'object',
         properties: {
           bash_id: {
             type: 'string',
-            description: 'The ID of the background shell to retrieve output from',
+            description:
+              'The ID of the background shell to retrieve output from',
           },
           filter: {
             type: 'string',
-            description: 'Optional regular expression to filter the output lines. Only lines matching this regex will be included.',
+            description:
+              'Optional regular expression to filter the output lines. Only lines matching this regex will be included.',
           },
         },
         required: ['bash_id'],
@@ -164,9 +173,10 @@ export function createBackgroundBashTools(_workingDir: string): ToolDefinition[]
             return `Error: Shell "${bashId}" not found.\n\nAvailable shells: ${available.length > 0 ? available.join(', ') : 'none'}`;
           }
 
-          const filter = filterStr && typeof filterStr === 'string'
-            ? new RegExp(filterStr)
-            : undefined;
+          const filter =
+            filterStr && typeof filterStr === 'string'
+              ? new RegExp(filterStr)
+              : undefined;
 
           const { stdout, stderr, status } = shell.getNewOutput(filter);
 
@@ -189,15 +199,17 @@ export function createBackgroundBashTools(_workingDir: string): ToolDefinition[]
           }
 
           return parts.join('\n');
-
         } catch (error: any) {
-          return buildError('retrieving shell output', error, { bash_id: bashId });
+          return buildError('retrieving shell output', error, {
+            bash_id: bashId,
+          });
         }
       },
     },
     {
       name: 'KillShell',
-      description: 'Kills a running background bash shell by its ID. Returns success or failure status.',
+      description:
+        'Kills a running background bash shell by its ID. Returns success or failure status.',
       parameters: {
         type: 'object',
         properties: {
@@ -225,7 +237,6 @@ export function createBackgroundBashTools(_workingDir: string): ToolDefinition[]
             const available = shellManager.listShells();
             return `Error: Shell "${shellId}" not found.\n\nAvailable shells: ${available.length > 0 ? available.join(', ') : 'none'}`;
           }
-
         } catch (error: any) {
           return buildError('killing shell', error, { shell_id: shellId });
         }
@@ -240,6 +251,9 @@ export function createBackgroundBashTools(_workingDir: string): ToolDefinition[]
  * This should be integrated into the main Bash tool with a run_in_background parameter.
  * For now, it's exported as a helper function.
  */
-export function startBackgroundShell(command: string, workingDir: string): string {
+export function startBackgroundShell(
+  command: string,
+  workingDir: string,
+): string {
   return shellManager.createShell(command, workingDir);
 }

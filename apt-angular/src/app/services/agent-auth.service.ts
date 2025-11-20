@@ -6,7 +6,7 @@ import {
   authState,
   signInAnonymously,
   signOut,
-  updateProfile
+  updateProfile,
 } from '@angular/fire/auth';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -37,8 +37,7 @@ export class AgentAuthService {
 
     effect(() => {
       if (!this.userState() && !this.loadingState()) {
-        this.ensureAnonymousSession().catch(() => {
-        });
+        this.ensureAnonymousSession().catch(() => {});
       }
     });
   }

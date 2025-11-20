@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createRepoCheckTools } from '../tools/repoChecksTools.js';
 
 export class RepoChecksCapabilityModule implements CapabilityModule {
@@ -13,7 +17,8 @@ export class RepoChecksCapabilityModule implements CapabilityModule {
     const workingDir = this.workingDirOverride ?? context.workingDir;
     return {
       id: 'repo.checks.tools',
-      description: 'Run repository validation commands (npm test/build/lint) inside the sandbox.',
+      description:
+        'Run repository validation commands (npm test/build/lint) inside the sandbox.',
       toolSuite: {
         id: 'repo-checks',
         description: 'Repository quality checks',

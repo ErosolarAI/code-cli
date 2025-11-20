@@ -6,11 +6,11 @@
 import { EventEmitter } from 'events';
 
 export enum InterruptPriority {
-  CRITICAL = 100,  // System errors, critical failures
-  HIGH = 75,       // User cancellation requests, important alerts
-  NORMAL = 50,     // Standard user input, questions
-  LOW = 25,        // Hints, suggestions
-  BACKGROUND = 0,  // Non-urgent notifications
+  CRITICAL = 100, // System errors, critical failures
+  HIGH = 75, // User cancellation requests, important alerts
+  NORMAL = 50, // Standard user input, questions
+  LOW = 25, // Hints, suggestions
+  BACKGROUND = 0, // Non-urgent notifications
 }
 
 export type InterruptType =
@@ -37,7 +37,13 @@ export interface InterruptConfig {
 }
 
 export interface Interrupt extends InterruptConfig {
-  status: 'pending' | 'active' | 'deferred' | 'completed' | 'expired' | 'cancelled';
+  status:
+    | 'pending'
+    | 'active'
+    | 'deferred'
+    | 'completed'
+    | 'expired'
+    | 'cancelled';
   activatedAt?: number;
   completedAt?: number;
   deferredCount: number;
@@ -142,7 +148,10 @@ export class InterruptManager extends EventEmitter {
         // Check if we can activate this interrupt
         if (!this.canActivate(interrupt)) {
           // If it's deferrable and hasn't exceeded max deferrals, defer it
-          if (interrupt.deferrable && interrupt.deferredCount < this.policy.maxDeferrals) {
+          if (
+            interrupt.deferrable &&
+            interrupt.deferredCount < this.policy.maxDeferrals
+          ) {
             this.deferInterrupt(interrupt);
           }
           break; // Wait for active interrupts to complete
@@ -367,7 +376,7 @@ export class InterruptManager extends EventEmitter {
    */
   private async smoothTransition(
     direction: 'in' | 'out',
-    interrupt: Interrupt
+    interrupt: Interrupt,
   ): Promise<void> {
     return new Promise((resolve) => {
       this.emit('interrupt:transition', {
@@ -476,7 +485,8 @@ export class InterruptManager extends EventEmitter {
 
     const avgPriority =
       allInterrupts.length > 0
-        ? allInterrupts.reduce((sum, i) => sum + i.priority, 0) / allInterrupts.length
+        ? allInterrupts.reduce((sum, i) => sum + i.priority, 0) /
+          allInterrupts.length
         : 0;
 
     const oldestTimestamp =

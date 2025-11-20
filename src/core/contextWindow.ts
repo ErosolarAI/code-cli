@@ -15,7 +15,9 @@ const MODEL_CONTEXT_WINDOWS: Array<{ pattern: RegExp; tokens: number }> = [
  * Returns the approximate context window (in tokens) for the provided model id.
  * Falls back to null when the model is unknown so callers can handle gracefully.
  */
-export function getContextWindowTokens(model: string | null | undefined): number | null {
+export function getContextWindowTokens(
+  model: string | null | undefined,
+): number | null {
   if (!model) {
     return null;
   }

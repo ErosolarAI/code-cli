@@ -23,22 +23,26 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'Grep',
-      description: 'A powerful search tool built on ripgrep patterns. Supports full regex syntax, multiple output modes, and context lines. Use for searching file contents.',
+      description:
+        'A powerful search tool built on ripgrep patterns. Supports full regex syntax, multiple output modes, and context lines. Use for searching file contents.',
       normalizeArguments: normalizeGrepArguments,
       parameters: {
         type: 'object',
         properties: {
           pattern: {
             type: 'string',
-            description: 'The regular expression pattern to search for in file contents',
+            description:
+              'The regular expression pattern to search for in file contents',
           },
           path: {
             type: 'string',
-            description: 'File or directory to search in (defaults to current working directory)',
+            description:
+              'File or directory to search in (defaults to current working directory)',
           },
           output_mode: {
             type: 'string',
-            description: 'Output mode: "content" shows matching lines, "files_with_matches" shows file paths (default), "count" shows match counts',
+            description:
+              'Output mode: "content" shows matching lines, "files_with_matches" shows file paths (default), "count" shows match counts',
           },
           '-i': {
             type: 'boolean',
@@ -46,39 +50,48 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
           },
           '-n': {
             type: 'boolean',
-            description: 'Show line numbers in output (requires output_mode: "content"). Defaults to true.',
+            description:
+              'Show line numbers in output (requires output_mode: "content"). Defaults to true.',
           },
           '-A': {
             type: 'number',
-            description: 'Number of lines to show after each match (requires output_mode: "content")',
+            description:
+              'Number of lines to show after each match (requires output_mode: "content")',
           },
           '-B': {
             type: 'number',
-            description: 'Number of lines to show before each match (requires output_mode: "content")',
+            description:
+              'Number of lines to show before each match (requires output_mode: "content")',
           },
           '-C': {
             type: 'number',
-            description: 'Number of lines to show before and after each match (requires output_mode: "content")',
+            description:
+              'Number of lines to show before and after each match (requires output_mode: "content")',
           },
           glob: {
             type: 'string',
-            description: 'Glob pattern to filter files (e.g. "*.js", "*.{ts,tsx}")',
+            description:
+              'Glob pattern to filter files (e.g. "*.js", "*.{ts,tsx}")',
           },
           type: {
             type: 'string',
-            description: 'File type to search (e.g. "js", "py", "rust", "go"). More efficient than glob for standard file types.',
+            description:
+              'File type to search (e.g. "js", "py", "rust", "go"). More efficient than glob for standard file types.',
           },
           multiline: {
             type: 'boolean',
-            description: 'Enable multiline mode where . matches newlines and patterns can span lines. Default: false.',
+            description:
+              'Enable multiline mode where . matches newlines and patterns can span lines. Default: false.',
           },
           head_limit: {
             type: 'number',
-            description: 'Limit output to first N lines/entries. Works across all output modes.',
+            description:
+              'Limit output to first N lines/entries. Works across all output modes.',
           },
           offset: {
             type: 'number',
-            description: 'Skip first N lines/entries before applying head_limit. Defaults to 0.',
+            description:
+              'Skip first N lines/entries before applying head_limit. Defaults to 0.',
           },
         },
         required: ['pattern'],
@@ -96,7 +109,10 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
         const globPattern = args['glob'];
         const fileType = args['type'];
         const multiline = args['multiline'] === true;
-        const headLimit = typeof args['head_limit'] === 'number' ? args['head_limit'] : undefined;
+        const headLimit =
+          typeof args['head_limit'] === 'number'
+            ? args['head_limit']
+            : undefined;
         const offset = typeof args['offset'] === 'number' ? args['offset'] : 0;
 
         // Validate pattern
@@ -105,29 +121,43 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
         }
 
         // Validate output_mode
-        if (outputMode !== 'content' && outputMode !== 'files_with_matches' && outputMode !== 'count') {
+        if (
+          outputMode !== 'content' &&
+          outputMode !== 'files_with_matches' &&
+          outputMode !== 'count'
+        ) {
           return 'Error: output_mode must be "content", "files_with_matches", or "count".';
         }
 
         try {
-          const searchPath = pathArg && typeof pathArg === 'string'
-            ? resolveFilePath(workingDir, pathArg)
-            : workingDir;
+          const searchPath =
+            pathArg && typeof pathArg === 'string'
+              ? resolveFilePath(workingDir, pathArg)
+              : workingDir;
 
           // Create regex with appropriate flags
           const flags = caseInsensitive ? 'gi' : 'g';
-          const dotallFlags = multiline ? (caseInsensitive ? 'gis' : 'gs') : flags;
+          const dotallFlags = multiline
+            ? caseInsensitive
+              ? 'gis'
+              : 'gs'
+            : flags;
           const regex = new RegExp(pattern, dotallFlags);
 
           // Perform search
           const matches = searchFiles(searchPath, regex, {
-            globPattern: typeof globPattern === 'string' ? globPattern : undefined,
+            globPattern:
+              typeof globPattern === 'string' ? globPattern : undefined,
             fileType: typeof fileType === 'string' ? fileType : undefined,
             multiline,
           });
 
           // Apply offset and head_limit
-          const filteredMatches = applyOffsetAndLimit(matches, offset, headLimit);
+          const filteredMatches = applyOffsetAndLimit(
+            matches,
+            offset,
+            headLimit,
+          );
 
           // Format output based on mode
           let result: string;
@@ -150,7 +180,6 @@ export function createGrepTools(workingDir: string): ToolDefinition[] {
           }
 
           return result;
-
         } catch (error: any) {
           return buildError('grep search', error, {
             pattern: String(pattern),
@@ -187,7 +216,9 @@ const GREP_FLAG_ALIASES: Record<string, string> = {
   C: '-C',
 };
 
-function normalizeGrepArguments(args: Record<string, unknown>): Record<string, unknown> {
+function normalizeGrepArguments(
+  args: Record<string, unknown>,
+): Record<string, unknown> {
   const normalized: Record<string, unknown> = {};
 
   for (const [rawKey, rawValue] of Object.entries(args ?? {})) {
@@ -243,7 +274,8 @@ function normalizeGrepArguments(args: Record<string, unknown>): Record<string, u
 function coerceString(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value);
   return undefined;
 }
 
@@ -287,12 +319,22 @@ function resolveFilePath(workingDir: string, path: string): string {
 function searchFiles(
   searchPath: string,
   regex: RegExp,
-  options: SearchOptions
+  options: SearchOptions,
 ): SearchMatch[] {
   const results: SearchMatch[] = [];
   const ignoredDirs = new Set([
-    '.git', 'node_modules', 'dist', '.next', 'build', 'coverage',
-    '.turbo', '.cache', '__pycache__', '.pytest_cache', '.venv', 'venv',
+    '.git',
+    'node_modules',
+    'dist',
+    '.next',
+    'build',
+    'coverage',
+    '.turbo',
+    '.cache',
+    '__pycache__',
+    '.pytest_cache',
+    '.venv',
+    'venv',
   ]);
 
   function search(currentPath: string) {
@@ -307,10 +349,16 @@ function searchFiles(
         }
       } else if (stat.isFile()) {
         // Filter by file type or glob
-        if (options.fileType && !matchesFileType(currentPath, options.fileType)) {
+        if (
+          options.fileType &&
+          !matchesFileType(currentPath, options.fileType)
+        ) {
           return;
         }
-        if (options.globPattern && !matchesGlob(currentPath, options.globPattern)) {
+        if (
+          options.globPattern &&
+          !matchesGlob(currentPath, options.globPattern)
+        ) {
           return;
         }
 
@@ -363,7 +411,7 @@ function searchFiles(
 function applyOffsetAndLimit(
   matches: SearchMatch[],
   offset: number,
-  headLimit?: number
+  headLimit?: number,
 ): SearchMatch[] {
   let result = matches;
 
@@ -380,7 +428,12 @@ function applyOffsetAndLimit(
 
 function formatContentOutput(
   matches: SearchMatch[],
-  options: { showLineNumbers: boolean; beforeContext: number; afterContext: number; searchPath: string }
+  options: {
+    showLineNumbers: boolean;
+    beforeContext: number;
+    afterContext: number;
+    searchPath: string;
+  },
 ): string {
   if (matches.length === 0) {
     return 'No matches found.';
@@ -390,7 +443,8 @@ function formatContentOutput(
 
   for (const match of matches) {
     const relPath = relative(options.searchPath, match.file);
-    const displayPath = relPath && !relPath.startsWith('..') ? relPath : match.file;
+    const displayPath =
+      relPath && !relPath.startsWith('..') ? relPath : match.file;
 
     if (options.showLineNumbers) {
       lines.push(`${displayPath}:${match.line}:${match.content}`);
@@ -408,8 +462,8 @@ function formatFilesOutput(matches: SearchMatch[], searchPath: string): string {
   }
 
   // Get unique file paths
-  const uniqueFiles = [...new Set(matches.map(m => m.file))];
-  const relativePaths = uniqueFiles.map(file => {
+  const uniqueFiles = [...new Set(matches.map((m) => m.file))];
+  const relativePaths = uniqueFiles.map((file) => {
     const rel = relative(searchPath, file);
     return rel && !rel.startsWith('..') ? rel : file;
   });
@@ -476,11 +530,33 @@ function matchesGlob(filePath: string, globPattern: string): boolean {
 function isBinaryFile(filePath: string): boolean {
   const ext = extname(filePath).toLowerCase();
   const binaryExts = new Set([
-    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.svg',
-    '.pdf', '.zip', '.tar', '.gz', '.7z', '.rar',
-    '.exe', '.dll', '.so', '.dylib', '.bin',
-    '.mp3', '.mp4', '.avi', '.mov', '.flv',
-    '.woff', '.woff2', '.ttf', '.eot',
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.gif',
+    '.bmp',
+    '.ico',
+    '.svg',
+    '.pdf',
+    '.zip',
+    '.tar',
+    '.gz',
+    '.7z',
+    '.rar',
+    '.exe',
+    '.dll',
+    '.so',
+    '.dylib',
+    '.bin',
+    '.mp3',
+    '.mp4',
+    '.avi',
+    '.mov',
+    '.flv',
+    '.woff',
+    '.woff2',
+    '.ttf',
+    '.eot',
   ]);
 
   return binaryExts.has(ext);

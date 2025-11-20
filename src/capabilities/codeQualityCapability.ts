@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createCodeQualityTools } from '../tools/codeQualityTools.js';
 
 export interface CodeQualityCapabilityOptions {

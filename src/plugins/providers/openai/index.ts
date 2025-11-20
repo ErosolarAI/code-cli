@@ -4,7 +4,9 @@ import type { ProviderId } from '../../../core/types.js';
 
 let registered = false;
 
-export function registerOpenAIProviderPlugin(providerId: ProviderId = 'openai'): void {
+export function registerOpenAIProviderPlugin(
+  providerId: ProviderId = 'openai',
+): void {
   if (registered) {
     return;
   }
@@ -14,7 +16,9 @@ export function registerOpenAIProviderPlugin(providerId: ProviderId = 'openai'):
       apiKey: requireEnv('OPENAI_API_KEY'),
       model: config.model,
       providerId,
-      ...(config.reasoningEffort ? { reasoningEffort: config.reasoningEffort } : {}),
+      ...(config.reasoningEffort
+        ? { reasoningEffort: config.reasoningEffort }
+        : {}),
       ...(config.textVerbosity ? { textVerbosity: config.textVerbosity } : {}),
     };
     return new OpenAIResponsesProvider(options);

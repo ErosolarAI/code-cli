@@ -1,4 +1,8 @@
-import type { CapabilityModule, CapabilityContribution, CapabilityContext } from '../runtime/agentHost.js';
+import type {
+  CapabilityModule,
+  CapabilityContribution,
+  CapabilityContext,
+} from '../runtime/agentHost.js';
 import readline from 'node:readline';
 import { stdin, stdout } from 'node:process';
 
@@ -54,11 +58,13 @@ Examples:
                     properties: {
                       question: {
                         type: 'string',
-                        description: 'The complete question to ask. Should end with a question mark.',
+                        description:
+                          'The complete question to ask. Should end with a question mark.',
                       },
                       header: {
                         type: 'string',
-                        description: 'Very short label (max 12 chars). Examples: "Auth method", "Library", "Approach"',
+                        description:
+                          'Very short label (max 12 chars). Examples: "Auth method", "Library", "Approach"',
                       },
                       options: {
                         type: 'array',
@@ -72,7 +78,8 @@ Examples:
                             },
                             description: {
                               type: 'string',
-                              description: 'Explanation of this option and its implications',
+                              description:
+                                'Explanation of this option and its implications',
                             },
                           },
                           required: ['label', 'description'],
@@ -123,7 +130,9 @@ Examples:
     console.log(`${question.options.length + 1}. Other (provide custom input)`);
 
     if (question.multiSelect) {
-      console.log(`\nEnter numbers separated by commas (e.g., "1,3") or type "other":`);
+      console.log(
+        `\nEnter numbers separated by commas (e.g., "1,3") or type "other":`,
+      );
     } else {
       console.log(`\nEnter the number of your choice or type "other":`);
     }
@@ -139,7 +148,10 @@ Examples:
 
         const trimmed = input.trim().toLowerCase();
 
-        if (trimmed === 'other' || trimmed === String(question.options.length + 1)) {
+        if (
+          trimmed === 'other' ||
+          trimmed === String(question.options.length + 1)
+        ) {
           const customRl = readline.createInterface({
             input: stdin,
             output: stdout,
@@ -158,7 +170,11 @@ Examples:
 
           for (const choice of choices) {
             const index = Number.parseInt(choice, 10);
-            if (Number.isFinite(index) && index >= 1 && index <= question.options.length) {
+            if (
+              Number.isFinite(index) &&
+              index >= 1 &&
+              index <= question.options.length
+            ) {
               selected.push(question.options[index - 1]!.label);
             }
           }
@@ -171,7 +187,11 @@ Examples:
           }
         } else {
           const choice = Number.parseInt(trimmed, 10);
-          if (Number.isFinite(choice) && choice >= 1 && choice <= question.options.length) {
+          if (
+            Number.isFinite(choice) &&
+            choice >= 1 &&
+            choice <= question.options.length
+          ) {
             resolve(question.options[choice - 1]!.label);
           } else {
             console.log('Invalid choice, using first option as default');

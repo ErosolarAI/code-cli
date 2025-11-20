@@ -18,7 +18,7 @@ export async function assertProjectRole(
   firestore: Firestore,
   projectId: string,
   uid: string,
-  allowed: ProjectRole[]
+  allowed: ProjectRole[],
 ): Promise<ProjectAssertion> {
   const snapshot = await firestore.doc(`projects/${projectId}`).get();
   if (!snapshot.exists) {
@@ -45,7 +45,7 @@ export async function assertProjectRole(
 export async function assertProjectMember(
   firestore: Firestore,
   projectId: string,
-  uid: string
+  uid: string,
 ): Promise<ProjectAssertion> {
   return assertProjectRole(firestore, projectId, uid, ['admin', 'editor', 'viewer']);
 }
@@ -55,7 +55,11 @@ export function buildProjectRunRef(firestore: Firestore, projectId: string, runI
   return runId ? runs.doc(runId) : runs.doc();
 }
 
-export function buildProjectConnectorRef(firestore: Firestore, projectId: string, connectorId?: string) {
+export function buildProjectConnectorRef(
+  firestore: Firestore,
+  projectId: string,
+  connectorId?: string,
+) {
   const connectors = firestore.collection(`projects/${projectId}/connectors`);
   return connectorId ? connectors.doc(connectorId) : connectors.doc();
 }

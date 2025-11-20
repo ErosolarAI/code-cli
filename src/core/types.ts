@@ -38,7 +38,11 @@ export interface ToolMessage {
   toolCallId: string;
 }
 
-export type ConversationMessage = SystemMessage | UserMessage | AssistantMessage | ToolMessage;
+export type ConversationMessage =
+  | SystemMessage
+  | UserMessage
+  | AssistantMessage
+  | ToolMessage;
 
 export interface JSONSchemaPropertyBase {
   description?: string;
@@ -116,8 +120,14 @@ export interface StreamChunk {
 export interface LLMProvider {
   readonly id: ProviderId;
   readonly model: string;
-  generate(messages: ConversationMessage[], tools: ProviderToolDefinition[]): Promise<ProviderResponse>;
-  generateStream?(messages: ConversationMessage[], tools: ProviderToolDefinition[]): AsyncIterableIterator<StreamChunk>;
+  generate(
+    messages: ConversationMessage[],
+    tools: ProviderToolDefinition[],
+  ): Promise<ProviderResponse>;
+  generateStream?(
+    messages: ConversationMessage[],
+    tools: ProviderToolDefinition[],
+  ): AsyncIterableIterator<StreamChunk>;
   getCapabilities?(): ProviderCapabilities;
 }
 

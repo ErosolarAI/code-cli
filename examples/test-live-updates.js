@@ -6,7 +6,7 @@
 import { Display } from '../dist/ui/display.js';
 
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function demonstrateLiveUpdates() {
@@ -85,8 +85,8 @@ async function demonstrateLiveUpdates() {
 
     display.stopThinking();
     display.showAssistantMessage(
-      'I\'ve successfully analyzed the codebase and implemented the requested changes. The tests are passing and everything looks good!',
-      { isFinal: true }
+      "I've successfully analyzed the codebase and implemented the requested changes. The tests are passing and everything looks good!",
+      { isFinal: true },
     );
 
     console.log('\n━'.repeat(60));
@@ -100,7 +100,6 @@ async function demonstrateLiveUpdates() {
     console.log('  ✓ Dynamic spinner messages for each action');
     console.log('  ✓ Emoji indicators for different tool types');
     console.log('  ✓ Smooth transitions between states\n');
-
   } catch (error) {
     console.error('❌ Error during demo:', error);
   }

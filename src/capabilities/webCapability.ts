@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createWebTools } from '../tools/webTools.js';
 
 export interface WebCapabilityOptions {

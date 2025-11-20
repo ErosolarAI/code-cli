@@ -22,9 +22,9 @@ resource inventory so the model knows which supporting files exist before readin
 
 ## Tooling
 
-| Tool        | Description                                                                                   |
-|-------------|-----------------------------------------------------------------------------------------------|
-| `ListSkills` | Scans for all SKILL packages and prints name, namespace-qualified slug, path, and resources. |
+| Tool         | Description                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| `ListSkills` | Scans for all SKILL packages and prints name, namespace-qualified slug, path, and resources.    |
 | `Skill`      | Loads a single SKILL by name/slug/path and returns metadata, body, and optional resource lists. |
 
 Both tools accept `refresh_cache: true` to force a re-scan when new skills are added during a live session.
@@ -38,6 +38,7 @@ ListSkills {}
 ```
 
 > Discovered 3 skills:
+>
 > - plugin-dev:command-development — Command authoring workflow for Claude plugins
 >   Source: workspace:skills • Path: claude-code/plugins/plugin-dev/skills/command-development
 >   Body ✅ | References ✅ | Scripts ✅ | Assets —

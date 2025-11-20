@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { NgClass, NgFor } from '@angular/common';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -114,7 +122,10 @@ export class AgentSteps implements AfterViewInit {
           onUpdate: (self) => {
             const clampedProgress = Math.min(1, Math.max(0, self.progress));
             this.scrollProgress.set(clampedProgress);
-            const index = Math.min(layers.length - 1, Math.round(clampedProgress * (layers.length - 1)));
+            const index = Math.min(
+              layers.length - 1,
+              Math.round(clampedProgress * (layers.length - 1)),
+            );
             this.activeStep.set(index);
           },
         },

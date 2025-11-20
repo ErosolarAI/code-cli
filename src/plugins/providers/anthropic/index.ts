@@ -12,8 +12,12 @@ export function registerAnthropicProviderPlugin(): void {
     const options = {
       apiKey: requireEnv('ANTHROPIC_API_KEY'),
       model: config.model,
-      ...(typeof config.temperature === 'number' ? { temperature: config.temperature } : {}),
-      ...(typeof config.maxTokens === 'number' ? { maxTokens: config.maxTokens } : {}),
+      ...(typeof config.temperature === 'number'
+        ? { temperature: config.temperature }
+        : {}),
+      ...(typeof config.maxTokens === 'number'
+        ? { maxTokens: config.maxTokens }
+        : {}),
     };
     return new AnthropicMessagesProvider(options);
   });

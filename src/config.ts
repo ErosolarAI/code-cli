@@ -1,7 +1,10 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
-import type { AgentProfileEntry, AgentProfileManifest } from './contracts/v1/agentProfileManifest.js';
+import type {
+  AgentProfileEntry,
+  AgentProfileManifest,
+} from './contracts/v1/agentProfileManifest.js';
 import type { ProviderId } from './core/types.js';
 import {
   registerAgentProfile,
@@ -10,7 +13,10 @@ import {
   type AgentProfileBlueprint,
   type ProfileName,
 } from './core/agentProfiles.js';
-import { buildAgentRulebookPrompt, loadAgentRulebook } from './core/agentRulebook.js';
+import {
+  buildAgentRulebookPrompt,
+  loadAgentRulebook,
+} from './core/agentRulebook.js';
 import { getAgentProfileManifest } from './core/agentProfileManifest.js';
 
 export type { ProfileName } from './core/agentProfiles.js';
@@ -41,8 +47,9 @@ const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const PROFILE_MANIFEST = getAgentProfileManifest();
 
-const DEFAULT_PROFILES: AgentProfileBlueprint[] = PROFILE_MANIFEST.profiles.map((entry) =>
-  normalizeProfileFromManifest(entry, PROFILE_MANIFEST, PACKAGE_ROOT)
+const DEFAULT_PROFILES: AgentProfileBlueprint[] = PROFILE_MANIFEST.profiles.map(
+  (entry) =>
+    normalizeProfileFromManifest(entry, PROFILE_MANIFEST, PACKAGE_ROOT),
 );
 
 for (const profile of DEFAULT_PROFILES) {
@@ -51,20 +58,27 @@ for (const profile of DEFAULT_PROFILES) {
   }
 }
 
-export function resolveProfileConfig(profile: ProfileName, workspaceContext: string | null): ResolvedProfileConfig {
+export function resolveProfileConfig(
+  profile: ProfileName,
+  workspaceContext: string | null,
+): ResolvedProfileConfig {
   const blueprint = getAgentProfile(profile);
 
   const envPrefix = toEnvPrefix(blueprint.name);
 
   const modelEnv = process.env[`${envPrefix}_MODEL`];
-  const modelLocked = typeof modelEnv === 'string' && modelEnv.trim().length > 0;
+  const modelLocked =
+    typeof modelEnv === 'string' && modelEnv.trim().length > 0;
   const model = modelLocked ? modelEnv!.trim() : blueprint.defaultModel;
 
-  const systemPrompt = process.env[`${envPrefix}_SYSTEM_PROMPT`] ?? blueprint.defaultSystemPrompt;
+  const systemPrompt =
+    process.env[`${envPrefix}_SYSTEM_PROMPT`] ?? blueprint.defaultSystemPrompt;
 
   const providerEnv = process.env[`${envPrefix}_PROVIDER`];
   const providerLocked = isProviderValue(providerEnv);
-  const provider = providerLocked ? providerEnv!.trim() : blueprint.defaultProvider;
+  const provider = providerLocked
+    ? providerEnv!.trim()
+    : blueprint.defaultProvider;
   const rulebook = loadRulebookMetadata(blueprint);
 
   const contextBlock = workspaceContext?.trim()
@@ -92,7 +106,6 @@ export function resolveProfileConfig(profile: ProfileName, workspaceContext: str
   return resolved;
 }
 
-
 function toEnvPrefix(profile: ProfileName): string {
   return profile
     .trim()
@@ -104,7 +117,9 @@ function isProviderValue(value: unknown): value is ProviderId {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function loadRulebookMetadata(profile: AgentProfileBlueprint): ProfileRulebookMetadata | null {
+function loadRulebookMetadata(
+  profile: AgentProfileBlueprint,
+): ProfileRulebookMetadata | null {
   try {
     // Check if rulebook is inline
     const rulebookRef = profile.rulebook as any;
@@ -145,7 +160,7 @@ function loadRulebookMetadata(profile: AgentProfileBlueprint): ProfileRulebookMe
 function normalizeProfileFromManifest(
   entry: AgentProfileEntry,
   manifest: AgentProfileManifest,
-  root: string
+  root: string,
 ): AgentProfileBlueprint {
   const defaultSystemPrompt = buildDefaultSystemPrompt(entry, root);
 
@@ -165,7 +180,10 @@ function normalizeProfileFromManifest(
   };
 }
 
-function buildDefaultSystemPrompt(entry: AgentProfileEntry, root: string): string {
+function buildDefaultSystemPrompt(
+  entry: AgentProfileEntry,
+  root: string,
+): string {
   try {
     const promptConfig = entry.systemPrompt;
     if (promptConfig.type === 'literal') {
@@ -176,8 +194,13 @@ function buildDefaultSystemPrompt(entry: AgentProfileEntry, root: string): strin
     // Check if rulebook is inline
     const rulebookRef = entry.rulebook as any;
     const rulebookPrompt = rulebookRef.inline
-      ? buildAgentRulebookPrompt(entry.name, { inline: rulebookRef.inline }).trim()
-      : buildAgentRulebookPrompt(entry.name, { root, file: rulebookRef.file }).trim();
+      ? buildAgentRulebookPrompt(entry.name, {
+          inline: rulebookRef.inline,
+        }).trim()
+      : buildAgentRulebookPrompt(entry.name, {
+          root,
+          file: rulebookRef.file,
+        }).trim();
     const replacements: Record<string, string> = {
       rulebook: rulebookPrompt,
       profile: entry.label || entry.name,
@@ -189,7 +212,7 @@ function buildDefaultSystemPrompt(entry: AgentProfileEntry, root: string): strin
       (_match, token: string) => {
         const key = token.toLowerCase() as keyof typeof replacements;
         return replacements[key] ?? '';
-      }
+      },
     );
 
     if (/\{\{\s*rulebook\s*\}\}/i.test(template)) {
@@ -201,6 +224,8 @@ function buildDefaultSystemPrompt(entry: AgentProfileEntry, root: string): strin
     return `${merged}${suffix}`.trim();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to build system prompt for profile "${entry.name}": ${message}`);
+    throw new Error(
+      `Failed to build system prompt for profile "${entry.name}": ${message}`,
+    );
   }
 }

@@ -59,7 +59,11 @@ test('agentSchemaLoader - getProvider returns specific provider', () => {
 
 test('agentSchemaLoader - getProvider returns undefined for unknown provider', () => {
   const provider = getProvider('unknown' as any);
-  assert.strictEqual(provider, undefined, 'Should return undefined for unknown provider');
+  assert.strictEqual(
+    provider,
+    undefined,
+    'Should return undefined for unknown provider',
+  );
 });
 
 test('agentSchemaLoader - getModels returns all models', () => {
@@ -81,7 +85,11 @@ test('agentSchemaLoader - getModelsByProvider filters correctly', () => {
 
   // All models should belong to openai
   for (const model of openaiModels) {
-    assert.strictEqual(model.provider, 'openai', 'Model should belong to OpenAI');
+    assert.strictEqual(
+      model.provider,
+      'openai',
+      'Model should belong to OpenAI',
+    );
   }
 });
 
@@ -101,7 +109,10 @@ test('agentSchemaLoader - getProfiles returns all profiles', () => {
   for (const profile of profiles) {
     assert.ok(profile.name, 'Profile should have a name');
     assert.ok(profile.label, 'Profile should have a label');
-    assert.ok(profile.defaultProvider, 'Profile should have a default provider');
+    assert.ok(
+      profile.defaultProvider,
+      'Profile should have a default provider',
+    );
     assert.ok(profile.defaultModel, 'Profile should have a default model');
   }
 });
@@ -124,11 +135,11 @@ test('agentSchemaLoader - profile references valid provider and model', () => {
   for (const profile of profiles) {
     assert.ok(
       providerIds.has(profile.defaultProvider),
-      `Profile "${profile.name}" references valid provider "${profile.defaultProvider}"`
+      `Profile "${profile.name}" references valid provider "${profile.defaultProvider}"`,
     );
     assert.ok(
       modelIds.has(profile.defaultModel),
-      `Profile "${profile.name}" references valid model "${profile.defaultModel}"`
+      `Profile "${profile.name}" references valid model "${profile.defaultModel}"`,
     );
   }
 });
@@ -158,52 +169,84 @@ test('agentSchemaLoader - getCapabilities returns capabilities', () => {
 
 test('agentSchemaLoader - isValidProvider validates correctly', () => {
   assert.ok(isValidProvider('openai'), 'OpenAI should be a valid provider');
-  assert.ok(isValidProvider('anthropic'), 'Anthropic should be a valid provider');
-  assert.ok(!isValidProvider('unknown'), 'Unknown should not be a valid provider');
+  assert.ok(
+    isValidProvider('anthropic'),
+    'Anthropic should be a valid provider',
+  );
+  assert.ok(
+    !isValidProvider('unknown'),
+    'Unknown should not be a valid provider',
+  );
 });
 
 test('agentSchemaLoader - isValidModel validates correctly', () => {
   assert.ok(isValidModel('gpt-5.1'), 'GPT-5.1 should be a valid model');
-  assert.ok(!isValidModel('unknown-model'), 'Unknown model should not be valid');
+  assert.ok(
+    !isValidModel('unknown-model'),
+    'Unknown model should not be valid',
+  );
 });
 
 test('agentSchemaLoader - isValidProfile validates correctly', () => {
   assert.ok(isValidProfile('general'), 'General should be a valid profile');
   assert.ok(isValidProfile('bo-code'), 'Bo Code should be a valid profile');
-  assert.ok(!isValidProfile('unknown-profile'), 'Unknown profile should not be valid');
+  assert.ok(
+    !isValidProfile('unknown-profile'),
+    'Unknown profile should not be valid',
+  );
 });
 
 test('agentSchemaLoader - validates no duplicate provider IDs', () => {
   const providers = getProviders();
   const ids = providers.map((p) => p.id);
   const uniqueIds = new Set(ids);
-  assert.strictEqual(ids.length, uniqueIds.size, 'All provider IDs should be unique');
+  assert.strictEqual(
+    ids.length,
+    uniqueIds.size,
+    'All provider IDs should be unique',
+  );
 });
 
 test('agentSchemaLoader - validates no duplicate model IDs', () => {
   const models = getModels();
   const ids = models.map((m) => m.id);
   const uniqueIds = new Set(ids);
-  assert.strictEqual(ids.length, uniqueIds.size, 'All model IDs should be unique');
+  assert.strictEqual(
+    ids.length,
+    uniqueIds.size,
+    'All model IDs should be unique',
+  );
 });
 
 test('agentSchemaLoader - validates no duplicate profile names', () => {
   const profiles = getProfiles();
   const names = profiles.map((p) => p.name);
   const uniqueNames = new Set(names);
-  assert.strictEqual(names.length, uniqueNames.size, 'All profile names should be unique');
+  assert.strictEqual(
+    names.length,
+    uniqueNames.size,
+    'All profile names should be unique',
+  );
 });
 
 test('agentSchemaLoader - schema is cached', () => {
   clearSchemaCache();
   const schema1 = getAgentSchemas();
   const schema2 = getAgentSchemas();
-  assert.strictEqual(schema1, schema2, 'Schema should be cached and return same instance');
+  assert.strictEqual(
+    schema1,
+    schema2,
+    'Schema should be cached and return same instance',
+  );
 });
 
 test('agentSchemaLoader - clearSchemaCache works', () => {
   const schema1 = getAgentSchemas();
   clearSchemaCache();
   const schema2 = getAgentSchemas();
-  assert.notStrictEqual(schema1, schema2, 'Cache should be cleared and new instance loaded');
+  assert.notStrictEqual(
+    schema1,
+    schema2,
+    'Cache should be cleared and new instance loaded',
+  );
 });

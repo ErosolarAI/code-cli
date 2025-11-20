@@ -1,6 +1,11 @@
 import { AgentGateway } from './gateway';
 import { PersistenceAdapter } from '../persistence/persistence-adapter';
-import { SessionEvent, SessionSnapshot, SessionCommandPayload, AgentSource } from '../../shared/session-models';
+import {
+  SessionEvent,
+  SessionSnapshot,
+  SessionCommandPayload,
+  AgentSource,
+} from '../../shared/session-models';
 
 export class PersistentGateway implements AgentGateway {
   readonly label: string;
@@ -8,7 +13,7 @@ export class PersistentGateway implements AgentGateway {
 
   constructor(
     private readonly adapter: PersistenceAdapter,
-    options: { label: string; source: AgentSource }
+    options: { label: string; source: AgentSource },
   ) {
     this.label = options.label;
     this.source = options.source;
@@ -18,7 +23,7 @@ export class PersistentGateway implements AgentGateway {
     const snapshot = await this.adapter.bootstrap();
     return {
       ...snapshot,
-      source: this.source
+      source: this.source,
     };
   }
 

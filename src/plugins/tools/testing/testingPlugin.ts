@@ -4,7 +4,8 @@ import { TestingCapabilityModule } from '../../../capabilities/testingCapability
 export function createTestingToolPlugin(): ToolPlugin {
   return {
     id: 'tool.testing.coverage',
-    description: 'Test generation scaffolding plus coverage execution/reporting utilities.',
+    description:
+      'Test generation scaffolding plus coverage execution/reporting utilities.',
     targets: ['node'],
     create: async (context: ToolPluginContext) =>
       new TestingCapabilityModule({

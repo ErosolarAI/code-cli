@@ -4,7 +4,8 @@ import { CodeAnalysisCapabilityModule } from '../../../capabilities/codeAnalysis
 export function createCodeAnalysisToolPlugin(): ToolPlugin {
   return {
     id: 'tool.code-analysis.structural',
-    description: 'Advanced code structure analysis, dependency tracking, and complexity metrics.',
+    description:
+      'Advanced code structure analysis, dependency tracking, and complexity metrics.',
     targets: ['node'],
     create: async (context: ToolPluginContext) => {
       return new CodeAnalysisCapabilityModule({

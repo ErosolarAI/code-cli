@@ -11,10 +11,7 @@
     </div>
   </div>
 
-  <div
-    class="chat-input__attachments"
-    *ngIf="pastedBlocks().length"
-  >
+  <div class="chat-input__attachments" *ngIf="pastedBlocks().length">
     <div class="attachments-head">
       <p class="attachments-label">
         saved paste {{ pastedBlocks().length === 1 ? 'block' : 'blocks' }}
@@ -22,13 +19,12 @@
       <span class="attachments-count">{{ pastedBlocks().length }}</span>
     </div>
     <div class="attachments-list">
-      <details
-        class="attachment"
-        *ngFor="let block of pastedBlocks()"
-      >
+      <details class="attachment" *ngFor="let block of pastedBlocks()">
         <summary>
           <div class="attachment-meta">
-            <span class="attachment-title">{{ block.lines }} lines • {{ block.characters }} chars</span>
+            <span class="attachment-title"
+              >{{ block.lines }} lines • {{ block.characters }} chars</span
+            >
             <p class="attachment-preview">{{ block.preview }}</p>
           </div>
           <div class="attachment-actions">

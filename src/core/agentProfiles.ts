@@ -1,4 +1,7 @@
-import type { AgentPromptConfig, AgentRulebookReference } from '../contracts/v1/agentProfileManifest.js';
+import type {
+  AgentPromptConfig,
+  AgentRulebookReference,
+} from '../contracts/v1/agentProfileManifest.js';
 import type { ProviderId } from './types.js';
 
 export type ProfileName = string;
@@ -54,7 +57,9 @@ export function getAgentProfile(name: ProfileName): AgentProfileBlueprint {
       .map((entry) => entry.name)
       .sort()
       .join(', ');
-    throw new Error(`Unknown profile "${name}". Registered profiles: ${known || 'none'}.`);
+    throw new Error(
+      `Unknown profile "${name}". Registered profiles: ${known || 'none'}.`,
+    );
   }
   return profile;
 }

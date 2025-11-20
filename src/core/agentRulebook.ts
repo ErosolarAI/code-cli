@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { AgentRulesetManifest, AgentStepRule, AgentRuleDefinition } from '../contracts/v1/agentRules.js';
+import type {
+  AgentRulesetManifest,
+  AgentStepRule,
+  AgentRuleDefinition,
+} from '../contracts/v1/agentRules.js';
 import type { ProfileName } from './agentProfiles.js';
 
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
@@ -16,13 +20,16 @@ export interface LoadRulebookOptions {
   inline?: AgentRulesetManifest;
 }
 
-export function loadAgentRulebook(profile: ProfileName, options: LoadRulebookOptions = {}): AgentRulesetManifest {
+export function loadAgentRulebook(
+  profile: ProfileName,
+  options: LoadRulebookOptions = {},
+): AgentRulesetManifest {
   // If inline manifest is provided, use it directly
   if (options.inline) {
     const manifest = options.inline;
     if (manifest.profile !== profile) {
       throw new Error(
-        `Rulebook profile mismatch for ${profile}. Expected \"${profile}\" but inline manifest declares \"${manifest.profile}\".`
+        `Rulebook profile mismatch for ${profile}. Expected "${profile}" but inline manifest declares "${manifest.profile}".`,
       );
     }
     return manifest;
@@ -43,7 +50,7 @@ export function loadAgentRulebook(profile: ProfileName, options: LoadRulebookOpt
 
   if (manifest.profile !== profile) {
     throw new Error(
-      `Rulebook profile mismatch for ${profile}. Expected \"${profile}\" but file declares \"${manifest.profile}\".`
+      `Rulebook profile mismatch for ${profile}. Expected "${profile}" but file declares "${manifest.profile}".`,
     );
   }
 
@@ -51,7 +58,10 @@ export function loadAgentRulebook(profile: ProfileName, options: LoadRulebookOpt
   return manifest;
 }
 
-export function buildAgentRulebookPrompt(profile: ProfileName, options: LoadRulebookOptions = {}): string {
+export function buildAgentRulebookPrompt(
+  profile: ProfileName,
+  options: LoadRulebookOptions = {},
+): string {
   // If inline, don't cache (since it might change)
   if (options.inline) {
     const manifest = loadAgentRulebook(profile, { inline: options.inline });
@@ -78,7 +88,7 @@ export function formatAgentRulebook(manifest: AgentRulesetManifest): string {
   const headerLabel = manifest.label || manifest.profile;
 
   lines.push(
-    `${headerLabel} — rulebook version ${manifest.version} (contract ${manifest.contractVersion}).`
+    `${headerLabel} — rulebook version ${manifest.version} (contract ${manifest.contractVersion}).`,
   );
 
   if (manifest.description) {
@@ -109,7 +119,11 @@ export function formatAgentRulebook(manifest: AgentRulesetManifest): string {
   return lines.filter(Boolean).join('\n');
 }
 
-function resolveRulebookPath(profile: ProfileName, root: string, fileOverride?: string): string {
+function resolveRulebookPath(
+  profile: ProfileName,
+  root: string,
+  fileOverride?: string,
+): string {
   const trimmedOverride = fileOverride?.trim();
   if (trimmedOverride) {
     return resolve(root, trimmedOverride);
@@ -167,7 +181,7 @@ function formatStepLine(step: AgentStepRule): string {
   if (step.subSteps?.length) {
     lines.push('    Sub-steps:');
     for (const subStep of step.subSteps) {
-      lines.push(formatStepLine(subStep).replace(/^  /gm, '      '));
+      lines.push(formatStepLine(subStep).replace(/^ {2}/gm, '      '));
     }
   }
 

@@ -1,5 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
-import { DestroyRef, Injectable, PLATFORM_ID, Signal, computed, effect, inject, signal } from '@angular/core';
+import {
+  DestroyRef,
+  Injectable,
+  PLATFORM_ID,
+  Signal,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   Firestore,
   QueryConstraint,
@@ -8,7 +17,7 @@ import {
   orderBy,
   limit,
   collectionData,
-  DocumentData
+  DocumentData,
 } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -99,10 +108,7 @@ export class AgentRunStore {
     }
 
     const baseRef = collection(firestore, `projects/${this.projectId}/agentRuns`);
-    const constraints: QueryConstraint[] = [
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    ];
+    const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc'), limit(50)];
 
     collectionData(query(baseRef, ...constraints), { idField: 'id' })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -114,7 +120,7 @@ export class AgentRunStore {
         error: (err) => {
           this.errorState.set(err?.message ?? 'Unable to load agent runs');
           this.loadingState.set(false);
-        }
+        },
       });
   }
 
@@ -131,7 +137,7 @@ export class AgentRunStore {
       createdAt: this.normalizeTimestamp(data['createdAt']),
       updatedAt: this.normalizeTimestamp(data['updatedAt']),
       startedAt: this.normalizeTimestamp(data['startedAt']),
-      completedAt: this.normalizeTimestamp(data['completedAt'])
+      completedAt: this.normalizeTimestamp(data['completedAt']),
     };
   }
 
@@ -162,7 +168,7 @@ export class AgentRunStore {
       projectId: this.projectId,
       profileId: environment.defaults.profileId,
       connectorId: environment.defaults.connectorId,
-      prompt
+      prompt,
     };
 
     const response = await callable(payload);

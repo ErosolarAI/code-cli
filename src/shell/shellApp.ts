@@ -4,7 +4,10 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import '../config.js';
 import type { ProfileName } from '../config.js';
-import { buildWorkspaceContext, resolveWorkspaceCaptureOptions } from '../workspace.js';
+import {
+  buildWorkspaceContext,
+  resolveWorkspaceCaptureOptions,
+} from '../workspace.js';
 import { type ToolRuntimeObserver } from '../core/toolRuntime.js';
 import type { ToolCallRequest } from '../core/types.js';
 import { InteractiveShell } from './interactiveShell.js';
@@ -30,7 +33,10 @@ import { buildInteractiveSystemPrompt } from './systemPrompt.js';
 import { ShellUIAdapter } from '../ui/ShellUIAdapter.js';
 import { stdout } from 'node:process';
 import { resolveProfileOverride } from '../core/brand.js';
-import { getSharedPolicyEngine, getSharedTimeline } from '../core/orchestrationContext.js';
+import {
+  getSharedPolicyEngine,
+  getSharedTimeline,
+} from '../core/orchestrationContext.js';
 
 export interface LaunchShellOptions {
   enableProfileSelection?: boolean;
@@ -41,16 +47,22 @@ export interface LaunchShellOptions {
  */
 export async function launchShell(
   defaultProfile: ProfileName,
-  options: LaunchShellOptions = {}
+  options: LaunchShellOptions = {},
 ): Promise<void> {
   try {
-    const { profileOverride, promptArgs } = parseLaunchArguments(process.argv.slice(2));
+    const { profileOverride, promptArgs } = parseLaunchArguments(
+      process.argv.slice(2),
+    );
     const envProfileOverride = resolveProfileOverride();
     const allowProfileSelection = Boolean(options.enableProfileSelection);
     const availableProfiles = listAgentProfiles();
-    const rawSavedProfile = allowProfileSelection ? loadActiveProfilePreference() : null;
+    const rawSavedProfile = allowProfileSelection
+      ? loadActiveProfilePreference()
+      : null;
     const savedProfile =
-      rawSavedProfile && hasAgentProfile(rawSavedProfile) ? rawSavedProfile : null;
+      rawSavedProfile && hasAgentProfile(rawSavedProfile)
+        ? rawSavedProfile
+        : null;
     const profile = resolveLaunchProfile({
       defaultProfile,
       availableProfiles,
@@ -63,7 +75,10 @@ export async function launchShell(
     const workingDir = process.cwd();
 
     const workspaceOptions = resolveWorkspaceCaptureOptions(process.env);
-    const workspaceContext = buildWorkspaceContext(workingDir, workspaceOptions);
+    const workspaceContext = buildWorkspaceContext(
+      workingDir,
+      workspaceOptions,
+    );
 
     const statusTracker = new LiveStatusTracker();
 
@@ -118,7 +133,7 @@ export async function launchShell(
     const enhancedSystemPrompt = buildInteractiveSystemPrompt(
       profileConfig.systemPrompt,
       profileConfig.label,
-      providerTools
+      providerTools,
     );
 
     const version = readPackageVersion();
@@ -129,7 +144,7 @@ export async function launchShell(
       initialModel.model,
       initialModel.provider,
       workingDir,
-      version
+      version,
     );
 
     display.showAvailableTools(providerTools);
@@ -234,7 +249,7 @@ function resolveLaunchProfile(input: ProfileResolutionInput): ProfileName {
     const resolved = matchProfile(input.cliOverride, input.availableProfiles);
     if (!resolved) {
       throw new Error(
-        `Unknown agent profile "${input.cliOverride}". Run "/agents" to view available options.`
+        `Unknown agent profile "${input.cliOverride}". Run "/agents" to view available options.`,
       );
     }
     return resolved;
@@ -244,7 +259,7 @@ function resolveLaunchProfile(input: ProfileResolutionInput): ProfileName {
     const resolved = matchProfile(input.envOverride, input.availableProfiles);
     if (!resolved) {
       throw new Error(
-        `Unknown agent profile "${input.envOverride}" provided via BO_PROFILE (or legacy APT_PROFILE).`
+        `Unknown agent profile "${input.envOverride}" provided via BO_PROFILE (or legacy APT_PROFILE).`,
       );
     }
     return resolved;
@@ -267,7 +282,7 @@ function resolveLaunchProfile(input: ProfileResolutionInput): ProfileName {
 
 function matchProfile(
   candidate: string | null | undefined,
-  availableProfiles: ReturnType<typeof listAgentProfiles>
+  availableProfiles: ReturnType<typeof listAgentProfiles>,
 ): ProfileName | null {
   if (!candidate) {
     return null;
@@ -283,7 +298,9 @@ function matchProfile(
   }
 
   const lower = trimmed.toLowerCase();
-  const match = availableProfiles.find((profile) => profile.name.toLowerCase() === lower);
+  const match = availableProfiles.find(
+    (profile) => profile.name.toLowerCase() === lower,
+  );
   return match ? (match.name as ProfileName) : null;
 }
 
@@ -302,7 +319,9 @@ function readPackageVersion(): string {
   try {
     const filePath = fileURLToPath(import.meta.url);
     const packagePath = resolve(dirname(filePath), '../../package.json');
-    const payload = JSON.parse(readFileSync(packagePath, 'utf8')) as { version?: string };
+    const payload = JSON.parse(readFileSync(packagePath, 'utf8')) as {
+      version?: string;
+    };
     return typeof payload.version === 'string' ? payload.version : '0.0.0';
   } catch {
     return '0.0.0';
@@ -314,7 +333,10 @@ function readPackageVersion(): string {
  * which provides unified UI integration. Kept for backward compatibility.
  */
 // @ts-expect-error - Legacy function kept for reference, not currently used
-function createToolObserver(root: string, statusTracker: LiveStatusTracker): ToolRuntimeObserver {
+function createToolObserver(
+  root: string,
+  statusTracker: LiveStatusTracker,
+): ToolRuntimeObserver {
   const inflight = new Map<string, string>();
 
   const popTitle = (call: ToolCallRequest): string => {
@@ -398,7 +420,10 @@ interface ToolOverlayDescription {
   tone?: LiveStatusTone;
 }
 
-function describeToolOverlay(call: ToolCallRequest, root: string): ToolOverlayDescription {
+function describeToolOverlay(
+  call: ToolCallRequest,
+  root: string,
+): ToolOverlayDescription {
   const describePath = (): string => {
     const value = stringArg(call.arguments?.['path']);
     return formatPath(value, root) || '.';
@@ -584,5 +609,7 @@ function truncate(value: string, max = 64): string {
 }
 
 function stringArg(value: unknown, fallback = ''): string {
-  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+  return typeof value === 'string' && value.trim().length > 0
+    ? value
+    : fallback;
 }

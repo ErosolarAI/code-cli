@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
-export type TimelineStatus = 'started' | 'succeeded' | 'failed' | 'blocked' | 'skipped';
+export type TimelineStatus =
+  | 'started'
+  | 'succeeded'
+  | 'failed'
+  | 'blocked'
+  | 'skipped';
 
 export interface TimelineEvent {
   eventId: string;
@@ -17,7 +22,10 @@ export interface TimelineEvent {
 export class TimelineRecorder {
   private readonly events: TimelineEvent[] = [];
 
-  record(event: Omit<TimelineEvent, 'eventId' | 'timestamp'> & Partial<Pick<TimelineEvent, 'eventId' | 'timestamp'>>): TimelineEvent {
+  record(
+    event: Omit<TimelineEvent, 'eventId' | 'timestamp'> &
+      Partial<Pick<TimelineEvent, 'eventId' | 'timestamp'>>,
+  ): TimelineEvent {
     const normalized: TimelineEvent = {
       ...event,
       eventId: event.eventId ?? randomUUID(),

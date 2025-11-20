@@ -4,13 +4,19 @@ import { join } from 'node:path';
 import { createNodeRuntime } from '../runtime/node.js';
 import type { CapabilityContext } from '../runtime/agentHost.js';
 import { loadToolSettings } from '../core/preferences.js';
-import { buildEnabledToolSet, evaluateToolPermissions } from '../capabilities/toolRegistry.js';
+import {
+  buildEnabledToolSet,
+  evaluateToolPermissions,
+} from '../capabilities/toolRegistry.js';
 import type { ToolPlugin } from '../plugins/tools/index.js';
 import type { ModelSelection } from '../runtime/agentSession.js';
 import type { AssistantMessageMetadata } from '../core/agent.js';
 import type { ConversationMessage } from '../core/types.js';
 import { resolveTasksDir } from '../core/brand.js';
-import { getSharedPolicyEngine, getSharedTimeline } from '../core/orchestrationContext.js';
+import {
+  getSharedPolicyEngine,
+  getSharedTimeline,
+} from '../core/orchestrationContext.js';
 
 type TaskModelName = 'sonnet' | 'opus' | 'haiku';
 
@@ -58,7 +64,8 @@ const SUBAGENT_DEFINITIONS: Record<string, SubAgentDefinition> = {
   explore: {
     id: 'explore',
     label: 'Explore',
-    summary: 'map the codebase, answer architectural questions, and locate patterns quickly',
+    summary:
+      'map the codebase, answer architectural questions, and locate patterns quickly',
     instructions: [
       'Prioritize read/search/glob tools before editing. Call out every directory or file you investigated.',
       'Return a crisp summary of what you learned plus direct file references so the parent agent can follow up.',
@@ -68,7 +75,8 @@ const SUBAGENT_DEFINITIONS: Record<string, SubAgentDefinition> = {
   plan: {
     id: 'plan',
     label: 'Plan',
-    summary: 'break down complex efforts into actionable steps and identify risks or dependencies',
+    summary:
+      'break down complex efforts into actionable steps and identify risks or dependencies',
     instructions: [
       'Produce a numbered plan with estimates, dependency notes, and explicit testing checkpoints.',
       'If the task mentions code changes, suggest which files/modules should be edited and why before any implementation occurs.',
@@ -77,7 +85,10 @@ const SUBAGENT_DEFINITIONS: Record<string, SubAgentDefinition> = {
   },
 };
 
-const MODEL_ID_LOOKUP: Record<TaskModelName, { provider: string; model: string }> = {
+const MODEL_ID_LOOKUP: Record<
+  TaskModelName,
+  { provider: string; model: string }
+> = {
   sonnet: { provider: 'anthropic', model: 'claude-sonnet-4-5-20250929' },
   opus: { provider: 'anthropic', model: 'claude-opus-4.1' },
   haiku: { provider: 'anthropic', model: 'claude-haiku-4.5' },
@@ -113,11 +124,14 @@ export class TaskRunner {
 
     try {
       const session = runtime.session;
-      const selection = this.buildModelSelection(session.profileConfig, options.model ?? definition.defaultModel);
+      const selection = this.buildModelSelection(
+        session.profileConfig,
+        options.model ?? definition.defaultModel,
+      );
       const systemPrompt = this.composeSystemPrompt(
         session.profileConfig.systemPrompt,
         definition,
-        options.description
+        options.description,
       );
 
       let finalMetadata: AssistantMessageMetadata | null = null;
@@ -135,12 +149,16 @@ export class TaskRunner {
               finalMetadata = metadata;
             }
           },
-        }
+        },
       );
 
-      const resumeSnapshot = options.resumeId ? await this.snapshots.load(options.resumeId) : null;
+      const resumeSnapshot = options.resumeId
+        ? await this.snapshots.load(options.resumeId)
+        : null;
       if (options.resumeId && !resumeSnapshot) {
-        throw new Error(`Resume id "${options.resumeId}" was not found. Call Task without resume to start a new agent.`);
+        throw new Error(
+          `Resume id "${options.resumeId}" was not found. Call Task without resume to start a new agent.`,
+        );
       }
       if (resumeSnapshot) {
         agent.loadHistory(resumeSnapshot.history);
@@ -194,8 +212,13 @@ export class TaskRunner {
   }
 
   private buildModelSelection(
-    profile: { provider: string; model: string; temperature?: number; maxTokens?: number },
-    preferred?: TaskModelName
+    profile: {
+      provider: string;
+      model: string;
+      temperature?: number;
+      maxTokens?: number;
+    },
+    preferred?: TaskModelName,
   ): ModelSelection {
     if (preferred && MODEL_ID_LOOKUP[preferred]) {
       const mapping = MODEL_ID_LOOKUP[preferred];
@@ -215,7 +238,11 @@ export class TaskRunner {
     };
   }
 
-  private composeSystemPrompt(basePrompt: string, definition: SubAgentDefinition, description: string): string {
+  private composeSystemPrompt(
+    basePrompt: string,
+    definition: SubAgentDefinition,
+    description: string,
+  ): string {
     const lines = [
       basePrompt.trim(),
       '',
@@ -284,7 +311,10 @@ function sanitizeId(value: string): string {
   return value.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'task';
 }
 
-function extractResponseSections(content: string): { thinking: string | null; response: string } {
+function extractResponseSections(content: string): {
+  thinking: string | null;
+  response: string;
+} {
   if (!content) {
     return { thinking: null, response: '' };
   }
@@ -323,7 +353,9 @@ function formatDuration(ms: number): string {
   return `${minutes}m ${remaining}s`;
 }
 
-function extractUsage(metadata: AssistantMessageMetadata | null): AssistantMessageMetadata['usage'] | null {
+function extractUsage(
+  metadata: AssistantMessageMetadata | null,
+): AssistantMessageMetadata['usage'] | null {
   return metadata?.usage ?? null;
 }
 

@@ -50,6 +50,6 @@ test('WebSearch warns when no provider configured', async () => {
   const output = await searchTool!.handler({ query: 'missing key test' });
   assert.match(
     output,
-    /requires (TAVILY_API_KEY.*preferred.*|TAVILY_API_KEY).*BRAVE_SEARCH_API_KEY.*SERPAPI_API_KEY/i
+    /requires (TAVILY_API_KEY.*preferred.*|TAVILY_API_KEY).*BRAVE_SEARCH_API_KEY.*SERPAPI_API_KEY/i,
   );
 });

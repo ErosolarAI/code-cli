@@ -22,17 +22,28 @@ export class NodeRuntimeAdapter implements RuntimeAdapter {
     this.options = options;
   }
 
-  async createCapabilityModules(context: RuntimeAdapterContext): Promise<CapabilityModule[]> {
+  async createCapabilityModules(
+    context: RuntimeAdapterContext,
+  ): Promise<CapabilityModule[]> {
     registerDefaultNodeToolPlugins();
 
     const filter = (plugin: ToolPlugin): boolean => {
-      if (this.options.includeFilesystem === false && plugin.id === 'tool.filesystem.local') {
+      if (
+        this.options.includeFilesystem === false &&
+        plugin.id === 'tool.filesystem.local'
+      ) {
         return false;
       }
-      if (this.options.includeSearch === false && plugin.id === 'tool.search.local') {
+      if (
+        this.options.includeSearch === false &&
+        plugin.id === 'tool.search.local'
+      ) {
         return false;
       }
-      if (this.options.includeBash === false && plugin.id === 'tool.bash.local') {
+      if (
+        this.options.includeBash === false &&
+        plugin.id === 'tool.bash.local'
+      ) {
         return false;
       }
       if (this.options.filter && !this.options.filter(plugin)) {
@@ -47,7 +58,7 @@ export class NodeRuntimeAdapter implements RuntimeAdapter {
         workingDir: context.workingDir,
         env: context.env,
       },
-      { filter }
+      { filter },
     );
 
     if (this.options.extraModules?.length) {

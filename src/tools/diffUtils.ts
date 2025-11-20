@@ -9,7 +9,10 @@ export interface DiffSegment {
   content: string;
 }
 
-export function buildDiffSegments(previous: string, next: string): DiffSegment[] {
+export function buildDiffSegments(
+  previous: string,
+  next: string,
+): DiffSegment[] {
   const before = normalizeNewlines(previous);
   const after = normalizeNewlines(next);
 
@@ -31,7 +34,7 @@ export function formatDiffLines(diff: DiffSegment[]): string[] {
   }
   const width = Math.max(
     1,
-    ...diff.map((entry) => Math.max(1, entry.lineNumber).toString().length)
+    ...diff.map((entry) => Math.max(1, entry.lineNumber).toString().length),
   );
 
   return diff.map((entry) => {
@@ -54,8 +57,17 @@ function tryBuildWithGit(before: string, after: string): DiffSegment[] | null {
 
     const result = spawnSync(
       'git',
-      ['--no-pager', 'diff', '--no-index', '--unified=0', '--color=never', '--', originalPath, updatedPath],
-      { encoding: 'utf8' }
+      [
+        '--no-pager',
+        'diff',
+        '--no-index',
+        '--unified=0',
+        '--color=never',
+        '--',
+        originalPath,
+        updatedPath,
+      ],
+      { encoding: 'utf8' },
     );
 
     if (result.error) {
@@ -104,7 +116,12 @@ function parseUnifiedDiff(output: string): DiffSegment[] {
       continue;
     }
 
-    if (line.startsWith('+++') || line.startsWith('---') || line.startsWith('diff ') || line.startsWith('index ')) {
+    if (
+      line.startsWith('+++') ||
+      line.startsWith('---') ||
+      line.startsWith('diff ') ||
+      line.startsWith('index ')
+    ) {
       continue;
     }
 
@@ -117,13 +134,21 @@ function parseUnifiedDiff(output: string): DiffSegment[] {
     }
 
     if (line.startsWith('+')) {
-      segments.push({ type: 'added', lineNumber: newLine, content: line.slice(1) });
+      segments.push({
+        type: 'added',
+        lineNumber: newLine,
+        content: line.slice(1),
+      });
       newLine += 1;
       continue;
     }
 
     if (line.startsWith('-')) {
-      segments.push({ type: 'removed', lineNumber: oldLine, content: line.slice(1) });
+      segments.push({
+        type: 'removed',
+        lineNumber: oldLine,
+        content: line.slice(1),
+      });
       oldLine += 1;
       continue;
     }

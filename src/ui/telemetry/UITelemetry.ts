@@ -132,7 +132,7 @@ export class UITelemetry extends EventEmitter {
     if (this.config.flushInterval > 0) {
       this.flushTimer = setInterval(
         () => this.flush(),
-        this.config.flushInterval
+        this.config.flushInterval,
       );
     }
 
@@ -153,7 +153,9 @@ export class UITelemetry extends EventEmitter {
     const event: UIEvent = {
       type,
       timestamp: Date.now(),
-      metadata: this.config.anonymize ? this.anonymizeData(eventMetadata) : eventMetadata,
+      metadata: this.config.anonymize
+        ? this.anonymizeData(eventMetadata)
+        : eventMetadata,
     };
 
     this.events.push(event);
@@ -214,7 +216,7 @@ export class UITelemetry extends EventEmitter {
    */
   recordInteraction(
     type: UserInteraction['type'],
-    target?: string
+    target?: string,
   ): {
     complete: () => void;
     cancel: () => void;
@@ -259,7 +261,8 @@ export class UITelemetry extends EventEmitter {
     const now = performance.now();
     const timeSinceLastFrame = now - this.frameCounter.lastFrame;
 
-    if (timeSinceLastFrame > 33.33) { // More than 2 frames at 60fps
+    if (timeSinceLastFrame > 33.33) {
+      // More than 2 frames at 60fps
       this.frameCounter.dropped++;
     }
 
@@ -338,8 +341,10 @@ export class UITelemetry extends EventEmitter {
    * Check performance threshold
    */
   private checkPerformanceThreshold(name: string, duration: number): void {
-    if (name.includes('render') &&
-        duration > this.config.performanceThresholds.renderTime) {
+    if (
+      name.includes('render') &&
+      duration > this.config.performanceThresholds.renderTime
+    ) {
       this.emit('performance:threshold-exceeded', {
         type: 'render',
         name,
@@ -366,7 +371,12 @@ export class UITelemetry extends EventEmitter {
    * Trim buffer to prevent memory issues
    */
   private trimBuffer(
-    bufferName: 'events' | 'metrics' | 'interactions' | 'renderMetrics' | 'errors'
+    bufferName:
+      | 'events'
+      | 'metrics'
+      | 'interactions'
+      | 'renderMetrics'
+      | 'errors',
   ): void {
     const buffer = this[bufferName];
     if (Array.isArray(buffer) && buffer.length > this.config.bufferSize) {
@@ -386,7 +396,14 @@ export class UITelemetry extends EventEmitter {
     const anonymized = { ...data };
 
     // Remove or hash sensitive fields
-    const sensitiveFields = ['password', 'token', 'key', 'secret', 'email', 'username'];
+    const sensitiveFields = [
+      'password',
+      'token',
+      'key',
+      'secret',
+      'email',
+      'username',
+    ];
 
     for (const field of sensitiveFields) {
       if (field in anonymized) {
@@ -421,26 +438,33 @@ export class UITelemetry extends EventEmitter {
     }
 
     // Calculate performance metrics
-    const renderTimes = this.renderMetrics.map(m => m.renderTime);
-    const avgRenderTime = renderTimes.length > 0
-      ? renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length
-      : 0;
+    const renderTimes = this.renderMetrics.map((m) => m.renderTime);
+    const avgRenderTime =
+      renderTimes.length > 0
+        ? renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length
+        : 0;
 
     const responseTimes = this.interactions
-      .filter(i => i.responseTime !== undefined)
-      .map(i => i.responseTime!);
-    const avgResponseTime = responseTimes.length > 0
-      ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
-      : 0;
+      .filter((i) => i.responseTime !== undefined)
+      .map((i) => i.responseTime!);
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+        : 0;
 
-    const framerate = this.frameCounter.frames > 0
-      ? (this.frameCounter.frames - this.frameCounter.dropped) /
-        ((now - this.sessionStart) / 1000)
-      : 0;
+    const framerate =
+      this.frameCounter.frames > 0
+        ? (this.frameCounter.frames - this.frameCounter.dropped) /
+          ((now - this.sessionStart) / 1000)
+        : 0;
 
     // Calculate interaction statistics
-    const completedInteractions = this.interactions.filter(i => i.completed).length;
-    const cancelledInteractions = this.interactions.filter(i => !i.completed).length;
+    const completedInteractions = this.interactions.filter(
+      (i) => i.completed,
+    ).length;
+    const cancelledInteractions = this.interactions.filter(
+      (i) => !i.completed,
+    ).length;
 
     // Calculate error statistics
     const errorsByType: Record<string, number> = {};
@@ -480,10 +504,16 @@ export class UITelemetry extends EventEmitter {
    * Get performance summary
    */
   getPerformanceSummary(): {
-    measures: Record<string, { avg: number; min: number; max: number; count: number }>;
+    measures: Record<
+      string,
+      { avg: number; min: number; max: number; count: number }
+    >;
     slowestOperations: Array<{ name: string; duration: number }>;
   } {
-    const summary: Record<string, { avg: number; min: number; max: number; count: number }> = {};
+    const summary: Record<
+      string,
+      { avg: number; min: number; max: number; count: number }
+    > = {};
 
     for (const [name, durations] of this.measures) {
       if (durations.length === 0) continue;
@@ -524,11 +554,11 @@ export class UITelemetry extends EventEmitter {
     // Clear old data based on buffer size
     const cutoff = Date.now() - this.config.flushInterval;
 
-    this.events = this.events.filter(e => e.timestamp > cutoff);
-    this.metrics = this.metrics.filter(m => m.timestamp > cutoff);
-    this.interactions = this.interactions.filter(i => i.timestamp > cutoff);
-    this.renderMetrics = this.renderMetrics.filter(m => m.timestamp > cutoff);
-    this.errors = this.errors.filter(e => e.timestamp > cutoff);
+    this.events = this.events.filter((e) => e.timestamp > cutoff);
+    this.metrics = this.metrics.filter((m) => m.timestamp > cutoff);
+    this.interactions = this.interactions.filter((i) => i.timestamp > cutoff);
+    this.renderMetrics = this.renderMetrics.filter((m) => m.timestamp > cutoff);
+    this.errors = this.errors.filter((e) => e.timestamp > cutoff);
   }
 
   /**

@@ -20,7 +20,10 @@ export interface ToolPolicyDecision {
 }
 
 export interface ToolPolicy {
-  evaluate(call: ToolCallRequest, tool?: ToolDefinition): ToolPolicyDecision | null;
+  evaluate(
+    call: ToolCallRequest,
+    tool?: ToolDefinition,
+  ): ToolPolicyDecision | null;
   setConfig?(config: Partial<PolicyConfig>): void;
   getConfigSnapshot?(): PolicyConfig;
 }
@@ -54,7 +57,10 @@ export class PolicyEngine implements ToolPolicy {
     return { ...this.config };
   }
 
-  evaluate(call: ToolCallRequest, tool?: ToolDefinition): ToolPolicyDecision | null {
+  evaluate(
+    call: ToolCallRequest,
+    tool?: ToolDefinition,
+  ): ToolPolicyDecision | null {
     const spec = this.specProvider ? this.specProvider() : this.spec;
     const capability = spec?.risk_profile?.capability ?? 'full_shell';
     const args = normalizeRecord(call.arguments);
@@ -63,7 +69,10 @@ export class PolicyEngine implements ToolPolicy {
     const command = typeof args['command'] === 'string' ? args['command'] : '';
     const config = this.config;
 
-    if (config.toolAllowlist?.length && !config.toolAllowlist.includes(call.name)) {
+    if (
+      config.toolAllowlist?.length &&
+      !config.toolAllowlist.includes(call.name)
+    ) {
       return {
         action: 'block',
         reason: `Tool "${call.name}" is not in the active allowlist.`,
@@ -120,7 +129,11 @@ export class PolicyEngine implements ToolPolicy {
       }
     }
 
-    if (config.maxRuntimeMs && typeof args['timeout'] === 'number' && args['timeout'] > config.maxRuntimeMs) {
+    if (
+      config.maxRuntimeMs &&
+      typeof args['timeout'] === 'number' &&
+      args['timeout'] > config.maxRuntimeMs
+    ) {
       return {
         action: 'block',
         reason: `Requested timeout ${args['timeout']}ms exceeds policy cap of ${config.maxRuntimeMs}ms.`,
@@ -153,7 +166,11 @@ export class PolicyEngine implements ToolPolicy {
   }
 }
 
-function buildPreview(call: ToolCallRequest, args: Record<string, unknown>, tool?: ToolDefinition): string {
+function buildPreview(
+  call: ToolCallRequest,
+  args: Record<string, unknown>,
+  tool?: ToolDefinition,
+): string {
   if (call.name === 'execute_bash' && typeof args['command'] === 'string') {
     return `Dry-run: would execute "${args['command']}"`;
   }
@@ -164,7 +181,12 @@ function buildPreview(call: ToolCallRequest, args: Record<string, unknown>, tool
 }
 
 function isShellTool(name: string): boolean {
-  return name === 'execute_bash' || name === 'execute_bash_stream' || name === 'BashOutput' || name === 'KillShell';
+  return (
+    name === 'execute_bash' ||
+    name === 'execute_bash_stream' ||
+    name === 'BashOutput' ||
+    name === 'KillShell'
+  );
 }
 
 function isMutatingTool(name: string): boolean {
@@ -208,20 +230,28 @@ function isHighRiskShell(command: string): boolean {
   if (!trimmed) {
     return false;
   }
-  return /^sudo\b/i.test(trimmed) || /\b(chmod\s+7|chown\s+)/i.test(trimmed) || /\bapt(-get)?\s+install\b/i.test(trimmed);
+  return (
+    /^sudo\b/i.test(trimmed) ||
+    /\b(chmod\s+7|chown\s+)/i.test(trimmed) ||
+    /\bapt(-get)?\s+install\b/i.test(trimmed)
+  );
 }
 
 function normalizeRecord(value: unknown): Record<string, unknown> {
   if (value instanceof Map) {
     return Object.fromEntries(value.entries());
   }
-  return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function normalizeStringArray(values?: string[]): string[] | undefined {
   if (!values) {
     return undefined;
   }
-  const normalized = values.map((value) => value?.trim()).filter(Boolean) as string[];
+  const normalized = values
+    .map((value) => value?.trim())
+    .filter(Boolean) as string[];
   return normalized.length ? normalized : undefined;
 }

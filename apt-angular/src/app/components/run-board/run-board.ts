@@ -7,7 +7,7 @@ import { AgentRunStore } from '../../services/agent-run.store';
   standalone: true,
   imports: [NgIf, NgFor, NgClass, DatePipe],
   templateUrl: './run-board.html',
-  styleUrls: ['./run-board.css']
+  styleUrls: ['./run-board.css'],
 })
 export class RunBoardComponent {
   private readonly store = inject(AgentRunStore);

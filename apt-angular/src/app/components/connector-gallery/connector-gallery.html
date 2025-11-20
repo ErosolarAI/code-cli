@@ -51,7 +51,9 @@
 
   <ng-template #emptyConnectors>
     <p class="connector-gallery__empty">
-      {{ isLoading() ? 'Loading connector catalog…' : 'Run the bootstrap script to seed connectors.' }}
+      {{
+        isLoading() ? 'Loading connector catalog…' : 'Run the bootstrap script to seed connectors.'
+      }}
     </p>
   </ng-template>
 </section>

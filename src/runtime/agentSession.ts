@@ -1,4 +1,8 @@
-import { resolveProfileConfig, type ProfileName, type ResolvedProfileConfig } from '../config.js';
+import {
+  resolveProfileConfig,
+  type ProfileName,
+  type ResolvedProfileConfig,
+} from '../config.js';
 import {
   createDefaultToolRuntime,
   type ToolExecutionContext,
@@ -6,8 +10,15 @@ import {
   type ToolRuntimeObserver,
   type ToolSuite,
 } from '../core/toolRuntime.js';
-import type { ProviderId, ReasoningEffortLevel, TextVerbosityLevel } from '../core/types.js';
-import { createProvider, type ProviderConfig } from '../providers/providerFactory.js';
+import type {
+  ProviderId,
+  ReasoningEffortLevel,
+  TextVerbosityLevel,
+} from '../core/types.js';
+import {
+  createProvider,
+  type ProviderConfig,
+} from '../providers/providerFactory.js';
 import { AgentRuntime, type AgentCallbacks } from '../core/agent.js';
 import { registerDefaultProviderPlugins } from '../plugins/providers/index.js';
 import {
@@ -55,7 +66,10 @@ export class AgentSession {
 
   constructor(options: AgentSessionOptions) {
     registerDefaultProviderPlugins();
-    const profileConfig = resolveProfileConfig(options.profile, options.workspaceContext);
+    const profileConfig = resolveProfileConfig(
+      options.profile,
+      options.workspaceContext,
+    );
     const toolContext: ToolExecutionContext = {
       profileName: profileConfig.profile,
       provider: profileConfig.provider,
@@ -65,20 +79,16 @@ export class AgentSession {
 
     // Create context manager to prevent token limit leaks
     const contextManager = createDefaultContextManager(
-      resolveContextManagerConfig(profileConfig.model)
+      resolveContextManagerConfig(profileConfig.model),
     );
 
     const toolSuites = options.toolSuites ? [...options.toolSuites] : [];
-    const toolRuntime = createDefaultToolRuntime(
-      toolContext,
-      toolSuites,
-      {
-        observer: options.toolObserver,
-        contextManager, // Pass context manager for output truncation
-        policy: options.policy,
-        timeline: options.timeline,
-      }
-    );
+    const toolRuntime = createDefaultToolRuntime(toolContext, toolSuites, {
+      observer: options.toolObserver,
+      contextManager, // Pass context manager for output truncation
+      policy: options.policy,
+      timeline: options.timeline,
+    });
 
     this.state = {
       profile: options.profile,
@@ -114,9 +124,14 @@ export class AgentSession {
     return this.state.toolContext;
   }
 
-  createAgent(selection: ModelSelection, callbacks?: AgentCallbacks): AgentRuntime {
+  createAgent(
+    selection: ModelSelection,
+    callbacks?: AgentCallbacks,
+  ): AgentRuntime {
     const provider = createProvider(asProviderConfig(selection));
-    const systemPrompt = (selection.systemPrompt ?? this.state.profileConfig.systemPrompt).trim();
+    const systemPrompt = (
+      selection.systemPrompt ?? this.state.profileConfig.systemPrompt
+    ).trim();
 
     return new AgentRuntime({
       provider,
@@ -130,10 +145,14 @@ export class AgentSession {
   updateToolContext(selection: ModelSelection): void {
     this.state.toolContext.provider = selection.provider;
     this.state.toolContext.model = selection.model;
-    this.state.contextManager.updateConfig(resolveContextManagerConfig(selection.model));
+    this.state.contextManager.updateConfig(
+      resolveContextManagerConfig(selection.model),
+    );
   }
 
-  refreshWorkspaceContext(workspaceContext: string | null): ResolvedProfileConfig {
+  refreshWorkspaceContext(
+    workspaceContext: string | null,
+  ): ResolvedProfileConfig {
     const resolved = resolveProfileConfig(this.state.profile, workspaceContext);
     this.state.workspaceContext = workspaceContext;
     this.state.toolContext.workspaceContext = workspaceContext;
@@ -150,7 +169,7 @@ export class AgentSession {
         contextManager: this.state.contextManager, // Preserve context manager
         policy: this.state.policy,
         timeline: this.state.timeline,
-      }
+      },
     );
     return this.state.profileConfig;
   }

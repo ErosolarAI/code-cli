@@ -5,12 +5,12 @@ import {
   OnChanges,
   SimpleChanges,
   ViewContainerRef,
-  inject
+  inject,
 } from '@angular/core';
 import { MessageExtension } from '../../../shared/session-models';
 import {
   ExtensionRendererRegistryService,
-  ExtensionRendererComponent
+  ExtensionRendererComponent,
 } from '../../services/extension-renderer-registry.service';
 import { DefaultExtensionRendererComponent } from './default-extension-renderer';
 
@@ -18,7 +18,7 @@ import { DefaultExtensionRendererComponent } from './default-extension-renderer'
   selector: 'app-extension-host',
   standalone: true,
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExtensionHostComponent implements OnChanges {
   @Input({ required: true }) extension!: MessageExtension;

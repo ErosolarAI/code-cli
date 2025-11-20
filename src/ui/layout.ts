@@ -29,7 +29,10 @@ export interface PanelOptions {
 
 export function getContentWidth(): number {
   const columns = getTerminalColumns();
-  const usable = typeof columns === 'number' && Number.isFinite(columns) ? columns - 4 : MAX_WIDTH;
+  const usable =
+    typeof columns === 'number' && Number.isFinite(columns)
+      ? columns - 4
+      : MAX_WIDTH;
   return clampWidth(usable, columns);
 }
 
@@ -82,18 +85,21 @@ export function normalizePanelWidth(width?: number): number {
   return clampWidth(getContentWidth(), getTerminalColumns());
 }
 
-export function renderPanel(lines: string[], options: PanelOptions = {}): string {
+export function renderPanel(
+  lines: string[],
+  options: PanelOptions = {},
+): string {
   const width = normalizePanelWidth(options.width);
   const border = options.borderColor ?? theme.ui.border;
   const isCustomAccent = Boolean(options.accentColor);
   const accent = options.accentColor ?? theme.primary;
-  const edge = isCustomAccent ? accent : theme.ui.panelEdge ?? border;
+  const edge = isCustomAccent ? accent : (theme.ui.panelEdge ?? border);
   const horizontal: Colorize = (
     isCustomAccent
       ? accent
-      : (theme.gradient?.horizon as Colorize | undefined) ??
+      : ((theme.gradient?.horizon as Colorize | undefined) ??
         (theme.gradient?.primary as Colorize | undefined) ??
-        accent
+        accent)
   ) as Colorize;
   const iconSegment = options.icon ? `${options.icon} ` : '';
   const titleText = options.title ? `${iconSegment}${options.title}` : '';
@@ -127,8 +133,13 @@ export function renderPanel(lines: string[], options: PanelOptions = {}): string
     const paddedTitle = padLine(accent(truncate(titleText, width)), width);
     output.push(`${leftEdge}${padding}${paddedTitle}${padding}${rightEdge}`);
     if (taglineText) {
-      const paddedTagline = padLine(theme.ui.muted(truncate(taglineText, width)), width);
-      output.push(`${leftEdge}${padding}${paddedTagline}${padding}${rightEdge}`);
+      const paddedTagline = padLine(
+        theme.ui.muted(truncate(taglineText, width)),
+        width,
+      );
+      output.push(
+        `${leftEdge}${padding}${paddedTagline}${padding}${rightEdge}`,
+      );
     }
     output.push(horizontal(`╞${'═'.repeat(contentWidth)}╡`));
   }
@@ -139,18 +150,19 @@ export function renderPanel(lines: string[], options: PanelOptions = {}): string
 
   for (const line of lines) {
     const padded = padLine(line, width);
-    const tinted = surface ? surface(theme.ui.text(padded)) : theme.ui.text(padded);
+    const tinted = surface
+      ? surface(theme.ui.text(padded))
+      : theme.ui.text(padded);
     output.push(`${leftEdge}${padding}${tinted}${padding}${rightEdge}`);
   }
 
   output.push(horizontal(`╚${'═'.repeat(contentWidth)}╝`));
   if (haloLine) {
-    const lowerHalo =
-      (
-        (theme.gradient?.aurora as Colorize | undefined) ??
-        (theme.gradient?.primary as Colorize | undefined) ??
-        accent
-      )(`╰${'┈'.repeat(contentWidth)}╯`);
+    const lowerHalo = (
+      (theme.gradient?.aurora as Colorize | undefined) ??
+      (theme.gradient?.primary as Colorize | undefined) ??
+      accent
+    )(`╰${'┈'.repeat(contentWidth)}╯`);
     output.push(lowerHalo);
   }
   return output.join('\n');

@@ -43,7 +43,9 @@ export interface ToolDefinition {
   parameters?: JSONSchemaObject;
   handler: ToolHandler;
   cacheable?: boolean; // Whether results can be cached
-  normalizeArguments?: (args: Record<string, unknown>) => Record<string, unknown>;
+  normalizeArguments?: (
+    args: Record<string, unknown>,
+  ) => Record<string, unknown>;
 }
 
 export interface ToolSuite {
@@ -86,7 +88,10 @@ export class ToolRuntime {
   private readonly policy: ToolPolicy | null;
   private readonly timeline: TimelineRecorder | null;
 
-  constructor(baseTools: ToolDefinition[] = [], options: ToolRuntimeOptions = {}) {
+  constructor(
+    baseTools: ToolDefinition[] = [],
+    options: ToolRuntimeOptions = {},
+  ) {
     this.observer = options.observer ?? null;
     this.contextManager = options.contextManager ?? null;
     this.enableCache = options.enableCache ?? true;
@@ -162,9 +167,13 @@ export class ToolRuntime {
       arguments: coercedArgs,
     };
 
-    const policyDecision = this.evaluatePolicy(normalizedExecutionCall, record.definition);
+    const policyDecision = this.evaluatePolicy(
+      normalizedExecutionCall,
+      record.definition,
+    );
     if (policyDecision?.action === 'block') {
-      const message = policyDecision.reason ?? `Tool "${call.name}" blocked by policy.`;
+      const message =
+        policyDecision.reason ?? `Tool "${call.name}" blocked by policy.`;
       this.timeline?.record({
         action: 'policy_blocked',
         status: 'blocked',
@@ -182,11 +191,15 @@ export class ToolRuntime {
     };
 
     // Check if tool is cacheable
-    const isCacheable = record.definition.cacheable ?? CACHEABLE_TOOLS.has(call.name);
+    const isCacheable =
+      record.definition.cacheable ?? CACHEABLE_TOOLS.has(call.name);
 
     // Try to get from cache
     if (this.enableCache && isCacheable) {
-      const cacheKey = this.getCacheKey({ ...normalizedExecutionCall, arguments: callArgs });
+      const cacheKey = this.getCacheKey({
+        ...normalizedExecutionCall,
+        arguments: callArgs,
+      });
       const cached = this.cache.get(cacheKey);
 
       if (cached && Date.now() - cached.timestamp < this.cacheTTLMs) {
@@ -205,7 +218,9 @@ export class ToolRuntime {
     });
 
     if (policyDecision?.action === 'dry-run') {
-      const preview = policyDecision.preview ?? `Dry-run blocked execution of "${normalizedCall.name}".`;
+      const preview =
+        policyDecision.preview ??
+        `Dry-run blocked execution of "${normalizedCall.name}".`;
       this.timeline?.record({
         action: 'tool_execution',
         status: 'skipped',
@@ -218,19 +233,27 @@ export class ToolRuntime {
     }
 
     try {
-      validateToolArguments(record.definition.name, record.definition.parameters, callArgs);
+      validateToolArguments(
+        record.definition.name,
+        record.definition.parameters,
+        callArgs,
+      );
       const result = await record.definition.handler(callArgs);
-      let output = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+      let output =
+        typeof result === 'string' ? result : JSON.stringify(result, null, 2);
 
       // Truncate output if context manager is available
       if (this.contextManager) {
-        const truncated = this.contextManager.truncateToolOutput(output, normalizedCall.name);
+        const truncated = this.contextManager.truncateToolOutput(
+          output,
+          normalizedCall.name,
+        );
         if (truncated.wasTruncated) {
           output = truncated.content;
           // Log truncation for debugging
           if (process.env['DEBUG_CONTEXT']) {
             console.warn(
-              `[Context Manager] Truncated ${normalizedCall.name} output: ${truncated.originalLength} -> ${truncated.truncatedLength} chars`
+              `[Context Manager] Truncated ${normalizedCall.name} output: ${truncated.originalLength} -> ${truncated.truncatedLength} chars`,
             );
           }
         }
@@ -238,7 +261,10 @@ export class ToolRuntime {
 
       // Cache the result if cacheable
       if (this.enableCache && isCacheable) {
-        const cacheKey = this.getCacheKey({ ...normalizedExecutionCall, arguments: callArgs });
+        const cacheKey = this.getCacheKey({
+          ...normalizedExecutionCall,
+          arguments: callArgs,
+        });
         this.cache.set(cacheKey, {
           result: output,
           timestamp: Date.now(),
@@ -278,7 +304,10 @@ export class ToolRuntime {
     return `${call.name}:${JSON.stringify(call.arguments)}`;
   }
 
-  private evaluatePolicy(call: ToolCallRequest, tool: ToolDefinition): ToolPolicyDecision | null {
+  private evaluatePolicy(
+    call: ToolCallRequest,
+    tool: ToolDefinition,
+  ): ToolPolicyDecision | null {
     if (!this.policy) {
       return null;
     }
@@ -317,7 +346,9 @@ export class ToolRuntime {
     }
     if (this.registry.has(definition.name)) {
       const owner = this.registry.get(definition.name)?.suiteId ?? 'unknown';
-      throw new Error(`Tool "${definition.name}" already registered by suite "${owner}".`);
+      throw new Error(
+        `Tool "${definition.name}" already registered by suite "${owner}".`,
+      );
     }
     this.registry.set(definition.name, {
       suiteId,
@@ -337,7 +368,7 @@ export class ToolRuntime {
 export function createDefaultToolRuntime(
   context: ToolExecutionContext,
   toolSuites: ToolSuite[] = [],
-  options: ToolRuntimeOptions = {}
+  options: ToolRuntimeOptions = {},
 ): ToolRuntime {
   const runtime = new ToolRuntime(
     [
@@ -345,7 +376,7 @@ export function createDefaultToolRuntime(
       buildCapabilitiesTool(context),
       buildProfileInspectorTool(context),
     ],
-    options
+    options,
   );
 
   for (const suite of toolSuites) {
@@ -377,16 +408,20 @@ function normalizeToolArguments(value: unknown): Record<string, unknown> {
   return {};
 }
 
-function buildContextSnapshotTool(workspaceContext?: string | null): ToolDefinition {
+function buildContextSnapshotTool(
+  workspaceContext?: string | null,
+): ToolDefinition {
   return {
     name: 'context_snapshot',
-    description: 'Returns the repository context that was automatically captured during startup.',
+    description:
+      'Returns the repository context that was automatically captured during startup.',
     parameters: {
       type: 'object',
       properties: {
         format: {
           type: 'string',
-          description: 'Use "plain" for raw text or "markdown" for a fenced block.',
+          description:
+            'Use "plain" for raw text or "markdown" for a fenced block.',
           enum: ['plain', 'markdown'],
         },
       },
@@ -422,7 +457,8 @@ function buildCapabilitiesTool(context: ToolExecutionContext): ToolDefinition {
     },
     handler: (args) => {
       const audience = args['audience'];
-      const adjective = audience === 'developer' ? 'Operator facing' : 'Model facing';
+      const adjective =
+        audience === 'developer' ? 'Operator facing' : 'Model facing';
       return [
         `${adjective} capabilities summary:`,
         '- Full file system access (read, write, list, search).',
@@ -436,7 +472,9 @@ function buildCapabilitiesTool(context: ToolExecutionContext): ToolDefinition {
   };
 }
 
-function buildProfileInspectorTool(context: ToolExecutionContext): ToolDefinition {
+function buildProfileInspectorTool(
+  context: ToolExecutionContext,
+): ToolDefinition {
   return {
     name: 'profile_details',
     description: 'Returns the configuration of the active CLI profile.',
@@ -445,7 +483,8 @@ function buildProfileInspectorTool(context: ToolExecutionContext): ToolDefinitio
       properties: {
         includeWorkspaceContext: {
           type: 'boolean',
-          description: 'Set true to append the workspace context snapshot if available.',
+          description:
+            'Set true to append the workspace context snapshot if available.',
         },
       },
       additionalProperties: false,
@@ -455,7 +494,9 @@ function buildProfileInspectorTool(context: ToolExecutionContext): ToolDefinitio
         profile: context.profileName,
         provider: context.provider,
         model: context.model,
-        workspaceContext: args['includeWorkspaceContext'] ? context.workspaceContext ?? null : null,
+        workspaceContext: args['includeWorkspaceContext']
+          ? (context.workspaceContext ?? null)
+          : null,
       };
       return JSON.stringify(payload, null, 2);
     },

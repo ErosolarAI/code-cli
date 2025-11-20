@@ -1,5 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import type { ConversationMessage, ProviderId } from './types.js';
 import type { ProfileName } from '../config.js';
@@ -42,7 +49,9 @@ interface SessionIndex {
 export function listSessions(profile?: ProfileName): SessionSummary[] {
   const index = readIndex();
   const entries = Object.values(index.entries);
-  const filtered = profile ? entries.filter((entry) => entry.profile === profile) : entries;
+  const filtered = profile
+    ? entries.filter((entry) => entry.profile === profile)
+    : entries;
   return filtered.sort((a, b) => {
     const aTime = Date.parse(a.updatedAt ?? '') || 0;
     const bTime = Date.parse(b.updatedAt ?? '') || 0;
@@ -50,10 +59,14 @@ export function listSessions(profile?: ProfileName): SessionSummary[] {
   });
 }
 
-export function saveSessionSnapshot(options: SaveSessionOptions): SessionSummary {
+export function saveSessionSnapshot(
+  options: SaveSessionOptions,
+): SessionSummary {
   ensureDirectory();
   if (!Array.isArray(options.messages)) {
-    throw new Error('Session snapshots must include the entire message history array.');
+    throw new Error(
+      'Session snapshots must include the entire message history array.',
+    );
   }
 
   const index = readIndex();
@@ -65,11 +78,15 @@ export function saveSessionSnapshot(options: SaveSessionOptions): SessionSummary
 
   const summary: SessionSummary = {
     id: summaryId,
-    title: sanitizeTitle(options.title) ?? previous?.title ?? buildDefaultTitle(options.messages),
+    title:
+      sanitizeTitle(options.title) ??
+      previous?.title ??
+      buildDefaultTitle(options.messages),
     profile: options.profile,
     provider: options.provider,
     model: options.model,
-    workspaceRoot: options.workspaceRoot ?? previous?.workspaceRoot ?? undefined,
+    workspaceRoot:
+      options.workspaceRoot ?? previous?.workspaceRoot ?? undefined,
     createdAt: previous?.createdAt ?? now,
     updatedAt: now,
     messageCount: options.messages.length,
@@ -80,7 +97,11 @@ export function saveSessionSnapshot(options: SaveSessionOptions): SessionSummary
     messages: options.messages,
   };
 
-  writeFileSync(getSessionPath(summaryId), JSON.stringify(payload, null, 2), 'utf8');
+  writeFileSync(
+    getSessionPath(summaryId),
+    JSON.stringify(payload, null, 2),
+    'utf8',
+  );
   index.entries[summaryId] = summary;
   writeIndex(index);
   return summary;
@@ -119,7 +140,7 @@ export function deleteSession(id: string): boolean {
 
 export function saveAutosaveSnapshot(
   profile: ProfileName,
-  options: Omit<SaveSessionOptions, 'profile'>
+  options: Omit<SaveSessionOptions, 'profile'>,
 ): void {
   ensureDirectory();
   const payload: StoredSession = {
@@ -134,10 +155,16 @@ export function saveAutosaveSnapshot(
     messageCount: options.messages.length,
     messages: options.messages,
   };
-  writeFileSync(getAutosavePath(profile), JSON.stringify(payload, null, 2), 'utf8');
+  writeFileSync(
+    getAutosavePath(profile),
+    JSON.stringify(payload, null, 2),
+    'utf8',
+  );
 }
 
-export function loadAutosaveSnapshot(profile: ProfileName): StoredSession | null {
+export function loadAutosaveSnapshot(
+  profile: ProfileName,
+): StoredSession | null {
   try {
     const raw = readFileSync(getAutosavePath(profile), 'utf8');
     return JSON.parse(raw) as StoredSession;
@@ -159,7 +186,11 @@ function readIndex(): SessionIndex {
   try {
     const raw = readFileSync(indexPath, 'utf8');
     const parsed = JSON.parse(raw) as SessionIndex;
-    if (!parsed || typeof parsed !== 'object' || typeof parsed.entries !== 'object') {
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      typeof parsed.entries !== 'object'
+    ) {
       return { entries: {} };
     }
     return { entries: { ...parsed.entries } };

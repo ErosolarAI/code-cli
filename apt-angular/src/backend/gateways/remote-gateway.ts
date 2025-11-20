@@ -24,8 +24,8 @@ export class RemoteAgentGateway implements AgentGateway {
           payload: {
             label: 'remote poll failed',
             detail: error instanceof Error ? error.message : String(error),
-            tone: 'warn'
-          }
+            tone: 'warn',
+          },
         });
       }
     }, 5000);
@@ -40,7 +40,7 @@ export class RemoteAgentGateway implements AgentGateway {
   private async fetchSnapshot(): Promise<SessionSnapshot> {
     const response = await fetch(new URL('/api/session', this.config.baseUrl), {
       headers: this.headers(),
-      cache: 'no-store'
+      cache: 'no-store',
     });
 
     if (!response.ok) {

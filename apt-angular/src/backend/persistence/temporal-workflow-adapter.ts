@@ -62,7 +62,7 @@ export class TemporalWorkflowAdapter implements PersistenceAdapter {
     await fetch(this.config.commandUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
   }
 

@@ -60,7 +60,10 @@ export class OpenAIResponsesProvider implements LLMProvider {
     this.textVerbosity = options.textVerbosity;
   }
 
-  async generate(messages: ConversationMessage[], tools: ProviderToolDefinition[]): Promise<ProviderResponse> {
+  async generate(
+    messages: ConversationMessage[],
+    tools: ProviderToolDefinition[],
+  ): Promise<ProviderResponse> {
     const request: EnhancedResponsesCreateParams = {
       model: this.model,
       input: mapMessages(messages),
@@ -155,7 +158,8 @@ function extractTextContent(response: Response): string {
     return primary;
   }
 
-  const aggregated = typeof response.output_text === 'string' ? response.output_text.trim() : '';
+  const aggregated =
+    typeof response.output_text === 'string' ? response.output_text.trim() : '';
   if (aggregated) {
     return aggregated;
   }
@@ -223,19 +227,27 @@ function mapUsage(usage?: Response['usage'] | null): ProviderUsage | null {
   };
 }
 
-function isFunctionCall(item: ResponseOutputItem): item is ResponseFunctionToolCall {
+function isFunctionCall(
+  item: ResponseOutputItem,
+): item is ResponseFunctionToolCall {
   return item.type === 'function_call';
 }
 
-function isOutputMessage(item: ResponseOutputItem): item is ResponseOutputMessage {
+function isOutputMessage(
+  item: ResponseOutputItem,
+): item is ResponseOutputMessage {
   return item.type === 'message';
 }
 
-function isRefusal(block: ResponseOutputMessage['content'][number]): block is ResponseOutputRefusal {
+function isRefusal(
+  block: ResponseOutputMessage['content'][number],
+): block is ResponseOutputRefusal {
   return block.type === 'refusal';
 }
 
-function assertHasOutput(response: ResponsesCreateResult): asserts response is Response {
+function assertHasOutput(
+  response: ResponsesCreateResult,
+): asserts response is Response {
   if (!('output' in response)) {
     throw new Error('Streaming responses are not supported in this runtime.');
   }

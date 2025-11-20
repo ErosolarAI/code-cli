@@ -33,7 +33,9 @@ export class SkillRepository {
   }
 
   getSkill(identifier: string): SkillRecord | undefined {
-    return this.skills.find((skill) => skill.id === identifier || skill.slug === identifier);
+    return this.skills.find(
+      (skill) => skill.id === identifier || skill.slug === identifier,
+    );
   }
 
   refresh(): void {

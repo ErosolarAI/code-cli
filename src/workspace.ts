@@ -19,15 +19,26 @@ export interface WorkspaceCaptureOptions {
   docExcerptLimit?: number;
 }
 
-export function resolveWorkspaceCaptureOptions(env: NodeJS.ProcessEnv = process.env): WorkspaceCaptureOptions {
+export function resolveWorkspaceCaptureOptions(
+  env: NodeJS.ProcessEnv = process.env,
+): WorkspaceCaptureOptions {
   return {
-    treeDepth: parsePositiveInt(pickBrandEnv(env, 'CONTEXT_TREE_DEPTH') ?? undefined),
-    maxEntries: parsePositiveInt(pickBrandEnv(env, 'CONTEXT_MAX_ENTRIES') ?? undefined),
-    docExcerptLimit: parsePositiveInt(pickBrandEnv(env, 'CONTEXT_DOC_LIMIT') ?? undefined),
+    treeDepth: parsePositiveInt(
+      pickBrandEnv(env, 'CONTEXT_TREE_DEPTH') ?? undefined,
+    ),
+    maxEntries: parsePositiveInt(
+      pickBrandEnv(env, 'CONTEXT_MAX_ENTRIES') ?? undefined,
+    ),
+    docExcerptLimit: parsePositiveInt(
+      pickBrandEnv(env, 'CONTEXT_DOC_LIMIT') ?? undefined,
+    ),
   };
 }
 
-export function buildWorkspaceContext(root: string, options: WorkspaceCaptureOptions = {}): string | null {
+export function buildWorkspaceContext(
+  root: string,
+  options: WorkspaceCaptureOptions = {},
+): string | null {
   const treeDepth = options.treeDepth ?? DEFAULT_TREE_DEPTH;
   const maxEntries = options.maxEntries ?? DEFAULT_MAX_ENTRIES;
   const docLimit = options.docExcerptLimit ?? DEFAULT_DOC_LIMIT;
@@ -53,11 +64,16 @@ export function buildWorkspaceContext(root: string, options: WorkspaceCaptureOpt
 }
 
 function capturePriorityDocs(root: string, docLimit: number): string[] {
-  return PRIORITY_DOCS.filter((name) => existsSync(join(root, name))).map((name) => {
-    const content = readFileSync(join(root, name), 'utf8');
-    const snippet = content.length > docLimit ? `${content.slice(0, docLimit)}\n...` : content;
-    return `--- ${name} ---\n${snippet.trim()}`;
-  });
+  return PRIORITY_DOCS.filter((name) => existsSync(join(root, name))).map(
+    (name) => {
+      const content = readFileSync(join(root, name), 'utf8');
+      const snippet =
+        content.length > docLimit
+          ? `${content.slice(0, docLimit)}\n...`
+          : content;
+      return `--- ${name} ---\n${snippet.trim()}`;
+    },
+  );
 }
 
 function captureRulebookSections(root: string): string[] {
@@ -89,7 +105,11 @@ function buildRulebookBlock(root: string, fileName: string): string | null {
   }
 }
 
-function formatFileTree(root: string, maxDepth: number, maxEntries: number): string[] {
+function formatFileTree(
+  root: string,
+  maxDepth: number,
+  maxEntries: number,
+): string[] {
   const lines: string[] = [];
   const walk = (dir: string, depth: number, prefix: string) => {
     if (depth > maxDepth || lines.length >= maxEntries) {

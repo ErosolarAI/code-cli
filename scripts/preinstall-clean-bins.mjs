@@ -1,5 +1,11 @@
 #!/usr/bin/env node
-import { existsSync, lstatSync, readFileSync, readlinkSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  readFileSync,
+  readlinkSync,
+  rmSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 const BIN_NAMES = ['bo', 'apt'];
@@ -12,7 +18,8 @@ if (!isGlobalInstall || !prefix) {
   process.exit(0);
 }
 
-const binDir = process.platform === 'win32' ? join(prefix, 'Scripts') : join(prefix, 'bin');
+const binDir =
+  process.platform === 'win32' ? join(prefix, 'Scripts') : join(prefix, 'bin');
 
 for (const name of BIN_NAMES) {
   for (const target of candidatePaths(binDir, name)) {
@@ -24,7 +31,11 @@ const conflicts = [];
 
 function candidatePaths(baseDir, name) {
   if (process.platform === 'win32') {
-    return [join(baseDir, name), join(baseDir, `${name}.cmd`), join(baseDir, `${name}.ps1`)];
+    return [
+      join(baseDir, name),
+      join(baseDir, `${name}.cmd`),
+      join(baseDir, `${name}.ps1`),
+    ];
   }
   return [join(baseDir, name)];
 }
@@ -49,7 +60,7 @@ if (conflicts.length) {
     console.error(` - ${conflict.path}: ${conflict.message}`);
   }
   console.error(
-    '[bo] Please remove the files above (e.g., `rm /path/to/bo` or `npm uninstall -g bo-cli`) and re-run the install.'
+    '[bo] Please remove the files above (e.g., `rm /path/to/bo` or `npm uninstall -g bo-cli`) and re-run the install.',
   );
   process.exit(1);
 }

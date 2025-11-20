@@ -1,6 +1,6 @@
 /**
  * Tool Contract v1.0
- * 
+ *
  * Stable interface for tool registration and execution.
  */
 
@@ -93,7 +93,7 @@ export interface IToolSuite {
  */
 export type ToolHandler = (
   parameters: Record<string, unknown>,
-  context?: ToolExecutionContext
+  context?: ToolExecutionContext,
 ) => Promise<string> | string;
 
 /**
@@ -138,7 +138,11 @@ export interface IToolRegistry {
   /**
    * Register a single tool
    */
-  registerTool(suiteId: string, definition: IToolDefinition, handler: ToolHandler): void;
+  registerTool(
+    suiteId: string,
+    definition: IToolDefinition,
+    handler: ToolHandler,
+  ): void;
 
   /**
    * Unregister a single tool

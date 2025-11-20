@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createSearchTools } from '../tools/searchTools.js';
 
 export interface SearchCapabilityOptions {
@@ -19,7 +23,9 @@ export class SearchCapabilityModule implements CapabilityModule {
     const workingDir = this.options.workingDir ?? context.workingDir;
     return {
       id: this.options.id ?? 'search.tools.repo',
-      description: this.options.description ?? 'Repository-aware search helpers (glob + structural grep).',
+      description:
+        this.options.description ??
+        'Repository-aware search helpers (glob + structural grep).',
       toolSuite: {
         id: 'search',
         description: 'Code search',

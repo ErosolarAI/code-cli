@@ -17,10 +17,10 @@ import { ChatInputComponent } from './components/chat-input/chat-input';
     ConnectorGalleryComponent,
     ChatMessageHostComponent,
     ChatInputComponent,
-    SettingsDrawerComponent
+    SettingsDrawerComponent,
   ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {
   private readonly session = inject(AgentSessionService);

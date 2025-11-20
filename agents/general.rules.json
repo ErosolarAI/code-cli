@@ -11,9 +11,7 @@
       "summary": "Do not proceed without a current workspace snapshot and captured context.",
       "detail": "If the snapshot omits files the user mentions, pause and request a fresh capture before proposing changes.",
       "severity": "critical",
-      "references": [
-        { "label": "README", "file": "README.md" }
-      ]
+      "references": [{ "label": "README", "file": "README.md" }]
     },
     {
       "id": "guardrail.rulebook_visibility",

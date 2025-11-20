@@ -9,7 +9,10 @@ import {
 import { ContextManager } from './contextManager.js';
 
 export interface AgentCallbacks {
-  onAssistantMessage?(content: string, metadata: AssistantMessageMetadata): void;
+  onAssistantMessage?(
+    content: string,
+    metadata: AssistantMessageMetadata,
+  ): void;
   onStreamChunk?(chunk: string): void;
   onContextPruned?(removedCount: number, stats: Record<string, unknown>): void;
 }
@@ -73,18 +76,26 @@ export class AgentRuntime {
   }
 
   private async processConversation(): Promise<string> {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       // Prune messages if approaching context limit
       this.pruneMessagesIfNeeded();
 
-      const response = await this.provider.generate(this.messages, this.providerTools);
+      const response = await this.provider.generate(
+        this.messages,
+        this.providerTools,
+      );
       const usage = response.usage ?? null;
       const contextStats = this.getContextStats();
 
       if (response.type === 'tool_calls') {
         const narration = response.content?.trim();
         if (narration) {
-          this.emitAssistantMessage(narration, { isFinal: false, usage, contextStats });
+          this.emitAssistantMessage(narration, {
+            isFinal: false,
+            usage,
+            contextStats,
+          });
         }
         const assistantMessage: ConversationMessage = {
           role: 'assistant',
@@ -100,7 +111,11 @@ export class AgentRuntime {
 
       const reply = response.content?.trim() ?? '';
       if (reply) {
-        this.emitAssistantMessage(reply, { isFinal: true, usage, contextStats });
+        this.emitAssistantMessage(reply, {
+          isFinal: true,
+          usage,
+          contextStats,
+        });
       }
       this.messages.push({ role: 'assistant', content: reply });
       return reply;
@@ -112,6 +127,7 @@ export class AgentRuntime {
       return this.processConversation();
     }
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       // Prune messages if approaching context limit
       this.pruneMessagesIfNeeded();
@@ -120,7 +136,10 @@ export class AgentRuntime {
       const toolCalls: ToolCallRequest[] = [];
       let usage: ProviderUsage | null = null;
 
-      const stream = this.provider.generateStream(this.messages, this.providerTools);
+      const stream = this.provider.generateStream(
+        this.messages,
+        this.providerTools,
+      );
 
       for await (const chunk of stream) {
         if (chunk.type === 'content' && chunk.content) {
@@ -139,7 +158,11 @@ export class AgentRuntime {
       if (toolCalls.length > 0) {
         const narration = fullContent.trim();
         if (narration) {
-          this.emitAssistantMessage(narration, { isFinal: false, usage, contextStats });
+          this.emitAssistantMessage(narration, {
+            isFinal: false,
+            usage,
+            contextStats,
+          });
         }
         const assistantMessage: ConversationMessage = {
           role: 'assistant',
@@ -154,7 +177,11 @@ export class AgentRuntime {
       // Final message
       const reply = fullContent.trim();
       if (reply) {
-        this.emitAssistantMessage(reply, { isFinal: true, usage, contextStats });
+        this.emitAssistantMessage(reply, {
+          isFinal: true,
+          usage,
+          contextStats,
+        });
       }
       this.messages.push({ role: 'assistant', content: reply });
       return reply;
@@ -167,7 +194,7 @@ export class AgentRuntime {
       toolCalls.map(async (call) => ({
         call,
         output: await this.toolRuntime.execute(call),
-      }))
+      })),
     );
 
     // Add results to messages in the same order as tool calls
@@ -185,11 +212,16 @@ export class AgentRuntime {
     return this.toolRuntime.listProviderTools();
   }
 
-  private emitAssistantMessage(content: string, metadata: AssistantMessageMetadata): void {
+  private emitAssistantMessage(
+    content: string,
+    metadata: AssistantMessageMetadata,
+  ): void {
     if (!content) {
       return;
     }
-    const elapsedMs = this.activeRun ? Date.now() - this.activeRun.startedAt : undefined;
+    const elapsedMs = this.activeRun
+      ? Date.now() - this.activeRun.startedAt
+      : undefined;
     const payload: AssistantMessageMetadata = { ...metadata };
     if (typeof elapsedMs === 'number') {
       payload.elapsedMs = elapsedMs;
@@ -243,7 +275,7 @@ export class AgentRuntime {
         if (process.env['DEBUG_CONTEXT']) {
           console.warn(
             `[Context Manager] Pruned ${result.removed} messages. ` +
-            `Tokens: ${stats.totalTokens} (${stats.percentage}%)`
+              `Tokens: ${stats.totalTokens} (${stats.percentage}%)`,
           );
         }
       }
@@ -270,7 +302,7 @@ export class AgentRuntime {
 
 function cloneMessage(message: ConversationMessage): ConversationMessage {
   switch (message.role) {
-    case 'assistant':
+    case 'assistant': {
       const clone: ConversationMessage = {
         role: 'assistant',
         content: message.content,
@@ -279,6 +311,7 @@ function cloneMessage(message: ConversationMessage): ConversationMessage {
         clone.toolCalls = message.toolCalls.map(cloneToolCall);
       }
       return clone;
+    }
     case 'tool':
       return {
         role: 'tool',

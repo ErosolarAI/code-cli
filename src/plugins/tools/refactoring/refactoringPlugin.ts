@@ -4,7 +4,8 @@ import { RefactoringCapabilityModule } from '../../../capabilities/refactoringCa
 export function createRefactoringToolPlugin(): ToolPlugin {
   return {
     id: 'tool.refactoring.assistant',
-    description: 'Refactoring intelligence (hotspot detection, impact studies, plan generation).',
+    description:
+      'Refactoring intelligence (hotspot detection, impact studies, plan generation).',
     targets: ['node'],
     create: async (context: ToolPluginContext) =>
       new RefactoringCapabilityModule({

@@ -187,8 +187,24 @@ const COMMON_C_KEYWORDS = [
   'of',
 ];
 
-const TYPESCRIPT_KEYWORDS = ['namespace', 'abstract', 'readonly', 'declare', 'keyof', 'infer', 'satisfies'];
-const JAVA_KEYWORDS = ['package', 'synchronized', 'volatile', 'transient', 'implements', 'extends', 'throws'];
+const TYPESCRIPT_KEYWORDS = [
+  'namespace',
+  'abstract',
+  'readonly',
+  'declare',
+  'keyof',
+  'infer',
+  'satisfies',
+];
+const JAVA_KEYWORDS = [
+  'package',
+  'synchronized',
+  'volatile',
+  'transient',
+  'implements',
+  'extends',
+  'throws',
+];
 const CSHARP_KEYWORDS = [
   'namespace',
   'async',
@@ -205,7 +221,18 @@ const CSHARP_KEYWORDS = [
   'when',
   'where',
 ];
-const CPP_KEYWORDS = ['constexpr', 'typename', 'template', 'namespace', 'using', 'virtual', 'override', 'mutable', 'explicit', 'friend'];
+const CPP_KEYWORDS = [
+  'constexpr',
+  'typename',
+  'template',
+  'namespace',
+  'using',
+  'virtual',
+  'override',
+  'mutable',
+  'explicit',
+  'friend',
+];
 const GO_KEYWORDS = [
   'package',
   'import',
@@ -281,7 +308,24 @@ const PYTHON_KEYWORDS = [
   'is',
   'in',
 ];
-const SHELL_KEYWORDS = ['if', 'then', 'fi', 'elif', 'else', 'for', 'while', 'in', 'do', 'done', 'case', 'esac', 'function', 'select', 'until', 'time'];
+const SHELL_KEYWORDS = [
+  'if',
+  'then',
+  'fi',
+  'elif',
+  'else',
+  'for',
+  'while',
+  'in',
+  'do',
+  'done',
+  'case',
+  'esac',
+  'function',
+  'select',
+  'until',
+  'time',
+];
 const RUBY_KEYWORDS = [
   'def',
   'class',
@@ -384,21 +428,156 @@ const SQL_KEYWORDS = [
   'between',
 ];
 
-const COMMON_C_TYPES = ['string', 'number', 'boolean', 'any', 'never', 'void', 'null', 'undefined', 'Promise', 'Array', 'Record', 'Map', 'Set'];
-const GO_TYPES = ['string', 'int', 'int64', 'int32', 'bool', 'error', 'byte', 'rune', 'float64', 'float32', 'map', 'chan', 'interface', 'struct'];
-const RUST_TYPES = ['String', 'str', 'Vec', 'u8', 'u16', 'u32', 'u64', 'usize', 'i32', 'i64', 'Result', 'Option', 'Box'];
-const PYTHON_TYPES = ['int', 'float', 'str', 'list', 'dict', 'set', 'tuple', 'bool', 'Any'];
+const COMMON_C_TYPES = [
+  'string',
+  'number',
+  'boolean',
+  'any',
+  'never',
+  'void',
+  'null',
+  'undefined',
+  'Promise',
+  'Array',
+  'Record',
+  'Map',
+  'Set',
+];
+const GO_TYPES = [
+  'string',
+  'int',
+  'int64',
+  'int32',
+  'bool',
+  'error',
+  'byte',
+  'rune',
+  'float64',
+  'float32',
+  'map',
+  'chan',
+  'interface',
+  'struct',
+];
+const RUST_TYPES = [
+  'String',
+  'str',
+  'Vec',
+  'u8',
+  'u16',
+  'u32',
+  'u64',
+  'usize',
+  'i32',
+  'i64',
+  'Result',
+  'Option',
+  'Box',
+];
+const PYTHON_TYPES = [
+  'int',
+  'float',
+  'str',
+  'list',
+  'dict',
+  'set',
+  'tuple',
+  'bool',
+  'Any',
+];
 const RUBY_TYPES = ['String', 'Array', 'Hash', 'Symbol', 'Integer', 'Float'];
-const PHP_TYPES = ['string', 'int', 'float', 'bool', 'array', 'callable', 'iterable', 'object', 'mixed', 'void', 'never'];
-const SQL_TYPES = ['int', 'integer', 'text', 'varchar', 'timestamp', 'date', 'json', 'boolean', 'serial', 'uuid'];
+const PHP_TYPES = [
+  'string',
+  'int',
+  'float',
+  'bool',
+  'array',
+  'callable',
+  'iterable',
+  'object',
+  'mixed',
+  'void',
+  'never',
+];
+const SQL_TYPES = [
+  'int',
+  'integer',
+  'text',
+  'varchar',
+  'timestamp',
+  'date',
+  'json',
+  'boolean',
+  'serial',
+  'uuid',
+];
 
-const JS_BUILTINS = ['console', 'process', 'Math', 'Date', 'Promise', 'JSON', 'setTimeout', 'setInterval'];
-const PY_BUILTINS = ['print', 'len', 'range', 'list', 'dict', 'set', 'tuple', 'enumerate', 'zip', 'map', 'filter', 'sum'];
-const SHELL_BUILTINS = ['echo', 'cd', 'alias', 'export', 'local', 'readonly', 'return', 'function', 'trap', 'printf', 'test'];
-const GO_BUILTINS = ['make', 'len', 'cap', 'append', 'copy', 'panic', 'recover', 'new', 'print', 'println'];
+const JS_BUILTINS = [
+  'console',
+  'process',
+  'Math',
+  'Date',
+  'Promise',
+  'JSON',
+  'setTimeout',
+  'setInterval',
+];
+const PY_BUILTINS = [
+  'print',
+  'len',
+  'range',
+  'list',
+  'dict',
+  'set',
+  'tuple',
+  'enumerate',
+  'zip',
+  'map',
+  'filter',
+  'sum',
+];
+const SHELL_BUILTINS = [
+  'echo',
+  'cd',
+  'alias',
+  'export',
+  'local',
+  'readonly',
+  'return',
+  'function',
+  'trap',
+  'printf',
+  'test',
+];
+const GO_BUILTINS = [
+  'make',
+  'len',
+  'cap',
+  'append',
+  'copy',
+  'panic',
+  'recover',
+  'new',
+  'print',
+  'println',
+];
 const RUST_BUILTINS = ['println', 'format', 'vec', 'dbg'];
-const RUBY_BUILTINS = ['puts', 'print', 'gets', 'attr_reader', 'attr_accessor', 'attr_writer'];
-const PHP_BUILTINS = ['echo', 'print', 'isset', 'empty', 'array_merge', 'count'];
+const RUBY_BUILTINS = [
+  'puts',
+  'print',
+  'gets',
+  'attr_reader',
+  'attr_accessor',
+  'attr_writer',
+];
+const PHP_BUILTINS = [
+  'echo',
+  'print',
+  'isset',
+  'empty',
+  'array_merge',
+  'count',
+];
 
 const JS_CONSTANTS = ['true', 'false', 'null', 'undefined', 'NaN', 'Infinity'];
 const PY_CONSTANTS = ['true', 'false', 'none'];
@@ -495,7 +674,16 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
   }),
   java: createProfile({
     keywords: [...COMMON_C_KEYWORDS, ...JAVA_KEYWORDS],
-    types: [...COMMON_C_TYPES, 'int', 'long', 'float', 'double', 'boolean', 'char', 'String'],
+    types: [
+      ...COMMON_C_TYPES,
+      'int',
+      'long',
+      'float',
+      'double',
+      'boolean',
+      'char',
+      'String',
+    ],
     builtins: ['System', 'String', 'List', 'Map', 'Set'],
     constants: JS_CONSTANTS,
     commentIndicators: ['//', '/*'],
@@ -505,7 +693,16 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
   }),
   csharp: createProfile({
     keywords: [...COMMON_C_KEYWORDS, ...CSHARP_KEYWORDS],
-    types: [...COMMON_C_TYPES, 'int', 'long', 'float', 'double', 'bool', 'string', 'Task'],
+    types: [
+      ...COMMON_C_TYPES,
+      'int',
+      'long',
+      'float',
+      'double',
+      'bool',
+      'string',
+      'Task',
+    ],
     builtins: ['Console', 'IEnumerable', 'List', 'Dictionary'],
     constants: JS_CONSTANTS,
     commentIndicators: ['//', '/*'],
@@ -516,7 +713,16 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
   }),
   cpp: createProfile({
     keywords: [...COMMON_C_KEYWORDS, ...CPP_KEYWORDS],
-    types: [...COMMON_C_TYPES, 'int', 'long', 'float', 'double', 'bool', 'char', 'std'],
+    types: [
+      ...COMMON_C_TYPES,
+      'int',
+      'long',
+      'float',
+      'double',
+      'bool',
+      'char',
+      'std',
+    ],
     builtins: ['std', 'cout', 'cin'],
     constants: JS_CONSTANTS,
     commentIndicators: ['//', '/*'],
@@ -526,7 +732,17 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
   }),
   c: createProfile({
     keywords: [...COMMON_C_KEYWORDS],
-    types: ['int', 'long', 'float', 'double', 'bool', 'char', 'size_t', 'uint32_t', 'uint64_t'],
+    types: [
+      'int',
+      'long',
+      'float',
+      'double',
+      'bool',
+      'char',
+      'size_t',
+      'uint32_t',
+      'uint64_t',
+    ],
     builtins: ['printf', 'scanf'],
     constants: JS_CONSTANTS,
     commentIndicators: ['//', '/*'],
@@ -535,7 +751,14 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
     identifierPart: IDENTIFIER_PART_C,
   }),
   swift: createProfile({
-    keywords: [...COMMON_C_KEYWORDS, 'struct', 'protocol', 'extension', 'guard', 'defer'],
+    keywords: [
+      ...COMMON_C_KEYWORDS,
+      'struct',
+      'protocol',
+      'extension',
+      'guard',
+      'defer',
+    ],
     types: [...COMMON_C_TYPES, 'Int', 'Float', 'Double', 'String', 'Bool'],
     builtins: ['print'],
     constants: JS_CONSTANTS,
@@ -545,8 +768,25 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
     identifierPart: IDENTIFIER_PART_C,
   }),
   kotlin: createProfile({
-    keywords: [...COMMON_C_KEYWORDS, 'fun', 'val', 'var', 'object', 'sealed', 'data', 'companion'],
-    types: [...COMMON_C_TYPES, 'Int', 'Long', 'Float', 'Double', 'String', 'Boolean'],
+    keywords: [
+      ...COMMON_C_KEYWORDS,
+      'fun',
+      'val',
+      'var',
+      'object',
+      'sealed',
+      'data',
+      'companion',
+    ],
+    types: [
+      ...COMMON_C_TYPES,
+      'Int',
+      'Long',
+      'Float',
+      'Double',
+      'String',
+      'Boolean',
+    ],
     builtins: ['println', 'print'],
     constants: JS_CONSTANTS,
     commentIndicators: ['//', '/*'],
@@ -565,11 +805,20 @@ const LANGUAGE_PROFILES: Partial<Record<HighlightLanguage, LanguageProfile>> = {
   }),
 };
 
-export function highlightAndWrapCode(code: string, language: string | undefined, width: number): HighlightedCodeBlock {
+export function highlightAndWrapCode(
+  code: string,
+  language: string | undefined,
+  width: number,
+): HighlightedCodeBlock {
   const normalized = normalizeLanguage(language);
-  const profile = normalized?.id ? LANGUAGE_PROFILES[normalized.id] ?? null : null;
+  const profile = normalized?.id
+    ? (LANGUAGE_PROFILES[normalized.id] ?? null)
+    : null;
   const tokenizer = selectTokenizer(normalized?.id ?? null, profile);
-  const available = Math.max(1, Number.isFinite(width) ? Math.floor(width) : 80);
+  const available = Math.max(
+    1,
+    Number.isFinite(width) ? Math.floor(width) : 80,
+  );
   const sanitized = code.replace(/\t/g, '  ');
   const lines: string[] = [];
 
@@ -603,11 +852,17 @@ function normalizeLanguage(value?: string): NormalizedLanguage | null {
   }
   const key = trimmed.toLowerCase();
   const id = LANGUAGE_ALIASES[key] ?? null;
-  const label = LANGUAGE_LABELS[key] ?? (id ? LANGUAGE_LABELS[id] : undefined) ?? trimmed.toUpperCase();
+  const label =
+    LANGUAGE_LABELS[key] ??
+    (id ? LANGUAGE_LABELS[id] : undefined) ??
+    trimmed.toUpperCase();
   return { id, label };
 }
 
-function selectTokenizer(language: HighlightLanguage | null, profile: LanguageProfile | null): Tokenizer {
+function selectTokenizer(
+  language: HighlightLanguage | null,
+  profile: LanguageProfile | null,
+): Tokenizer {
   if (language === 'json') {
     return tokenizeJsonLine;
   }
@@ -659,7 +914,9 @@ function toWordSet(values: string[]): ReadonlySet<string> {
 }
 
 function tokenizeGenericLine(profile: LanguageProfile): Tokenizer {
-  const commentIndicators = [...profile.commentIndicators].sort((a, b) => b.length - a.length);
+  const commentIndicators = [...profile.commentIndicators].sort(
+    (a, b) => b.length - a.length,
+  );
   return (line: string): Token[] => {
     if (!line.length) {
       return [{ text: '' }];
@@ -678,7 +935,9 @@ function tokenizeGenericLine(profile: LanguageProfile): Tokenizer {
     while (index < line.length) {
       const rest = line.slice(index);
 
-      const comment = commentIndicators.find((indicator) => rest.startsWith(indicator));
+      const comment = commentIndicators.find((indicator) =>
+        rest.startsWith(indicator),
+      );
       if (comment) {
         push(line.slice(index), theme.ui.muted);
         break;
@@ -865,7 +1124,10 @@ function wrapTokens(tokens: Token[], width: number): string[] {
   return lines;
 }
 
-function pickIdentifierFormatter(value: string, profile: LanguageProfile): Formatter | undefined {
+function pickIdentifierFormatter(
+  value: string,
+  profile: LanguageProfile,
+): Formatter | undefined {
   const lower = value.toLowerCase();
   if (profile.keywords.has(lower)) {
     return theme.primary;
@@ -882,7 +1144,11 @@ function pickIdentifierFormatter(value: string, profile: LanguageProfile): Forma
   return undefined;
 }
 
-function readString(line: string, start: number, delimiter: string): { text: string; next: number } {
+function readString(
+  line: string,
+  start: number,
+  delimiter: string,
+): { text: string; next: number } {
   let index = start + 1;
   while (index < line.length) {
     const char = line.charAt(index);
@@ -899,7 +1165,10 @@ function readString(line: string, start: number, delimiter: string): { text: str
   return { text: line.slice(start, index), next: index };
 }
 
-function readNumber(line: string, start: number): { text: string; next: number } {
+function readNumber(
+  line: string,
+  start: number,
+): { text: string; next: number } {
   let index = start;
 
   if (line.charAt(index) === '-' || line.charAt(index) === '+') {
@@ -925,7 +1194,10 @@ function readNumber(line: string, start: number): { text: string; next: number }
     }
   }
 
-  if ((line.charAt(index) === 'e' || line.charAt(index) === 'E') && /[+\-0-9]/.test(line.charAt(index + 1))) {
+  if (
+    (line.charAt(index) === 'e' || line.charAt(index) === 'E') &&
+    /[+0-9]/.test(line.charAt(index + 1))
+  ) {
     index += 1;
     if (line.charAt(index) === '+' || line.charAt(index) === '-') {
       index += 1;
@@ -946,19 +1218,30 @@ function isNumberStart(line: string, index: number): boolean {
   return /[0-9]/.test(char);
 }
 
-function readIdentifier(line: string, start: number, profile: LanguageProfile): { text: string; next: number } {
+function readIdentifier(
+  line: string,
+  start: number,
+  profile: LanguageProfile,
+): { text: string; next: number } {
   let index = start;
   if (!profile.identifierStart.test(line.charAt(index))) {
     return { text: line.charAt(start), next: start + 1 };
   }
   index += 1;
-  while (index < line.length && profile.identifierPart.test(line.charAt(index))) {
+  while (
+    index < line.length &&
+    profile.identifierPart.test(line.charAt(index))
+  ) {
     index += 1;
   }
   return { text: line.slice(start, index), next: index };
 }
 
-function readVariable(line: string, start: number, profile: LanguageProfile): { text: string; next: number } {
+function readVariable(
+  line: string,
+  start: number,
+  profile: LanguageProfile,
+): { text: string; next: number } {
   if (line.charAt(start + 1) === '{') {
     let index = start + 2;
     while (index < line.length && line.charAt(index) !== '}') {
@@ -971,7 +1254,10 @@ function readVariable(line: string, start: number, profile: LanguageProfile): { 
   }
 
   let index = start + 1;
-  while (index < line.length && profile.identifierPart.test(line.charAt(index))) {
+  while (
+    index < line.length &&
+    profile.identifierPart.test(line.charAt(index))
+  ) {
     index += 1;
   }
   return { text: line.slice(start, index), next: index };

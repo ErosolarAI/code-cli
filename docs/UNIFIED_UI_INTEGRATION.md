@@ -7,6 +7,7 @@ Successfully completed the integration of the Unified UI System into the APT CLI
 ## What Was Implemented
 
 ### 1. Core UI Components (Already Existed)
+
 All these components were already implemented and documented:
 
 - **OverlayManager** (`src/ui/overlay/OverlayManager.ts`) - Terminal overlay rendering with ANSI escape sequences
@@ -20,6 +21,7 @@ All these components were already implemented and documented:
 ### 2. Shell Integration (Newly Completed)
 
 #### Changes to `src/shell/interactiveShell.ts`:
+
 - **Added `uiAdapter` field** to the `InteractiveShell` class
 - **Updated `ShellConfig` interface** to accept a `ShellUIAdapter` instance
 - **Connected processing lifecycle**:
@@ -34,12 +36,14 @@ All these components were already implemented and documented:
 - **Added cleanup** - Disposes of UI adapter on shell close
 
 #### Changes to `src/shell/shellApp.ts`:
+
 - **Created `ShellUIAdapter` early** in the launch process (before agent creation)
 - **Replaced legacy `createToolObserver()`** with `uiAdapter.createToolObserver()`
 - **Passed `uiAdapter` to `InteractiveShell`** via the config
 - **Marked legacy observer as deprecated** for future removal
 
 #### Bug Fix:
+
 - **Fixed telemetry timing issue** in `UnifiedUIController.ts` - uncommented the `markStart()` call for overlay updates to prevent "No start mark found" warnings
 
 ### 3. Tool Execution Integration
@@ -108,17 +112,20 @@ This integration happens at the `AgentSession` level, ensuring all tools (bash, 
 The unified UI now provides real-time status updates for:
 
 ### 1. **Processing States**
+
 - Shows "Working on your request" when processing begins
 - Updates to "Waiting for next instruction..." when complete
 - Includes elapsed time tracking
 
 ### 2. **Tool Execution**
+
 - Live spinner animations for running tools
 - Progress bars for tools that report progress (e.g., file operations)
 - Tool descriptions (e.g., "Reading file.txt", "Running: npm test")
 - Automatic cleanup when tools complete
 
 ### 3. **Context Usage**
+
 - Real-time percentage display (e.g., "Context 75% used")
 - Color-coded warnings:
   - Blue/Info: < 70%
@@ -127,10 +134,12 @@ The unified UI now provides real-time status updates for:
 - Shown during context cleanup operations
 
 ### 4. **Slash Commands**
+
 - Preview of available commands when user types '/'
 - Automatically hides when command is executed
 
 ### 5. **Adaptive Performance**
+
 - Monitors frame rate and render time
 - Automatically adjusts animation quality
 - Switches between High (60 FPS), Balanced (30 FPS), and Low (10 FPS) modes
@@ -138,7 +147,9 @@ The unified UI now provides real-time status updates for:
 ## Testing
 
 ### Test Script
+
 Created `examples/test-unified-ui.js` to demonstrate all capabilities:
+
 - Processing state transitions
 - Tool execution with progress tracking
 - Status overrides
@@ -148,6 +159,7 @@ Created `examples/test-unified-ui.js` to demonstrate all capabilities:
 - Performance metrics collection
 
 ### Running Tests
+
 ```bash
 # Build the project
 npm run build
@@ -169,6 +181,7 @@ The unified UI system includes comprehensive telemetry:
 - **Adaptive Degradation** - Automatically reduces quality on slow systems
 
 Target metrics:
+
 - Render time: < 16ms (60 FPS)
 - Response time: < 100ms
 - Minimum frame rate: 30 FPS
@@ -238,16 +251,19 @@ The system is fully integrated into the interactive shell and provides a user ex
 ## Files Modified
 
 ### Created:
+
 - `docs/UNIFIED_UI_ARCHITECTURE.md` - Comprehensive architecture documentation
 - `examples/test-unified-ui.js` - Demonstration and testing script
 - `docs/UNIFIED_UI_INTEGRATION.md` - This completion report
 
 ### Modified:
+
 - `src/shell/interactiveShell.ts` - Integrated UI adapter
 - `src/shell/shellApp.ts` - Created and connected UI adapter
 - `src/ui/UnifiedUIController.ts` - Fixed telemetry timing bug
 
 ### Components (Already Existed):
+
 - `src/ui/overlay/OverlayManager.ts`
 - `src/ui/orchestration/StatusOrchestrator.ts`
 - `src/ui/animation/AnimationScheduler.ts`

@@ -16,7 +16,6 @@ import type { FeedbackPacket } from '../core/taskContracts.js';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
-
 export interface ShellUIAdapterConfig {
   useUnifiedUI: boolean; // Feature flag to switch between old and new UI
   preserveCompatibility: boolean; // Keep old APIs working
@@ -39,7 +38,7 @@ export class ShellUIAdapter {
   constructor(
     writeStream: NodeJS.WriteStream,
     display: Display,
-    config: Partial<ShellUIAdapterConfig> = {}
+    config: Partial<ShellUIAdapterConfig> = {},
   ) {
     this.display = display;
     this.config = {
@@ -136,10 +135,7 @@ export class ShellUIAdapter {
         this.display.updateThinking('Handling error...');
 
         // Display error
-        this.display.showAction(
-          `Error in ${call.name}: ${message}`,
-          'error'
-        );
+        this.display.showAction(`Error in ${call.name}: ${message}`, 'error');
 
         this.pushFeedbackFromMission();
       },
@@ -189,7 +185,9 @@ export class ShellUIAdapter {
     if (hasDeltas) {
       lines.push('- Deltas:');
       for (const delta of payload.deltas ?? []) {
-        const status = (delta as any).status ? `[${(delta as any).status}] ` : '';
+        const status = (delta as any).status
+          ? `[${(delta as any).status}] `
+          : '';
         const target = (delta as any).target ?? (delta as any).id ?? 'delta';
         const title = (delta as any).title ?? (delta as any).type ?? '';
         lines.push(`  • ${status}${target}${title ? ` - ${title}` : ''}`);
@@ -205,7 +203,9 @@ export class ShellUIAdapter {
     if (payload.timeline_refs?.length) {
       lines.push(`- Timeline refs: ${payload.timeline_refs.join(', ')}`);
     }
-    lines.push('Use /feedback to re-open. Mark decisions with /accept <target> or /reject <target>.');
+    lines.push(
+      'Use /feedback to re-open. Mark decisions with /accept <target> or /reject <target>.',
+    );
 
     this.display.showSystemMessage(lines.join('\n'));
 
@@ -216,7 +216,7 @@ export class ShellUIAdapter {
     }
     const deltaItems = (payload.deltas ?? []).map((delta: any) => ({
       kind: 'delta',
-      text: `Δ ${(delta.target ?? delta.id ?? 'delta')} ${(delta.status ? `[${delta.status}]` : '')}`.trim(),
+      text: `Δ ${delta.target ?? delta.id ?? 'delta'} ${delta.status ? `[${delta.status}]` : ''}`.trim(),
     }));
     const errorItems = (payload.errors ?? []).map((err: any) => ({
       kind: 'error',
@@ -260,7 +260,10 @@ export class ShellUIAdapter {
       return `Artifact "${id}" not found in cache or filesystem. View with /artifact first.`;
     }
 
-    const result = spawnSync('patch', ['-p0'], { input: content, encoding: 'utf8' });
+    const result = spawnSync('patch', ['-p0'], {
+      input: content,
+      encoding: 'utf8',
+    });
     if (result.status === 0) {
       return `Applied artifact "${id}".\n${result.stdout || ''}`.trim();
     }
@@ -283,7 +286,10 @@ export class ShellUIAdapter {
       if (Array.isArray(entry.artifacts)) {
         for (const artifact of entry.artifacts) {
           if (typeof artifact === 'string') {
-            add(artifact, existsSync(artifact) ? readFileSync(artifact, 'utf8') : undefined);
+            add(
+              artifact,
+              existsSync(artifact) ? readFileSync(artifact, 'utf8') : undefined,
+            );
           }
         }
       }
@@ -346,18 +352,17 @@ export class ShellUIAdapter {
   showInterrupt(
     message: string,
     type: 'confirmation' | 'alert' | 'question' = 'alert',
-    handler?: () => void | Promise<void>
+    handler?: () => void | Promise<void>,
   ): string {
     if (this.config.useUnifiedUI) {
-      const priority = type === 'alert'
-        ? InterruptPriority.HIGH
-        : InterruptPriority.NORMAL;
+      const priority =
+        type === 'alert' ? InterruptPriority.HIGH : InterruptPriority.NORMAL;
 
       return this.uiController.queueInterrupt(
         type,
         message,
         priority,
-        handler ? async () => handler() : undefined
+        handler ? async () => handler() : undefined,
       );
     } else {
       // For legacy, just show the message immediately
@@ -383,7 +388,7 @@ export class ShellUIAdapter {
    */
   showSlashCommandPreview(
     commands: Array<{ command: string; description: string }>,
-    filterText?: string
+    filterText?: string,
   ): void {
     if (this.config.useUnifiedUI) {
       // Build a Claude Code-style command menu
@@ -391,17 +396,19 @@ export class ShellUIAdapter {
       const separator = '─'.repeat(terminalWidth - 1);
 
       // Build command lines with proper indentation
-      const commandLines = commands.map(cmd => {
-        // Wrap description to fit terminal width with indentation
-        const descriptionIndent = '      '; // 6 spaces
-        const maxDescWidth = terminalWidth - descriptionIndent.length - 2;
-        const wrappedDesc = this.wrapText(cmd.description, maxDescWidth)
-          .split('\n')
-          .map(line => descriptionIndent + line)
-          .join('\n');
+      const commandLines = commands
+        .map((cmd) => {
+          // Wrap description to fit terminal width with indentation
+          const descriptionIndent = '      '; // 6 spaces
+          const maxDescWidth = terminalWidth - descriptionIndent.length - 2;
+          const wrappedDesc = this.wrapText(cmd.description, maxDescWidth)
+            .split('\n')
+            .map((line) => descriptionIndent + line)
+            .join('\n');
 
-        return `  ${cmd.command}\n${wrappedDesc}`;
-      }).join('\n');
+          return `  ${cmd.command}\n${wrappedDesc}`;
+        })
+        .join('\n');
 
       // Create overlay content with separators and prompt
       const userInput = filterText || '/';
@@ -411,10 +418,14 @@ export class ShellUIAdapter {
       this.uiController.updateCommandsOverlay(content);
     } else if (this.legacyStatusTracker) {
       // Legacy fallback - just show command names
-      const preview = commands.map(c => c.command).join(' | ');
-      this.legacyStatusTracker.pushOverride('slash-preview', `Commands: ${preview}`, {
-        tone: 'info',
-      });
+      const preview = commands.map((c) => c.command).join(' | ');
+      this.legacyStatusTracker.pushOverride(
+        'slash-preview',
+        `Commands: ${preview}`,
+        {
+          tone: 'info',
+        },
+      );
     }
   }
 
@@ -457,7 +468,7 @@ export class ShellUIAdapter {
    */
   showProfileSwitcher(
     profiles: Array<{ command: string; description: string }>,
-    currentProfile: string
+    currentProfile: string,
   ): void {
     if (this.config.useUnifiedUI) {
       // Build profile switcher overlay
@@ -465,9 +476,11 @@ export class ShellUIAdapter {
       const separator = '─'.repeat(terminalWidth - 1);
 
       // Build profile lines
-      const profileLines = profiles.map(profile => {
-        return `  ${profile.command}\n      ${profile.description}`;
-      }).join('\n');
+      const profileLines = profiles
+        .map((profile) => {
+          return `  ${profile.command}\n      ${profile.description}`;
+        })
+        .join('\n');
 
       // Create overlay content
       const header = `Switch Profile (Shift+Tab)`;
@@ -582,7 +595,7 @@ export class ShellUIAdapter {
   }
 
   private summarizeToolResult(call: ToolCallRequest, output: string): string {
-    const lines = output.split('\n').filter(l => l.trim());
+    const lines = output.split('\n').filter((l) => l.trim());
     const lineCount = lines.length;
     const args = call.arguments as any;
 
@@ -664,7 +677,10 @@ export class ShellUIAdapter {
     if (url.length <= maxLength) return url;
     try {
       const urlObj = new URL(url);
-      return urlObj.hostname + (urlObj.pathname.length > 10 ? '/...' : urlObj.pathname);
+      return (
+        urlObj.hostname +
+        (urlObj.pathname.length > 10 ? '/...' : urlObj.pathname)
+      );
     } catch {
       return url.slice(0, maxLength - 3) + '...';
     }
@@ -677,7 +693,7 @@ export class ShellUIAdapter {
       .replace(/([A-Z])/g, ' $1')
       .trim()
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 

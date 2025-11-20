@@ -85,7 +85,9 @@ const SECRET_DEFINITIONS: SecretDefinition[] = [
 ];
 
 const envCodexHome = process.env['CODEX_HOME'];
-const SECRET_DIR = envCodexHome ? resolve(envCodexHome) : join(homedir(), '.codex');
+const SECRET_DIR = envCodexHome
+  ? resolve(envCodexHome)
+  : join(homedir(), '.codex');
 const SECRET_FILE = join(SECRET_DIR, 'secrets.json');
 
 export class MissingSecretError extends Error {
@@ -149,8 +151,13 @@ export function ensureSecretForProvider(provider: ProviderId): string {
   return value;
 }
 
-export function getSecretDefinitionForProvider(provider: ProviderId): SecretDefinition | null {
-  return SECRET_DEFINITIONS.find((entry) => entry.providers.includes(provider)) ?? null;
+export function getSecretDefinitionForProvider(
+  provider: ProviderId,
+): SecretDefinition | null {
+  return (
+    SECRET_DEFINITIONS.find((entry) => entry.providers.includes(provider)) ??
+    null
+  );
 }
 
 function readSecretStore(): SecretStoreData {
@@ -174,8 +181,11 @@ function writeSecretStore(store: SecretStoreData): void {
   const directory = dirname(SECRET_FILE);
   mkdirSync(directory, { recursive: true });
   const payload = JSON.stringify(store, null, 2);
-  writeFileSync(SECRET_FILE, `${payload}
-`);
+  writeFileSync(
+    SECRET_FILE,
+    `${payload}
+`,
+  );
 }
 
 function findDefinitionForProvider(provider: ProviderId): SecretDefinition {

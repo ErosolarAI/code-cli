@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createPerformanceTools } from '../tools/performanceTools.js';
 import { createAdvancedPerformanceTools } from '../tools/advancedPerformanceTools.js';
 
@@ -18,7 +22,7 @@ export class PerformanceCapabilityModule implements CapabilityModule {
   async create(_context: CapabilityContext): Promise<CapabilityContribution> {
     const performanceTools = createPerformanceTools();
     const advancedPerformanceTools = createAdvancedPerformanceTools();
-    
+
     return {
       id: this.options.id ?? 'performance.tools',
       description:

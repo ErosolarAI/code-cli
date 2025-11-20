@@ -21,12 +21,16 @@ export interface CustomCommandContext {
   model: string;
 }
 
-export function loadCustomSlashCommands(dir: string = defaultCommandsDir): LoadedCustomCommand[] {
+export function loadCustomSlashCommands(
+  dir: string = defaultCommandsDir,
+): LoadedCustomCommand[] {
   if (!existsSync(dir)) {
     return [];
   }
 
-  const files = readdirSync(dir).filter((file) => file.toLowerCase().endsWith('.json'));
+  const files = readdirSync(dir).filter((file) =>
+    file.toLowerCase().endsWith('.json'),
+  );
   const commands: LoadedCustomCommand[] = [];
   const seen = new Set<string>();
 
@@ -61,7 +65,7 @@ export function loadCustomSlashCommands(dir: string = defaultCommandsDir): Loade
 export function buildCustomCommandPrompt(
   command: LoadedCustomCommand,
   input: string,
-  context: CustomCommandContext
+  context: CustomCommandContext,
 ): string {
   const replacements: Record<string, string> = {
     input,
@@ -76,7 +80,10 @@ export function buildCustomCommandPrompt(
   });
 }
 
-function normalizeCommand(entry: unknown, source: string): LoadedCustomCommand | null {
+function normalizeCommand(
+  entry: unknown,
+  source: string,
+): LoadedCustomCommand | null {
   if (!entry || typeof entry !== 'object') {
     return null;
   }
@@ -84,7 +91,11 @@ function normalizeCommand(entry: unknown, source: string): LoadedCustomCommand |
   const rawCommandValue = record['command'];
   const rawCommand =
     typeof rawCommandValue === 'string' ? rawCommandValue.trim() : '';
-  const command = rawCommand ? (rawCommand.startsWith('/') ? rawCommand : `/${rawCommand}`) : '';
+  const command = rawCommand
+    ? rawCommand.startsWith('/')
+      ? rawCommand
+      : `/${rawCommand}`
+    : '';
 
   const descriptionValue = record['description'];
   const description =
@@ -100,7 +111,8 @@ function normalizeCommand(entry: unknown, source: string): LoadedCustomCommand |
   }
 
   const requireInputEntry = record['requireInput'] ?? record['inputRequired'];
-  const requireInput = typeof requireInputEntry === 'boolean' ? requireInputEntry : false;
+  const requireInput =
+    typeof requireInputEntry === 'boolean' ? requireInputEntry : false;
 
   return {
     command,

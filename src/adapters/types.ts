@@ -12,6 +12,6 @@ export interface RuntimeAdapter {
   id: string;
   description?: string;
   createCapabilityModules(
-    context: RuntimeAdapterContext
+    context: RuntimeAdapterContext,
   ): CapabilityModule[] | Promise<CapabilityModule[]>;
 }

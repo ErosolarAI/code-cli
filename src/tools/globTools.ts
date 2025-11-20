@@ -19,17 +19,20 @@ export function createGlobTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'Glob',
-      description: 'Fast file pattern matching tool that works with any codebase size. Supports glob patterns like "**/*.js" or "src/**/*.ts". Returns matching file paths sorted by modification time.',
+      description:
+        'Fast file pattern matching tool that works with any codebase size. Supports glob patterns like "**/*.js" or "src/**/*.ts". Returns matching file paths sorted by modification time.',
       parameters: {
         type: 'object',
         properties: {
           pattern: {
             type: 'string',
-            description: 'The glob pattern to match files against (e.g., "**/*.ts", "src/**/*.js", "*.md")',
+            description:
+              'The glob pattern to match files against (e.g., "**/*.ts", "src/**/*.js", "*.md")',
           },
           path: {
             type: 'string',
-            description: 'The directory to search in. If not specified, the current working directory will be used.',
+            description:
+              'The directory to search in. If not specified, the current working directory will be used.',
           },
         },
         required: ['pattern'],
@@ -45,9 +48,10 @@ export function createGlobTools(workingDir: string): ToolDefinition[] {
         }
 
         try {
-          const searchPath = pathArg && typeof pathArg === 'string'
-            ? resolveFilePath(workingDir, pathArg)
-            : workingDir;
+          const searchPath =
+            pathArg && typeof pathArg === 'string'
+              ? resolveFilePath(workingDir, pathArg)
+              : workingDir;
 
           // Perform glob search
           const matches = globSearch(searchPath, pattern);
@@ -64,7 +68,7 @@ export function createGlobTools(workingDir: string): ToolDefinition[] {
           });
 
           // Convert to relative paths
-          const relativePaths = sorted.map(filePath => {
+          const relativePaths = sorted.map((filePath) => {
             const rel = relative(workingDir, filePath);
             return rel && !rel.startsWith('..') ? rel : filePath;
           });
@@ -73,12 +77,12 @@ export function createGlobTools(workingDir: string): ToolDefinition[] {
             return `No files found matching pattern: ${pattern}`;
           }
 
-          const summary = relativePaths.length === 1
-            ? '1 file found'
-            : `${relativePaths.length} files found`;
+          const summary =
+            relativePaths.length === 1
+              ? '1 file found'
+              : `${relativePaths.length} files found`;
 
           return `${summary} matching "${pattern}":\n\n${relativePaths.join('\n')}`;
-
         } catch (error: any) {
           return buildError('glob search', error, {
             pattern: String(pattern),
@@ -159,10 +163,10 @@ function globToRegex(pattern: string): RegExp {
 
   // Convert glob patterns to regex
   escaped = escaped
-    .replace(/\*\*/g, '<!GLOBSTAR!>')   // Placeholder for **
-    .replace(/\*/g, '[^/]*')             // * matches any characters except /
-    .replace(/<!GLOBSTAR!>/g, '.*')     // ** matches any characters including /
-    .replace(/\?/g, '.');                // ? matches any single character
+    .replace(/\*\*/g, '<!GLOBSTAR!>') // Placeholder for **
+    .replace(/\*/g, '[^/]*') // * matches any characters except /
+    .replace(/<!GLOBSTAR!>/g, '.*') // ** matches any characters including /
+    .replace(/\?/g, '.'); // ? matches any single character
 
   return new RegExp(escaped + '$');
 }

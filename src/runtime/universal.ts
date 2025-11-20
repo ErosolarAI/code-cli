@@ -2,7 +2,10 @@ import { AgentHost, type CapabilityModule } from './agentHost.js';
 import { AgentSession } from './agentSession.js';
 import type { ProfileName } from '../config.js';
 import type { ToolRuntimeObserver } from '../core/toolRuntime.js';
-import type { RuntimeAdapter, RuntimeAdapterContext } from '../adapters/types.js';
+import type {
+  RuntimeAdapter,
+  RuntimeAdapterContext,
+} from '../adapters/types.js';
 import type { ToolPolicy } from '../core/policyEngine.js';
 import type { TimelineRecorder } from '../core/timeline.js';
 
@@ -25,7 +28,7 @@ export interface UniversalRuntime {
 }
 
 export async function createUniversalRuntime(
-  options: UniversalRuntimeOptions
+  options: UniversalRuntimeOptions,
 ): Promise<UniversalRuntime> {
   const env = options.env ? { ...options.env } : { ...process.env };
   const host = new AgentHost({
@@ -45,7 +48,8 @@ export async function createUniversalRuntime(
     env,
   };
 
-  const adapterModules = await options.adapter.createCapabilityModules(adapterContext);
+  const adapterModules =
+    await options.adapter.createCapabilityModules(adapterContext);
   const additionalModules = options.additionalModules ?? [];
 
   if (adapterModules.length || additionalModules.length) {

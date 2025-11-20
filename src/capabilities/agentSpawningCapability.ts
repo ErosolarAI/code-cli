@@ -1,5 +1,12 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
-import { TaskRunner, type TaskInvocationOptions } from '../subagents/taskRunner.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
+import {
+  TaskRunner,
+  type TaskInvocationOptions,
+} from '../subagents/taskRunner.js';
 
 export class AgentSpawningCapabilityModule implements CapabilityModule {
   readonly id = 'capability.agent-spawning';
@@ -9,7 +16,8 @@ export class AgentSpawningCapabilityModule implements CapabilityModule {
 
     return {
       id: 'agent-spawning.tools',
-      description: 'Launch specialized agents to handle complex, multi-step tasks autonomously',
+      description:
+        'Launch specialized agents to handle complex, multi-step tasks autonomously',
       toolSuite: {
         id: 'agent-spawning',
         description: 'Task agent spawning and management',
@@ -58,16 +66,19 @@ Example usage:
                 },
                 subagent_type: {
                   type: 'string',
-                  description: 'The type of specialized agent to use for this task',
+                  description:
+                    'The type of specialized agent to use for this task',
                 },
                 model: {
                   type: 'string',
                   enum: ['sonnet', 'opus', 'haiku'],
-                  description: 'Optional model to use for this agent. If not specified, inherits from parent. Prefer haiku for quick, straightforward tasks to minimize cost and latency.',
+                  description:
+                    'Optional model to use for this agent. If not specified, inherits from parent. Prefer haiku for quick, straightforward tasks to minimize cost and latency.',
                 },
                 resume: {
                   type: 'string',
-                  description: 'Optional agent ID to resume from. If provided, the agent will continue from the previous execution transcript.',
+                  description:
+                    'Optional agent ID to resume from. If provided, the agent will continue from the previous execution transcript.',
                 },
               },
               required: ['description', 'prompt', 'subagent_type'],
@@ -78,7 +89,8 @@ Example usage:
                 const result = await runner.runTask(input);
                 return result.output;
               } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
+                const message =
+                  error instanceof Error ? error.message : String(error);
                 return `Task tool failed: ${message}`;
               }
             },
@@ -89,21 +101,33 @@ Example usage:
   }
 }
 
-function parseTaskArguments(args: Record<string, unknown>): TaskInvocationOptions {
+function parseTaskArguments(
+  args: Record<string, unknown>,
+): TaskInvocationOptions {
   const description = expectString(args['description'], 'description');
   const prompt = expectString(args['prompt'], 'prompt');
   const subagentType = expectString(args['subagent_type'], 'subagent_type');
 
-  const modelValue = typeof args['model'] === 'string' ? args['model'].trim().toLowerCase() : undefined;
+  const modelValue =
+    typeof args['model'] === 'string'
+      ? args['model'].trim().toLowerCase()
+      : undefined;
   let model: TaskInvocationOptions['model'];
   if (modelValue) {
-    if (modelValue !== 'sonnet' && modelValue !== 'opus' && modelValue !== 'haiku') {
-      throw new Error(`Invalid model "${args['model']}". Allowed values are sonnet, opus, or haiku.`);
+    if (
+      modelValue !== 'sonnet' &&
+      modelValue !== 'opus' &&
+      modelValue !== 'haiku'
+    ) {
+      throw new Error(
+        `Invalid model "${args['model']}". Allowed values are sonnet, opus, or haiku.`,
+      );
     }
     model = modelValue;
   }
 
-  const resumeId = typeof args['resume'] === 'string' ? args['resume'].trim() : undefined;
+  const resumeId =
+    typeof args['resume'] === 'string' ? args['resume'].trim() : undefined;
 
   return {
     description,

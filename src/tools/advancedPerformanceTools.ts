@@ -51,17 +51,19 @@ export function createAdvancedPerformanceTools(): ToolDefinition[] {
       },
       handler: async (args: Record<string, unknown>) => {
         const operation = args['operation'] as string;
-        const duration = typeof args['duration'] === 'number' ? args['duration'] : 5000;
-        const interval = typeof args['interval'] === 'number' ? args['interval'] : 1000;
+        const duration =
+          typeof args['duration'] === 'number' ? args['duration'] : 5000;
+        const interval =
+          typeof args['interval'] === 'number' ? args['interval'] : 1000;
 
         try {
           const { performance } = await import('node:perf_hooks');
           const { memoryUsage, cpuUsage } = await import('node:process');
-          
+
           const startTime = performance.now();
           const startMemory = memoryUsage();
           const startCpu = cpuUsage();
-          
+
           const samples: Array<{
             timestamp: number;
             memory: NodeJS.MemoryUsage;
@@ -89,18 +91,18 @@ export function createAdvancedPerformanceTools(): ToolDefinition[] {
           }, interval);
 
           // Wait for monitoring duration
-          await new Promise(resolve => setTimeout(resolve, duration));
-          
+          await new Promise((resolve) => setTimeout(resolve, duration));
+
           clearInterval(sampleInterval);
-          
+
           const endTime = performance.now();
           const endMemory = memoryUsage();
-          
+
           // Calculate metrics
           const totalTime = endTime - startTime;
           const memoryIncrease = endMemory.heapUsed - startMemory.heapUsed;
           const cpuUsageDiff = cpuUsage(startCpu);
-          
+
           return formatPerformanceResults({
             operation,
             duration: totalTime,
@@ -157,37 +159,40 @@ export function createAdvancedPerformanceTools(): ToolDefinition[] {
           },
           threshold: {
             type: 'number',
-            description: 'Memory threshold in MB for optimization recommendations (default: 100)',
+            description:
+              'Memory threshold in MB for optimization recommendations (default: 100)',
           },
         },
         required: ['operation'],
       },
       handler: async (args: Record<string, unknown>) => {
         const operation = args['operation'] as string;
-        const threshold = typeof args['threshold'] === 'number' ? args['threshold'] : 100;
+        const threshold =
+          typeof args['threshold'] === 'number' ? args['threshold'] : 100;
 
         try {
           const { memoryUsage } = await import('node:process');
           const { performance } = await import('node:perf_hooks');
           const gc = (globalThis as typeof globalThis & { gc?: () => void }).gc;
-          
+
           // Force garbage collection if available
           if (gc) {
             gc();
           }
-          
+
           const startMemory = memoryUsage();
           const startTime = performance.now();
-          
+
           // Simulate some memory-intensive operation
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
           const endMemory = memoryUsage();
           const endTime = performance.now();
-          
-          const memoryUsedMB = (endMemory.heapUsed - startMemory.heapUsed) / (1024 * 1024);
+
+          const memoryUsedMB =
+            (endMemory.heapUsed - startMemory.heapUsed) / (1024 * 1024);
           const timeElapsed = endTime - startTime;
-          
+
           return formatMemoryOptimizationResults({
             operation,
             memoryUsedMB,
@@ -226,31 +231,37 @@ function formatPerformanceResults(results: {
   };
 }): string {
   const lines: string[] = ['Performance Monitoring Results:'];
-  
+
   lines.push(`\n📊 Operation: ${results.operation}`);
   lines.push(`⏱️  Duration: ${(results.duration / 1000).toFixed(2)}s`);
   lines.push(`📈 Samples Collected: ${results.samples.length}`);
-  
+
   lines.push(`\n💾 Memory Usage:`);
-  lines.push(`   Start: ${(results.memory.start.heapUsed / (1024 * 1024)).toFixed(2)} MB`);
-  lines.push(`   End: ${(results.memory.end.heapUsed / (1024 * 1024)).toFixed(2)} MB`);
-  lines.push(`   Increase: ${(results.memory.increase / (1024 * 1024)).toFixed(2)} MB`);
-  
+  lines.push(
+    `   Start: ${(results.memory.start.heapUsed / (1024 * 1024)).toFixed(2)} MB`,
+  );
+  lines.push(
+    `   End: ${(results.memory.end.heapUsed / (1024 * 1024)).toFixed(2)} MB`,
+  );
+  lines.push(
+    `   Increase: ${(results.memory.increase / (1024 * 1024)).toFixed(2)} MB`,
+  );
+
   lines.push(`\n⚡ CPU Usage:`);
   lines.push(`   User: ${results.cpu.user.toFixed(2)}ms`);
   lines.push(`   System: ${results.cpu.system.toFixed(2)}ms`);
-  
+
   // Memory trend analysis
   const memoryTrend = analyzeMemoryTrend(results.samples);
   lines.push(`\n📈 Memory Trend: ${memoryTrend}`);
-  
+
   // Performance recommendations
   const recommendations = generatePerformanceRecommendations(results);
   if (recommendations.length > 0) {
     lines.push(`\n💡 Performance Recommendations:`);
-    recommendations.forEach(rec => lines.push(`   - ${rec}`));
+    recommendations.forEach((rec) => lines.push(`   - ${rec}`));
   }
-  
+
   return lines.join('\n');
 }
 
@@ -265,31 +276,41 @@ function formatMemoryOptimizationResults(results: {
   };
 }): string {
   const lines: string[] = ['Memory Optimization Analysis:'];
-  
+
   lines.push(`\n📊 Operation: ${results.operation}`);
   lines.push(`💾 Memory Used: ${results.memoryUsedMB.toFixed(2)} MB`);
   lines.push(`⏱️  Time Elapsed: ${results.timeElapsed.toFixed(2)}ms`);
-  
+
   lines.push(`\n📈 Memory Breakdown:`);
-  lines.push(`   Heap Used: ${(results.memory.end.heapUsed / (1024 * 1024)).toFixed(2)} MB`);
-  lines.push(`   Heap Total: ${(results.memory.end.heapTotal / (1024 * 1024)).toFixed(2)} MB`);
-  lines.push(`   External: ${(results.memory.end.external / (1024 * 1024)).toFixed(2)} MB`);
-  
+  lines.push(
+    `   Heap Used: ${(results.memory.end.heapUsed / (1024 * 1024)).toFixed(2)} MB`,
+  );
+  lines.push(
+    `   Heap Total: ${(results.memory.end.heapTotal / (1024 * 1024)).toFixed(2)} MB`,
+  );
+  lines.push(
+    `   External: ${(results.memory.end.external / (1024 * 1024)).toFixed(2)} MB`,
+  );
+
   // Optimization recommendations
   const recommendations = generateMemoryOptimizationRecommendations(results);
   if (recommendations.length > 0) {
     lines.push(`\n💡 Optimization Recommendations:`);
-    recommendations.forEach(rec => lines.push(`   - ${rec}`));
+    recommendations.forEach((rec) => lines.push(`   - ${rec}`));
   }
-  
+
   // Memory efficiency rating
   const efficiency = calculateMemoryEfficiency(results);
-  lines.push(`\n🎯 Memory Efficiency: ${efficiency.rating} (${efficiency.score}/100)`);
-  
+  lines.push(
+    `\n🎯 Memory Efficiency: ${efficiency.rating} (${efficiency.score}/100)`,
+  );
+
   return lines.join('\n');
 }
 
-function analyzeMemoryTrend(samples: Array<{ memory: NodeJS.MemoryUsage; elapsed: number }>): string {
+function analyzeMemoryTrend(
+  samples: Array<{ memory: NodeJS.MemoryUsage; elapsed: number }>,
+): string {
   if (samples.length < 2) return 'Insufficient data';
   const firstSample = samples[0];
   const lastSample = samples[samples.length - 1];
@@ -298,7 +319,7 @@ function analyzeMemoryTrend(samples: Array<{ memory: NodeJS.MemoryUsage; elapsed
   const first = firstSample.memory.heapUsed;
   const last = lastSample.memory.heapUsed;
   const diff = last - first;
-  
+
   if (diff > 50 * 1024 * 1024) return '🔴 High memory growth (potential leak)';
   if (diff > 10 * 1024 * 1024) return '🟡 Moderate memory growth';
   if (diff < -10 * 1024 * 1024) return '🟢 Memory decreasing (good)';
@@ -311,23 +332,31 @@ function generatePerformanceRecommendations(results: {
   duration: number;
 }): string[] {
   const recommendations: string[] = [];
-  
+
   if (results.memory.increase > 100 * 1024 * 1024) {
-    recommendations.push('Consider implementing memory pooling for large allocations');
+    recommendations.push(
+      'Consider implementing memory pooling for large allocations',
+    );
   }
-  
+
   if (results.cpu.user > results.duration * 0.8) {
-    recommendations.push('Operation is CPU-bound - consider optimization or parallelization');
+    recommendations.push(
+      'Operation is CPU-bound - consider optimization or parallelization',
+    );
   }
-  
+
   if (results.cpu.system > results.duration * 0.3) {
-    recommendations.push('High system CPU usage - check for excessive I/O operations');
+    recommendations.push(
+      'High system CPU usage - check for excessive I/O operations',
+    );
   }
-  
+
   if (results.duration > 10000) {
-    recommendations.push('Long-running operation - consider breaking into smaller chunks');
+    recommendations.push(
+      'Long-running operation - consider breaking into smaller chunks',
+    );
   }
-  
+
   return recommendations;
 }
 
@@ -339,19 +368,25 @@ function generateMemoryOptimizationRecommendations(results: {
   };
 }): string[] {
   const recommendations: string[] = [];
-  
+
   if (results.memoryUsedMB > results.threshold) {
-    recommendations.push(`Memory usage exceeds ${results.threshold}MB threshold - consider streaming or chunking`);
+    recommendations.push(
+      `Memory usage exceeds ${results.threshold}MB threshold - consider streaming or chunking`,
+    );
   }
-  
+
   if (results.memory.end.external > 50 * 1024 * 1024) {
-    recommendations.push('High external memory usage - check for unclosed file handles or network connections');
+    recommendations.push(
+      'High external memory usage - check for unclosed file handles or network connections',
+    );
   }
-  
+
   if (results.memory.end.heapUsed / results.memory.end.heapTotal > 0.8) {
-    recommendations.push('Heap usage approaching maximum - consider increasing memory or optimizing allocations');
+    recommendations.push(
+      'Heap usage approaching maximum - consider increasing memory or optimizing allocations',
+    );
   }
-  
+
   return recommendations;
 }
 
@@ -360,9 +395,10 @@ function calculateMemoryEfficiency(results: {
   timeElapsed: number;
 }): { rating: string; score: number } {
   // Simple efficiency calculation based on memory usage per time unit
-  const efficiency = (results.timeElapsed / Math.max(results.memoryUsedMB, 1)) / 10;
+  const efficiency =
+    results.timeElapsed / Math.max(results.memoryUsedMB, 1) / 10;
   const score = Math.min(100, Math.max(0, 100 - efficiency));
-  
+
   if (score >= 80) return { rating: 'Excellent', score };
   if (score >= 60) return { rating: 'Good', score };
   if (score >= 40) return { rating: 'Fair', score };

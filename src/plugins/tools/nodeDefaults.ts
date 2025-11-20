@@ -22,6 +22,7 @@ import { createMcpToolPlugin } from './mcp/mcpPlugin.js';
 import { createMissionToolPlugin } from './mission/missionPlugin.js';
 import performancePlugin from './performance/index.js';
 import codeIntelligencePlugin from './codeIntelligence/index.js';
+import cachingPlugin from './caching/index.js';
 
 let registered = false;
 
@@ -53,6 +54,7 @@ export function registerDefaultNodeToolPlugins(): void {
   registerToolPlugin(createMissionToolPlugin());
   registerToolPlugin(performancePlugin);
   registerToolPlugin(codeIntelligencePlugin);
+  registerToolPlugin(cachingPlugin);
 
   registered = true;
 }

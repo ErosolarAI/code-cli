@@ -51,7 +51,14 @@ export interface Shortcut {
   description: string;
 }
 
-export type AgentSource = 'mock' | 'local-cli' | 'remote-cloud' | 'mirror-file' | 'jsonl-store' | 'redis-stream' | 'temporal-workflow';
+export type AgentSource =
+  | 'mock'
+  | 'local-cli'
+  | 'remote-cloud'
+  | 'mirror-file'
+  | 'jsonl-store'
+  | 'redis-stream'
+  | 'temporal-workflow';
 
 export interface SessionStatus {
   label: string;

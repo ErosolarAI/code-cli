@@ -112,7 +112,7 @@ export function getAgentSchemas(): AgentSchemasManifest {
     return cachedSchema;
   } catch (error) {
     throw new Error(
-      `Failed to load agent schemas: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to load agent schemas: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -128,7 +128,9 @@ export function getProviders(): ProviderConfig[] {
 /**
  * Get a specific provider by ID
  */
-export function getProvider(providerId: ProviderId): ProviderConfig | undefined {
+export function getProvider(
+  providerId: ProviderId,
+): ProviderConfig | undefined {
   const providers = getProviders();
   return providers.find((p) => p.id === providerId);
 }
@@ -232,7 +234,9 @@ function validateAgentSchemas(manifest: AgentSchemasManifest): void {
       throw new Error(`Duplicate model ID: ${model.id}`);
     }
     if (!providerIds.has(model.provider)) {
-      throw new Error(`Model "${model.id}" references unknown provider: ${model.provider}`);
+      throw new Error(
+        `Model "${model.id}" references unknown provider: ${model.provider}`,
+      );
     }
     modelIds.add(model.id);
   }
@@ -240,17 +244,28 @@ function validateAgentSchemas(manifest: AgentSchemasManifest): void {
   // Validate profile uniqueness and references
   const profileNames = new Set<string>();
   for (const profile of manifest.profiles) {
-    if (!profile.name || !profile.label || !profile.defaultProvider || !profile.defaultModel) {
-      throw new Error('Profile missing required fields: name, label, defaultProvider, defaultModel');
+    if (
+      !profile.name ||
+      !profile.label ||
+      !profile.defaultProvider ||
+      !profile.defaultModel
+    ) {
+      throw new Error(
+        'Profile missing required fields: name, label, defaultProvider, defaultModel',
+      );
     }
     if (profileNames.has(profile.name)) {
       throw new Error(`Duplicate profile name: ${profile.name}`);
     }
     if (!providerIds.has(profile.defaultProvider)) {
-      throw new Error(`Profile "${profile.name}" references unknown provider: ${profile.defaultProvider}`);
+      throw new Error(
+        `Profile "${profile.name}" references unknown provider: ${profile.defaultProvider}`,
+      );
     }
     if (!modelIds.has(profile.defaultModel)) {
-      throw new Error(`Profile "${profile.name}" references unknown model: ${profile.defaultModel}`);
+      throw new Error(
+        `Profile "${profile.name}" references unknown model: ${profile.defaultModel}`,
+      );
     }
     profileNames.add(profile.name);
   }
@@ -260,7 +275,9 @@ function validateAgentSchemas(manifest: AgentSchemasManifest): void {
     const commands = new Set<string>();
     for (const cmd of manifest.slashCommands) {
       if (!cmd.command || !cmd.description) {
-        throw new Error('Slash command missing required fields: command, description');
+        throw new Error(
+          'Slash command missing required fields: command, description',
+        );
       }
       if (commands.has(cmd.command)) {
         throw new Error(`Duplicate slash command: ${cmd.command}`);

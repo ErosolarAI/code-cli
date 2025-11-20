@@ -1,6 +1,11 @@
 import type { CapabilityContext } from '../runtime/agentHost.js';
 import type { ToolDefinition, ToolSuite } from '../core/toolRuntime.js';
-import type { McpContentBlock, McpServerConfig, McpToolCallResult, McpToolDescription } from './types.js';
+import type {
+  McpContentBlock,
+  McpServerConfig,
+  McpToolCallResult,
+  McpToolDescription,
+} from './types.js';
 import { loadMcpServers } from './config.js';
 import { McpStdioClient } from './stdioClient.js';
 
@@ -40,14 +45,16 @@ export class McpToolBridge {
         suites.push({
           id: `mcp.${config.id}`,
           description: `MCP server at ${config.description ?? config.command}`,
-          tools: tools.map((tool) => this.buildToolDefinition(config.id, client, tool)),
+          tools: tools.map((tool) =>
+            this.buildToolDefinition(config.id, client, tool),
+          ),
         });
       } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(
           `Failed to load MCP server "${config.id}" (${config.source}): ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         );
       }
     }
@@ -56,14 +63,16 @@ export class McpToolBridge {
   }
 
   async dispose(): Promise<void> {
-    await Promise.allSettled(this.servers.map((entry) => entry.client.dispose()));
+    await Promise.allSettled(
+      this.servers.map((entry) => entry.client.dispose()),
+    );
     this.servers = [];
   }
 
   private buildToolDefinition(
     serverId: string,
     client: McpStdioClient,
-    tool: McpToolDescription
+    tool: McpToolDescription,
   ): ToolDefinition {
     const name = buildToolName(serverId, tool.name);
     const description = tool.description
@@ -88,7 +97,9 @@ function buildToolName(serverId: string, toolName: string): string {
   return `mcp__${safeServer}__${safeTool}`;
 }
 
-function normalizeSchema(schema?: McpToolDescription['inputSchema']): McpToolDescription['inputSchema'] {
+function normalizeSchema(
+  schema?: McpToolDescription['inputSchema'],
+): McpToolDescription['inputSchema'] {
   if (schema && typeof schema === 'object') {
     return schema;
   }

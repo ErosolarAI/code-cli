@@ -4,7 +4,10 @@ import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import type { ToolDefinition } from '../core/toolRuntime.js';
-import { createBackgroundBashTools, startBackgroundShell } from './backgroundBashTools.js';
+import {
+  createBackgroundBashTools,
+  startBackgroundShell,
+} from './backgroundBashTools.js';
 import { BRAND_DOT_DIR, LEGACY_DOT_DIRS, pickBrandEnv } from '../core/brand.js';
 
 const execAsync = promisify(exec);
@@ -25,7 +28,8 @@ export function createBashTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'execute_bash',
-      description: 'Execute a bash command in the working directory. Use run_in_background: true to run commands in the background and monitor with BashOutput.',
+      description:
+        'Execute a bash command in the working directory. Use run_in_background: true to run commands in the background and monitor with BashOutput.',
       parameters: {
         type: 'object',
         properties: {
@@ -35,11 +39,13 @@ export function createBashTools(workingDir: string): ToolDefinition[] {
           },
           timeout: {
             type: 'number',
-            description: 'Timeout in milliseconds (default: 30000). Not used when run_in_background is true.',
+            description:
+              'Timeout in milliseconds (default: 30000). Not used when run_in_background is true.',
           },
           run_in_background: {
             type: 'boolean',
-            description: 'Set to true to run this command in the background. Returns a shell ID that can be used with BashOutput to monitor output.',
+            description:
+              'Set to true to run this command in the background. Returns a shell ID that can be used with BashOutput to monitor output.',
           },
         },
         required: ['command'],
@@ -49,8 +55,15 @@ export function createBashTools(workingDir: string): ToolDefinition[] {
         const timeout = (args['timeout'] as number) || 30000;
         const runInBackground = args['run_in_background'] === true;
 
-        const dangerousCommands = ['rm -rf /', 'format', 'mkfs', ':(){ :|:& };:'];
-        if (dangerousCommands.some((dangerous) => command.includes(dangerous))) {
+        const dangerousCommands = [
+          'rm -rf /',
+          'format',
+          'mkfs',
+          ':(){ :|:& };:',
+        ];
+        if (
+          dangerousCommands.some((dangerous) => command.includes(dangerous))
+        ) {
           return 'Error: Dangerous command blocked for safety';
         }
 
@@ -85,7 +98,8 @@ export function createBashTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'execute_bash_stream',
-      description: 'Execute a bash command and stream output (for long-running commands)',
+      description:
+        'Execute a bash command and stream output (for long-running commands)',
       parameters: {
         type: 'object',
         properties: {
@@ -111,7 +125,7 @@ interface SandboxEnvOptions {
 
 export async function buildSandboxEnv(
   workingDir: string,
-  options?: SandboxEnvOptions
+  options?: SandboxEnvOptions,
 ): Promise<NodeJS.ProcessEnv> {
   const envPreference = pickBrandEnv(process.env, 'PRESERVE_HOME');
   const preserveHome =
@@ -161,16 +175,24 @@ async function ensureSandboxPaths(workingDir: string): Promise<SandboxPaths> {
 
 async function createSandboxPaths(workingDir: string): Promise<SandboxPaths> {
   const preferredRoot = join(workingDir, BRAND_DOT_DIR, 'shell-sandbox');
-  const legacyRoots = LEGACY_DOT_DIRS.map((dir) => join(workingDir, dir, 'shell-sandbox'));
+  const legacyRoots = LEGACY_DOT_DIRS.map((dir) =>
+    join(workingDir, dir, 'shell-sandbox'),
+  );
   const root =
-    existsSync(preferredRoot) || !legacyRoots.some((candidate) => existsSync(candidate))
+    existsSync(preferredRoot) ||
+    !legacyRoots.some((candidate) => existsSync(candidate))
       ? preferredRoot
-      : legacyRoots.find((candidate) => existsSync(candidate)) ?? preferredRoot;
+      : (legacyRoots.find((candidate) => existsSync(candidate)) ??
+        preferredRoot);
   const home = join(root, 'home');
   const cache = join(root, 'cache');
   const config = join(root, 'config');
   const data = join(root, 'data');
   const tmp = join(root, 'tmp');
-  await Promise.all([home, cache, config, data, tmp].map((dir) => mkdir(dir, { recursive: true })));
+  await Promise.all(
+    [home, cache, config, data, tmp].map((dir) =>
+      mkdir(dir, { recursive: true }),
+    ),
+  );
   return { root, home, cache, config, data, tmp };
 }

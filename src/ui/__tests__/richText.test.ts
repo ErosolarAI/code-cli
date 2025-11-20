@@ -27,17 +27,32 @@ test('renderMessageBody outputs compact, link-aware content', () => {
     assert.equal(line, line.trimEnd());
     if (!line.trim()) {
       blankRun += 1;
-      assert.ok(blankRun <= 1, 'should not render multiple consecutive blank separators');
+      assert.ok(
+        blankRun <= 1,
+        'should not render multiple consecutive blank separators',
+      );
     } else {
       blankRun = 0;
     }
   }
 
-  const bareLink = (theme.link?.url ?? theme.info)('https://www.cnn.com/politics/trump-asia');
+  const bareLink = (theme.link?.url ?? theme.info)(
+    'https://www.cnn.com/politics/trump-asia',
+  );
   assert.ok(body.includes(bareLink), 'bare links should be colorized');
 
-  const markdownLinkLabel = (theme.link?.label ?? theme.secondary)('Full itinerary');
-  const markdownLinkUrl = (theme.link?.url ?? theme.info)('(https://www.reuters.com/world/example-trip)');
-  assert.ok(body.includes(markdownLinkLabel), 'markdown link labels should be highlighted');
-  assert.ok(body.includes(markdownLinkUrl), 'markdown link URLs should reuse link color');
+  const markdownLinkLabel = (theme.link?.label ?? theme.secondary)(
+    'Full itinerary',
+  );
+  const markdownLinkUrl = (theme.link?.url ?? theme.info)(
+    '(https://www.reuters.com/world/example-trip)',
+  );
+  assert.ok(
+    body.includes(markdownLinkLabel),
+    'markdown link labels should be highlighted',
+  );
+  assert.ok(
+    body.includes(markdownLinkUrl),
+    'markdown link URLs should reuse link color',
+  );
 });

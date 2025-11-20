@@ -133,7 +133,9 @@ export class MissionManager {
   }
 
   getPlan(): PlanDAG | null {
-    return this.plan ? { ...this.plan, nodes: this.plan.nodes.map((node) => ({ ...node })) } : null;
+    return this.plan
+      ? { ...this.plan, nodes: this.plan.nodes.map((node) => ({ ...node })) }
+      : null;
   }
 
   getCurrentTask(): PlanNode | null {
@@ -162,8 +164,10 @@ export class MissionManager {
     }
     const completed = new Set(
       this.plan.nodes
-        .filter((node) => node.status === 'succeeded' || node.status === 'skipped')
-        .map((node) => node.id)
+        .filter(
+          (node) => node.status === 'succeeded' || node.status === 'skipped',
+        )
+        .map((node) => node.id),
     );
     return this.plan.nodes.filter((node) => {
       if (node.status !== 'pending' && node.status !== 'running') {
@@ -184,7 +188,14 @@ export class MissionManager {
       return;
     }
     current.status = status;
-    const timelineStatus = status === 'succeeded' ? 'succeeded' : status === 'skipped' ? 'skipped' : status === 'blocked' ? 'blocked' : 'failed';
+    const timelineStatus =
+      status === 'succeeded'
+        ? 'succeeded'
+        : status === 'skipped'
+          ? 'skipped'
+          : status === 'blocked'
+            ? 'blocked'
+            : 'failed';
     this.timeline.record({
       action: 'plan.node_completed',
       status: timelineStatus,
@@ -192,7 +203,10 @@ export class MissionManager {
       message: current.title,
     });
 
-    if (this.getRunnableNodes().length === 0 && this.plan.nodes.every((node) => node.status === 'succeeded')) {
+    if (
+      this.getRunnableNodes().length === 0 &&
+      this.plan.nodes.every((node) => node.status === 'succeeded')
+    ) {
       this.state = 'PLANNING';
     }
   }
@@ -202,7 +216,9 @@ export class MissionManager {
       return false;
     }
     const node = this.plan.nodes.find(
-      (entry) => entry.id === target || entry.title?.toLowerCase() === target.toLowerCase()
+      (entry) =>
+        entry.id === target ||
+        entry.title?.toLowerCase() === target.toLowerCase(),
     );
     if (!node) {
       return false;
@@ -210,7 +226,12 @@ export class MissionManager {
     node.status = sanitizeStatus(status);
     this.timeline.record({
       action: 'plan.node_manual_update',
-      status: node.status === 'succeeded' ? 'succeeded' : node.status === 'failed' ? 'failed' : 'blocked',
+      status:
+        node.status === 'succeeded'
+          ? 'succeeded'
+          : node.status === 'failed'
+            ? 'failed'
+            : 'blocked',
       stepId: node.id,
       message: `Manually marked ${node.title}`,
     });
@@ -232,11 +253,16 @@ export class MissionManager {
       return `Mission "${this.mission}" is complete.`;
     }
 
-    const status = [`Mission: "${this.mission ?? 'n/a'}"`, `State: ${this.state}`];
+    const status = [
+      `Mission: "${this.mission ?? 'n/a'}"`,
+      `State: ${this.state}`,
+    ];
 
     const plan = this.plan;
     if (plan) {
-      const succeeded = plan.nodes.filter((node) => node.status === 'succeeded').length;
+      const succeeded = plan.nodes.filter(
+        (node) => node.status === 'succeeded',
+      ).length;
       const total = plan.nodes.length;
       status.push(`Plan progress: ${succeeded}/${total} done`);
       const current = this.getCurrentTask();
@@ -253,7 +279,10 @@ export class MissionManager {
   getFeedbackPacket(): FeedbackPacket {
     const events = this.timeline.latest(10);
     const errors = events
-      .filter((event) => event.status === 'failed' || event.action === 'policy_blocked')
+      .filter(
+        (event) =>
+          event.status === 'failed' || event.action === 'policy_blocked',
+      )
       .map((event) => ({
         type: event.action,
         message: event.message,
@@ -272,8 +301,12 @@ export class MissionManager {
       summaryParts.push(`Goal: ${this.taskSpec.goal.natural}`);
     }
     if (this.plan) {
-      const succeeded = this.plan.nodes.filter((node) => node.status === 'succeeded').length;
-      summaryParts.push(`Plan: ${succeeded}/${this.plan.nodes.length} nodes done`);
+      const succeeded = this.plan.nodes.filter(
+        (node) => node.status === 'succeeded',
+      ).length;
+      summaryParts.push(
+        `Plan: ${succeeded}/${this.plan.nodes.length} nodes done`,
+      );
     }
 
     return {
@@ -290,7 +323,11 @@ export class MissionManager {
 }
 
 function sanitizeStatus(status?: PlanNodeStatus): PlanNodeStatus {
-  return status === 'running' || status === 'succeeded' || status === 'failed' || status === 'skipped' || status === 'blocked'
+  return status === 'running' ||
+    status === 'succeeded' ||
+    status === 'failed' ||
+    status === 'skipped' ||
+    status === 'blocked'
     ? status
     : 'pending';
 }

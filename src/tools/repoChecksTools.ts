@@ -37,13 +37,17 @@ export function createRepoCheckTools(workingDir: string): ToolDefinition[] {
           },
           extraArgs: {
             type: 'string',
-            description: 'Additional arguments appended to every npm run <script> invocation.',
+            description:
+              'Additional arguments appended to every npm run <script> invocation.',
           },
         },
         additionalProperties: false,
       },
       handler: async (args) => {
-        const { scripts, skipped } = await resolveScripts(args['scripts'], workingDir);
+        const { scripts, skipped } = await resolveScripts(
+          args['scripts'],
+          workingDir,
+        );
         if (!scripts.length) {
           return 'No runnable npm scripts found (looked for test, build, lint). Add scripts to package.json or pass scripts explicitly.';
         }
@@ -84,12 +88,19 @@ export function createRepoCheckTools(workingDir: string): ToolDefinition[] {
   ];
 }
 
-async function resolveScripts(raw: unknown, workingDir: string): Promise<{ scripts: string[]; skipped: string[] }> {
+async function resolveScripts(
+  raw: unknown,
+  workingDir: string,
+): Promise<{ scripts: string[]; skipped: string[] }> {
   const declaredScripts = await readPackageScripts(workingDir);
   const requested = normalizeScriptList(raw);
 
-  const baseline = DEFAULT_SCRIPT_ORDER.filter((name) => declaredScripts.has(name));
-  const selected = (requested.length ? requested : baseline).filter((name) => declaredScripts.has(name));
+  const baseline = DEFAULT_SCRIPT_ORDER.filter((name) =>
+    declaredScripts.has(name),
+  );
+  const selected = (requested.length ? requested : baseline).filter((name) =>
+    declaredScripts.has(name),
+  );
   const skipped = requested.filter((name) => !declaredScripts.has(name));
 
   return { scripts: selected, skipped };
@@ -99,7 +110,10 @@ async function readPackageScripts(workingDir: string): Promise<Set<string>> {
   try {
     const raw = await readFile(join(workingDir, 'package.json'), 'utf8');
     const parsed = JSON.parse(raw);
-    const scripts = parsed?.scripts && typeof parsed.scripts === 'object' ? Object.keys(parsed.scripts) : [];
+    const scripts =
+      parsed?.scripts && typeof parsed.scripts === 'object'
+        ? Object.keys(parsed.scripts)
+        : [];
     return new Set(scripts);
   } catch {
     return new Set<string>();
@@ -111,7 +125,10 @@ function normalizeScriptList(raw: unknown): string[] {
     return [];
   }
   if (Array.isArray(raw)) {
-    return raw.map(String).map((value) => value.trim()).filter(Boolean);
+    return raw
+      .map(String)
+      .map((value) => value.trim())
+      .filter(Boolean);
   }
   if (typeof raw === 'string') {
     return raw
@@ -126,7 +143,7 @@ async function runScript(
   script: string,
   command: string,
   workingDir: string,
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
 ): Promise<ScriptResult> {
   const startedAt = Date.now();
   try {
@@ -166,7 +183,9 @@ function formatResults(results: ScriptResult[]): string {
 
   for (const result of results) {
     const icon = result.success ? '✓' : '✕';
-    const duration = result.elapsedMs ? ` (${(result.elapsedMs / 1000).toFixed(1)}s)` : '';
+    const duration = result.elapsedMs
+      ? ` (${(result.elapsedMs / 1000).toFixed(1)}s)`
+      : '';
     const label = result.skipped ? 'skipped' : result.command;
     lines.push(`- ${icon} ${label}${duration}`);
 
@@ -193,6 +212,9 @@ function formatStream(label: string, value: string): string | null {
   if (!trimmed) {
     return null;
   }
-  const truncated = trimmed.length > MAX_STREAM_CHARS ? `${trimmed.slice(0, MAX_STREAM_CHARS)}...` : trimmed;
+  const truncated =
+    trimmed.length > MAX_STREAM_CHARS
+      ? `${trimmed.slice(0, MAX_STREAM_CHARS)}...`
+      : trimmed;
   return `${label}:\n${truncated}`;
 }

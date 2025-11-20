@@ -12,7 +12,7 @@ module.exports = {
     proxyTimeout: 300000,
     logLevel: 'info',
     headers: {
-      Connection: 'keep-alive'
-    }
-  }
+      Connection: 'keep-alive',
+    },
+  },
 };

@@ -1,8 +1,19 @@
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  readdirSync,
+  statSync,
+  mkdirSync,
+} from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import type { ToolDefinition } from '../core/toolRuntime.js';
 import { buildError } from '../core/errors.js';
-import { buildDiffSegments, formatDiffLines, type DiffSegment } from './diffUtils.js';
+import {
+  buildDiffSegments,
+  formatDiffLines,
+  type DiffSegment,
+} from './diffUtils.js';
 
 export function createFileTools(workingDir: string): ToolDefinition[] {
   return [
@@ -14,7 +25,8 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
         properties: {
           path: {
             type: 'string',
-            description: 'The file path (relative to working directory or absolute)',
+            description:
+              'The file path (relative to working directory or absolute)',
             minLength: 1,
           },
         },
@@ -35,19 +47,24 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
           const content = readFileSync(filePath, 'utf-8');
           return `File: ${filePath}\n\n${content}`;
         } catch (error: any) {
-          return buildError('reading file', error, { path: requestedPath, resolvedPath });
+          return buildError('reading file', error, {
+            path: requestedPath,
+            resolvedPath,
+          });
         }
       },
     },
     {
       name: 'write_file',
-      description: 'Write content to a file at the specified path (creates directories if needed)',
+      description:
+        'Write content to a file at the specified path (creates directories if needed)',
       parameters: {
         type: 'object',
         properties: {
           path: {
             type: 'string',
-            description: 'The file path (relative to working directory or absolute)',
+            description:
+              'The file path (relative to working directory or absolute)',
             minLength: 1,
           },
           content: {
@@ -70,16 +87,29 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
             mkdirSync(dir, { recursive: true });
           }
 
-          const nextContent = typeof args['content'] === 'string' ? (args['content'] as string) : '';
+          const nextContent =
+            typeof args['content'] === 'string'
+              ? (args['content'] as string)
+              : '';
           const filePreviouslyExisted = existsSync(filePath);
-          const previousContent = filePreviouslyExisted ? readFileSync(filePath, 'utf-8') : '';
+          const previousContent = filePreviouslyExisted
+            ? readFileSync(filePath, 'utf-8')
+            : '';
           const diffSegments = buildDiffSegments(previousContent, nextContent);
 
           writeFileSync(filePath, nextContent, 'utf-8');
 
-          return buildWriteSummary(filePath, diffSegments, workingDir, filePreviouslyExisted);
+          return buildWriteSummary(
+            filePath,
+            diffSegments,
+            workingDir,
+            filePreviouslyExisted,
+          );
         } catch (error: any) {
-          return buildError('writing file', error, { path: requestedPath, resolvedPath });
+          return buildError('writing file', error, {
+            path: requestedPath,
+            resolvedPath,
+          });
         }
       },
     },
@@ -91,7 +121,8 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
         properties: {
           path: {
             type: 'string',
-            description: 'The directory path (defaults to current working directory)',
+            description:
+              'The directory path (defaults to current working directory)',
             minLength: 1,
           },
           recursive: {
@@ -107,7 +138,9 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
         let resolvedPath: string | undefined;
         try {
           const dirPath =
-            pathArg !== undefined && pathArg !== null ? resolveFilePath(workingDir, pathArg) : workingDir;
+            pathArg !== undefined && pathArg !== null
+              ? resolveFilePath(workingDir, pathArg)
+              : workingDir;
           resolvedPath = dirPath;
           const recursive = args['recursive'] === true;
 
@@ -115,16 +148,24 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
             return `Error: Directory not found: ${dirPath}`;
           }
 
-          const files = listFilesRecursive(dirPath, recursive ? 5 : 1, workingDir);
+          const files = listFilesRecursive(
+            dirPath,
+            recursive ? 5 : 1,
+            workingDir,
+          );
           return `Directory: ${dirPath}\n\n${files.join('\n')}`;
         } catch (error: any) {
-          return buildError('listing files', error, { path: requestedPath, resolvedPath });
+          return buildError('listing files', error, {
+            path: requestedPath,
+            resolvedPath,
+          });
         }
       },
     },
     {
       name: 'search_files',
-      description: 'Search for files matching a pattern (supports glob patterns)',
+      description:
+        'Search for files matching a pattern (supports glob patterns)',
       parameters: {
         type: 'object',
         properties: {
@@ -135,7 +176,8 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
           },
           path: {
             type: 'string',
-            description: 'The directory to search in (defaults to current working directory)',
+            description:
+              'The directory to search in (defaults to current working directory)',
             minLength: 1,
           },
         },
@@ -146,15 +188,21 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
         const pathArg = args['path'];
         const requestedPath = normalizePathContext(pathArg);
         const patternArg = args['pattern'];
-        const requestedPattern = typeof patternArg === 'string' ? patternArg : undefined;
+        const requestedPattern =
+          typeof patternArg === 'string' ? patternArg : undefined;
         let resolvedPath: string | undefined;
         try {
-          const pattern = typeof patternArg === 'string' && patternArg.trim() ? patternArg : null;
+          const pattern =
+            typeof patternArg === 'string' && patternArg.trim()
+              ? patternArg
+              : null;
           if (!pattern) {
             return 'Error: pattern must be a non-empty string.';
           }
           const searchPath =
-            pathArg !== undefined && pathArg !== null ? resolveFilePath(workingDir, pathArg) : workingDir;
+            pathArg !== undefined && pathArg !== null
+              ? resolveFilePath(workingDir, pathArg)
+              : workingDir;
           resolvedPath = searchPath;
           const results = searchFilesGlob(searchPath, pattern);
           if (results.length === 0) {
@@ -196,12 +244,24 @@ function normalizePathContext(path: unknown): string | undefined {
   }
 }
 
-function listFilesRecursive(dir: string, maxDepth: number, baseDir: string, currentDepth = 0): string[] {
+function listFilesRecursive(
+  dir: string,
+  maxDepth: number,
+  baseDir: string,
+  currentDepth = 0,
+): string[] {
   if (currentDepth >= maxDepth) {
     return [];
   }
 
-  const ignoredDirs = new Set(['.git', 'node_modules', 'dist', '.next', 'build', 'coverage']);
+  const ignoredDirs = new Set([
+    '.git',
+    'node_modules',
+    'dist',
+    '.next',
+    'build',
+    'coverage',
+  ]);
   const results: string[] = [];
 
   try {
@@ -217,7 +277,9 @@ function listFilesRecursive(dir: string, maxDepth: number, baseDir: string, curr
 
       if (entry.isDirectory()) {
         results.push(`${indent}${entry.name}/`);
-        results.push(...listFilesRecursive(fullPath, maxDepth, baseDir, currentDepth + 1));
+        results.push(
+          ...listFilesRecursive(fullPath, maxDepth, baseDir, currentDepth + 1),
+        );
       } else {
         const stats = statSync(fullPath);
         const size = formatFileSize(stats.size);
@@ -225,7 +287,8 @@ function listFilesRecursive(dir: string, maxDepth: number, baseDir: string, curr
       }
     }
   } catch (error) {
-  }
+        // ignore errors
+      }
 
   return results;
 }
@@ -235,7 +298,14 @@ function searchFilesGlob(dir: string, pattern: string): string[] {
   const regex = globToRegex(pattern);
 
   function search(currentDir: string) {
-    const ignoredDirs = new Set(['.git', 'node_modules', 'dist', '.next', 'build', 'coverage']);
+    const ignoredDirs = new Set([
+      '.git',
+      'node_modules',
+      'dist',
+      '.next',
+      'build',
+      'coverage',
+    ]);
 
     try {
       const entries = readdirSync(currentDir, { withFileTypes: true });
@@ -254,7 +324,8 @@ function searchFilesGlob(dir: string, pattern: string): string[] {
         }
       }
     } catch (error) {
-    }
+        // ignore errors
+      }
   }
 
   search(dir);
@@ -265,13 +336,21 @@ function buildWriteSummary(
   filePath: string,
   diffSegments: DiffSegment[],
   workingDir: string,
-  filePreviouslyExisted: boolean
+  filePreviouslyExisted: boolean,
 ): string {
   const readablePath = formatRelativeFilePath(filePath, workingDir);
-  const addedLines = diffSegments.filter((segment) => segment.type === 'added').length;
-  const removedLines = diffSegments.filter((segment) => segment.type === 'removed').length;
+  const addedLines = diffSegments.filter(
+    (segment) => segment.type === 'added',
+  ).length;
+  const removedLines = diffSegments.filter(
+    (segment) => segment.type === 'removed',
+  ).length;
   const hasChanges = diffSegments.length > 0;
-  const actionLabel = !filePreviouslyExisted ? 'Added' : hasChanges ? 'Edited' : 'Updated';
+  const actionLabel = !filePreviouslyExisted
+    ? 'Added'
+    : hasChanges
+      ? 'Edited'
+      : 'Updated';
   const header = `#### ${actionLabel} ${readablePath}`;
 
   if (!hasChanges) {

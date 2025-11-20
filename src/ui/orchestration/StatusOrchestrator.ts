@@ -183,7 +183,7 @@ export class StatusOrchestrator extends EventEmitter {
    */
   onToolProgress(
     toolId: string,
-    progress: { current: number; total: number; message?: string }
+    progress: { current: number; total: number; message?: string },
   ): void {
     const toolStatus = this.context.tools.get(toolId);
     if (!toolStatus) return;
@@ -267,7 +267,7 @@ export class StatusOrchestrator extends EventEmitter {
 
     // Insert based on priority
     const index = this.context.interrupts.pending.findIndex(
-      (i) => i.priority < interrupt.priority
+      (i) => i.priority < interrupt.priority,
     );
 
     if (index === -1) {
@@ -292,7 +292,10 @@ export class StatusOrchestrator extends EventEmitter {
    * Process pending interrupts
    */
   private processInterrupts(): void {
-    if (this.context.interrupts.active || this.context.interrupts.pending.length === 0) {
+    if (
+      this.context.interrupts.active ||
+      this.context.interrupts.pending.length === 0
+    ) {
       return;
     }
 
@@ -343,7 +346,9 @@ export class StatusOrchestrator extends EventEmitter {
       const activeTools = toolStatuses.filter((t) => t.status === 'running');
 
       if (activeTools.length > 0) {
-        const mostRecent = activeTools.sort((a, b) => b.updatedAt - a.updatedAt)[0];
+        const mostRecent = activeTools.sort(
+          (a, b) => b.updatedAt - a.updatedAt,
+        )[0];
         if (mostRecent) {
           return {
             text: mostRecent.description,
@@ -371,7 +376,7 @@ export class StatusOrchestrator extends EventEmitter {
   registerAnimation(
     id: string,
     type: AnimationState['type'],
-    data?: unknown
+    data?: unknown,
   ): void {
     this.context.animations.set(id, {
       id,

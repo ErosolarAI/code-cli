@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createCodeAnalysisTools } from '../tools/codeAnalysisTools.js';
 
 export interface CodeAnalysisCapabilityOptions {
@@ -19,7 +23,9 @@ export class CodeAnalysisCapabilityModule implements CapabilityModule {
     const workingDir = this.options.workingDir ?? context.workingDir;
     return {
       id: this.options.id ?? 'code-analysis.tools.structural',
-      description: this.options.description ?? 'Advanced code structure analysis, dependency tracking, and complexity metrics.',
+      description:
+        this.options.description ??
+        'Advanced code structure analysis, dependency tracking, and complexity metrics.',
       toolSuite: {
         id: 'code-analysis',
         description: 'Code analysis and metrics',

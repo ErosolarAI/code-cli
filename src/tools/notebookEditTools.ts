@@ -38,29 +38,35 @@ export function createNotebookEditTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'NotebookEdit',
-      description: 'Completely replaces or modifies cells in a Jupyter notebook (.ipynb file). Use edit_mode=replace (default) to replace a cell, edit_mode=insert to add a new cell, or edit_mode=delete to remove a cell.',
+      description:
+        'Completely replaces or modifies cells in a Jupyter notebook (.ipynb file). Use edit_mode=replace (default) to replace a cell, edit_mode=insert to add a new cell, or edit_mode=delete to remove a cell.',
       parameters: {
         type: 'object',
         properties: {
           notebook_path: {
             type: 'string',
-            description: 'The absolute path to the Jupyter notebook file to edit (must be .ipynb file)',
+            description:
+              'The absolute path to the Jupyter notebook file to edit (must be .ipynb file)',
           },
           cell_id: {
             type: 'string',
-            description: 'The ID of the cell to edit. When inserting a new cell, the new cell will be inserted after the cell with this ID, or at the beginning if not specified.',
+            description:
+              'The ID of the cell to edit. When inserting a new cell, the new cell will be inserted after the cell with this ID, or at the beginning if not specified.',
           },
           new_source: {
             type: 'string',
-            description: 'The new source for the cell (code or markdown content)',
+            description:
+              'The new source for the cell (code or markdown content)',
           },
           cell_type: {
             type: 'string',
-            description: 'The type of the cell (code or markdown). If not specified, defaults to current cell type. Required when using edit_mode=insert.',
+            description:
+              'The type of the cell (code or markdown). If not specified, defaults to current cell type. Required when using edit_mode=insert.',
           },
           edit_mode: {
             type: 'string',
-            description: 'The type of edit to make: "replace" (default), "insert", or "delete"',
+            description:
+              'The type of edit to make: "replace" (default), "insert", or "delete"',
           },
         },
         required: ['notebook_path', 'new_source'],
@@ -83,7 +89,11 @@ export function createNotebookEditTools(workingDir: string): ToolDefinition[] {
         if (typeof newSource !== 'string') {
           return 'Error: new_source must be a string.';
         }
-        if (editMode !== 'replace' && editMode !== 'insert' && editMode !== 'delete') {
+        if (
+          editMode !== 'replace' &&
+          editMode !== 'insert' &&
+          editMode !== 'delete'
+        ) {
           return 'Error: edit_mode must be "replace", "insert", or "delete".';
         }
         if (editMode === 'insert' && !cellType) {
@@ -119,14 +129,27 @@ export function createNotebookEditTools(workingDir: string): ToolDefinition[] {
           let resultMessage: string;
           switch (editMode) {
             case 'insert':
-              resultMessage = insertCell(notebook, cellId as string | undefined, newSource, cellType as 'code' | 'markdown');
+              resultMessage = insertCell(
+                notebook,
+                cellId as string | undefined,
+                newSource,
+                cellType as 'code' | 'markdown',
+              );
               break;
             case 'delete':
-              resultMessage = deleteCell(notebook, cellId as string | undefined);
+              resultMessage = deleteCell(
+                notebook,
+                cellId as string | undefined,
+              );
               break;
             case 'replace':
             default:
-              resultMessage = replaceCell(notebook, cellId as string | undefined, newSource, cellType as 'code' | 'markdown' | undefined);
+              resultMessage = replaceCell(
+                notebook,
+                cellId as string | undefined,
+                newSource,
+                cellType as 'code' | 'markdown' | undefined,
+              );
               break;
           }
 
@@ -135,7 +158,6 @@ export function createNotebookEditTools(workingDir: string): ToolDefinition[] {
           writeFileSync(filePath, updatedContent, 'utf-8');
 
           return `✓ Notebook edited: ${filePath}\n${resultMessage}`;
-
         } catch (error: any) {
           return buildError('editing notebook', error, {
             notebook_path: notebookPath,
@@ -156,20 +178,22 @@ function replaceCell(
   notebook: JupyterNotebook,
   cellId: string | undefined,
   newSource: string,
-  cellType?: 'code' | 'markdown'
+  cellType?: 'code' | 'markdown',
 ): string {
   let cellIndex: number;
 
   if (cellId) {
     // Find cell by ID
-    cellIndex = notebook.cells.findIndex(c => c.id === cellId);
+    cellIndex = notebook.cells.findIndex((c) => c.id === cellId);
     if (cellIndex === -1) {
       throw new Error(`Cell with id "${cellId}" not found.`);
     }
   } else {
     // Default to first cell
     if (notebook.cells.length === 0) {
-      throw new Error('Notebook has no cells. Use edit_mode=insert to add a cell.');
+      throw new Error(
+        'Notebook has no cells. Use edit_mode=insert to add a cell.',
+      );
     }
     cellIndex = 0;
   }
@@ -202,12 +226,12 @@ function insertCell(
   notebook: JupyterNotebook,
   afterCellId: string | undefined,
   newSource: string,
-  cellType: 'code' | 'markdown'
+  cellType: 'code' | 'markdown',
 ): string {
   let insertIndex = 0;
 
   if (afterCellId) {
-    const afterIndex = notebook.cells.findIndex(c => c.id === afterCellId);
+    const afterIndex = notebook.cells.findIndex((c) => c.id === afterCellId);
     if (afterIndex === -1) {
       throw new Error(`Cell with id "${afterCellId}" not found.`);
     }
@@ -233,13 +257,13 @@ function insertCell(
 
 function deleteCell(
   notebook: JupyterNotebook,
-  cellId: string | undefined
+  cellId: string | undefined,
 ): string {
   if (!cellId) {
     throw new Error('cell_id is required when edit_mode=delete.');
   }
 
-  const cellIndex = notebook.cells.findIndex(c => c.id === cellId);
+  const cellIndex = notebook.cells.findIndex((c) => c.id === cellId);
   if (cellIndex === -1) {
     throw new Error(`Cell with id "${cellId}" not found.`);
   }

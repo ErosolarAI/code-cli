@@ -15,7 +15,11 @@ test('loadMcpServers discovers workspace .mcp.json definitions', async () => {
         {
           filesystem: {
             command: 'npx',
-            args: ['-y', '@modelcontextprotocol/server-filesystem', '${WORKSPACE_ROOT}'],
+            args: [
+              '-y',
+              '@modelcontextprotocol/server-filesystem',
+              '${WORKSPACE_ROOT}',
+            ],
             env: {
               TOKEN: '${CUSTOM_TOKEN}',
             },
@@ -23,8 +27,8 @@ test('loadMcpServers discovers workspace .mcp.json definitions', async () => {
           },
         },
         null,
-        2
-      )
+        2,
+      ),
     );
 
     const servers = await loadMcpServers({
@@ -37,7 +41,11 @@ test('loadMcpServers discovers workspace .mcp.json definitions', async () => {
     assert.ok(server);
     assert.equal(server.id, 'filesystem');
     assert.equal(server.command, 'npx');
-    assert.deepEqual(server.args, ['-y', '@modelcontextprotocol/server-filesystem', root]);
+    assert.deepEqual(server.args, [
+      '-y',
+      '@modelcontextprotocol/server-filesystem',
+      root,
+    ]);
     assert.equal(server.env['TOKEN'], 'abc123');
     assert.equal(server.description, 'Workspace FS');
   } finally {

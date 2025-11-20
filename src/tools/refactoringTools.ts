@@ -1,22 +1,34 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 import type { ToolDefinition } from '../core/toolRuntime.js';
-import { performAdvancedAstAnalysis, type AstSymbolInsight } from './codeAnalysisTools.js';
+import {
+  performAdvancedAstAnalysis,
+  type AstSymbolInsight,
+} from './codeAnalysisTools.js';
 
 const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
-const IGNORED_DIRECTORIES = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.turbo']);
+const IGNORED_DIRECTORIES = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '.next',
+  '.turbo',
+]);
 
 export function createRefactoringTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'detect_refactoring_hotspots',
-      description: 'Scan a file or directory for large/complex functions that merit refactoring.',
+      description:
+        'Scan a file or directory for large/complex functions that merit refactoring.',
       parameters: {
         type: 'object',
         properties: {
           path: {
             type: 'string',
-            description: 'File or directory to inspect (relative to workspace).',
+            description:
+              'File or directory to inspect (relative to workspace).',
           },
           maxResults: {
             type: 'number',
@@ -65,7 +77,8 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
                   file,
                   symbol,
                   reasons,
-                  score: symbol.cyclomaticComplexity * 2 + symbol.statementCount,
+                  score:
+                    symbol.cyclomaticComplexity * 2 + symbol.statementCount,
                 });
               }
             }
@@ -77,14 +90,18 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
 
           const maxResultsArg = args['maxResults'];
           const limit =
-            typeof maxResultsArg === 'number' && Number.isFinite(maxResultsArg) && maxResultsArg > 0
+            typeof maxResultsArg === 'number' &&
+            Number.isFinite(maxResultsArg) &&
+            maxResultsArg > 0
               ? Math.floor(maxResultsArg)
               : 10;
           hotspots.sort((a, b) => b.score - a.score);
           const selection = hotspots.slice(0, limit);
 
           const output: string[] = [];
-          output.push(`# Refactoring hotspots (${selection.length}/${hotspots.length})`);
+          output.push(
+            `# Refactoring hotspots (${selection.length}/${hotspots.length})`,
+          );
           output.push('');
           selection.forEach((record, index) => {
             const relPath = relative(workingDir, record.file);
@@ -94,7 +111,9 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
             );
             output.push(`   - Severity score: ${record.score}`);
             output.push(`   - Reasons: ${record.reasons.join(', ')}`);
-            output.push(`   - Statements: ${record.symbol.statementCount}, CC: ${record.symbol.cyclomaticComplexity}, span ${span} lines`);
+            output.push(
+              `   - Statements: ${record.symbol.statementCount}, CC: ${record.symbol.cyclomaticComplexity}, span ${span} lines`,
+            );
           });
 
           return output.join('\n');
@@ -105,7 +124,8 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'generate_refactor_plan',
-      description: 'Create a structured refactor plan for the most complex symbol in a file (or a specific symbol).',
+      description:
+        'Create a structured refactor plan for the most complex symbol in a file (or a specific symbol).',
       parameters: {
         type: 'object',
         properties: {
@@ -115,7 +135,8 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
           },
           symbol: {
             type: 'string',
-            description: 'Optional symbol to target (defaults to the most complex function).',
+            description:
+              'Optional symbol to target (defaults to the most complex function).',
           },
         },
         required: ['path'],
@@ -139,7 +160,10 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
             return `Symbol "${String(args['symbol'])}" not found in ${filePath}.`;
           }
 
-          const callOutputs = ast.callGraph.filter((edge) => edge.from === targetSymbol.name || edge.to === targetSymbol.name);
+          const callOutputs = ast.callGraph.filter(
+            (edge) =>
+              edge.from === targetSymbol.name || edge.to === targetSymbol.name,
+          );
 
           const relPath = relative(workingDir, filePath);
           const plan: string[] = [];
@@ -148,30 +172,50 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
           plan.push('');
           plan.push('## Current metrics');
           plan.push(`- Statements: ${targetSymbol.statementCount}`);
-          plan.push(`- Cyclomatic complexity: ${targetSymbol.cyclomaticComplexity}`);
-          plan.push(`- Span: lines ${targetSymbol.startLine}-${targetSymbol.endLine}`);
+          plan.push(
+            `- Cyclomatic complexity: ${targetSymbol.cyclomaticComplexity}`,
+          );
+          plan.push(
+            `- Span: lines ${targetSymbol.startLine}-${targetSymbol.endLine}`,
+          );
           plan.push('');
           plan.push('## Recommended steps');
-          plan.push('- Break the function into cohesive helpers grouped by responsibility.');
+          plan.push(
+            '- Break the function into cohesive helpers grouped by responsibility.',
+          );
           if (targetSymbol.statementCount > 60) {
-            plan.push('- Extract the initialization / setup logic into a dedicated helper.');
+            plan.push(
+              '- Extract the initialization / setup logic into a dedicated helper.',
+            );
           }
           if (targetSymbol.cyclomaticComplexity > 14) {
-            plan.push('- Replace deeply nested branching with guard clauses or strategy objects.');
+            plan.push(
+              '- Replace deeply nested branching with guard clauses or strategy objects.',
+            );
           }
-          plan.push('- Introduce descriptive interfaces/types to clarify inputs and return values.');
-          plan.push('- Write focused unit tests for each new helper and for the refactored entry point.');
+          plan.push(
+            '- Introduce descriptive interfaces/types to clarify inputs and return values.',
+          );
+          plan.push(
+            '- Write focused unit tests for each new helper and for the refactored entry point.',
+          );
           plan.push('');
           plan.push('## Dependency considerations');
           if (callOutputs.length === 0) {
-            plan.push('This symbol does not interact with other tracked functions inside the file.');
+            plan.push(
+              'This symbol does not interact with other tracked functions inside the file.',
+            );
           } else {
             plan.push('Calls & referenced symbols:');
             callOutputs.forEach((edge) => {
               if (edge.from === targetSymbol.name) {
-                plan.push(`- Calls ${edge.to} (${edge.count} time${edge.count === 1 ? '' : 's'})`);
+                plan.push(
+                  `- Calls ${edge.to} (${edge.count} time${edge.count === 1 ? '' : 's'})`,
+                );
               } else {
-                plan.push(`- Invoked by ${edge.from} (${edge.count} call${edge.count === 1 ? '' : 's'})`);
+                plan.push(
+                  `- Invoked by ${edge.from} (${edge.count} call${edge.count === 1 ? '' : 's'})`,
+                );
               }
             });
           }
@@ -184,7 +228,8 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'analyze_refactor_impact',
-      description: 'Summarize inbound/outbound calls for a symbol to estimate refactor blast radius.',
+      description:
+        'Summarize inbound/outbound calls for a symbol to estimate refactor blast radius.',
       parameters: {
         type: 'object',
         properties: {
@@ -194,7 +239,8 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
           },
           symbol: {
             type: 'string',
-            description: 'Symbol name to inspect. Defaults to the most connected symbol.',
+            description:
+              'Symbol name to inspect. Defaults to the most connected symbol.',
           },
         },
         required: ['path'],
@@ -218,10 +264,14 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
           const symbolName =
             typeof symbolArg === 'string' && symbolArg.trim()
               ? symbolArg.trim()
-              : findMostConnectedSymbol(ast) ?? fallbackSymbol;
+              : (findMostConnectedSymbol(ast) ?? fallbackSymbol);
 
-          const incoming = ast.callGraph.filter((edge) => edge.to === symbolName);
-          const outgoing = ast.callGraph.filter((edge) => edge.from === symbolName);
+          const incoming = ast.callGraph.filter(
+            (edge) => edge.to === symbolName,
+          );
+          const outgoing = ast.callGraph.filter(
+            (edge) => edge.from === symbolName,
+          );
 
           const summary: string[] = [];
           summary.push(`# Refactor impact for ${symbolName}`);
@@ -231,7 +281,9 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
             summary.push('No recorded inbound calls inside this file.');
           } else {
             incoming.forEach((edge) => {
-              summary.push(`- ${edge.from} (${edge.count} call${edge.count === 1 ? '' : 's'})`);
+              summary.push(
+                `- ${edge.from} (${edge.count} call${edge.count === 1 ? '' : 's'})`,
+              );
             });
           }
           summary.push('');
@@ -240,7 +292,9 @@ export function createRefactoringTools(workingDir: string): ToolDefinition[] {
             summary.push('No outbound calls recorded.');
           } else {
             outgoing.forEach((edge) => {
-              summary.push(`- ${edge.to} (${edge.count} call${edge.count === 1 ? '' : 's'})`);
+              summary.push(
+                `- ${edge.to} (${edge.count} call${edge.count === 1 ? '' : 's'})`,
+              );
             });
           }
 
@@ -295,9 +349,14 @@ function collectSourceFiles(targetPath: string): string[] {
   return [];
 }
 
-function selectTargetSymbol(symbols: AstSymbolInsight[], requestedSymbol: unknown): AstSymbolInsight | null {
+function selectTargetSymbol(
+  symbols: AstSymbolInsight[],
+  requestedSymbol: unknown,
+): AstSymbolInsight | null {
   if (typeof requestedSymbol === 'string' && requestedSymbol.trim()) {
-    const match = symbols.find((symbol) => symbol.name === requestedSymbol.trim());
+    const match = symbols.find(
+      (symbol) => symbol.name === requestedSymbol.trim(),
+    );
     if (match) {
       return match;
     }
@@ -310,11 +369,19 @@ function selectTargetSymbol(symbols: AstSymbolInsight[], requestedSymbol: unknow
   return sorted[0] ?? null;
 }
 
-function findMostConnectedSymbol(ast: ReturnType<typeof performAdvancedAstAnalysis>): string | null {
+function findMostConnectedSymbol(
+  ast: ReturnType<typeof performAdvancedAstAnalysis>,
+): string | null {
   const connectionWeights = new Map<string, number>();
   for (const edge of ast.callGraph) {
-    connectionWeights.set(edge.from, (connectionWeights.get(edge.from) ?? 0) + edge.count);
-    connectionWeights.set(edge.to, (connectionWeights.get(edge.to) ?? 0) + edge.count);
+    connectionWeights.set(
+      edge.from,
+      (connectionWeights.get(edge.from) ?? 0) + edge.count,
+    );
+    connectionWeights.set(
+      edge.to,
+      (connectionWeights.get(edge.to) ?? 0) + edge.count,
+    );
   }
 
   let bestSymbol: string | null = null;

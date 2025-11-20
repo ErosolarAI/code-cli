@@ -125,7 +125,12 @@ export class PromptSkin {
     }
     const original = stream.write;
     const skin = this;
-    stream.write = function patchedWrite(this: typeof stream, chunk: any, encoding?: any, cb?: any) {
+    stream.write = function patchedWrite(
+      this: typeof stream,
+      chunk: any,
+      encoding?: any,
+      cb?: any,
+    ) {
       if (skin.suppressOutputGuards) {
         return original.call(this, chunk, encoding, cb);
       }
@@ -183,7 +188,8 @@ export class PromptSkin {
       const line = this.rl.line ?? '';
       const inputLength = this.visibleLength(line);
       const closingWidth = 1; // right border
-      const remaining = totalColumns - promptLength - inputLength - closingWidth;
+      const remaining =
+        totalColumns - promptLength - inputLength - closingWidth;
       if (remaining <= 0) {
         return;
       }
@@ -312,7 +318,9 @@ export class PromptSkin {
     const toneColor = this.resolveStatusTone(this.status.tone);
     const bullet = theme.secondary('•');
     const text = toneColor(this.status.text);
-    const elapsed = this.status.startedAt ? this.formatElapsed(Date.now() - this.status.startedAt) : null;
+    const elapsed = this.status.startedAt
+      ? this.formatElapsed(Date.now() - this.status.startedAt)
+      : null;
     const segments = [`${bullet} ${text}`];
     if (elapsed) {
       const elapsedColor = theme.metrics?.elapsedValue ?? theme.info;

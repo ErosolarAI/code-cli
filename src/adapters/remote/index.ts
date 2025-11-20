@@ -3,7 +3,9 @@ import type { RuntimeAdapter, RuntimeAdapterContext } from '../types.js';
 
 export type RemoteModuleFactory =
   | CapabilityModule
-  | ((context: RuntimeAdapterContext) => CapabilityModule | Promise<CapabilityModule>);
+  | ((
+      context: RuntimeAdapterContext,
+    ) => CapabilityModule | Promise<CapabilityModule>);
 
 export interface RemoteAdapterOptions {
   modules?: RemoteModuleFactory[];
@@ -17,7 +19,9 @@ export class RemoteRuntimeAdapter implements RuntimeAdapter {
     this.options = options;
   }
 
-  async createCapabilityModules(context: RuntimeAdapterContext): Promise<CapabilityModule[]> {
+  async createCapabilityModules(
+    context: RuntimeAdapterContext,
+  ): Promise<CapabilityModule[]> {
     const modules: CapabilityModule[] = [];
     for (const entry of this.options.modules ?? []) {
       if (typeof entry === 'function') {

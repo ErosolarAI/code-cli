@@ -11,6 +11,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ### 1. Welcome Banner
 
 **Before (Bo Style):**
+
 ```
 ╭─ Bo CLI 1.0.4 • support@ero.solar ─────╮
 │AGENT: Bo Code                          │
@@ -22,6 +23,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ```
 
 **After (Claude Code Style):**
+
 ```
 ╭────────────────────────────────────────────────────────────╮
 │                                                            │
@@ -41,6 +43,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ```
 
 **Changes:**
+
 - ✅ Centered layout (all content)
 - ✅ Personalized greeting with username
 - ✅ ASCII art logo matching Claude's style
@@ -51,6 +54,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ### 2. Tool Listing
 
 **Before:**
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ℹ AVAILABLE TOOLS
@@ -63,11 +67,13 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ```
 
 **After:**
+
 ```
 (No tool listing - clean startup)
 ```
 
 **Changes:**
+
 - ✅ Removed verbose tool listing on startup
 - ✅ Tools remain available but not displayed
 - ✅ Matches Claude Code's minimal approach
@@ -75,14 +81,17 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ### 3. Spinner Animation
 
 **Before:**
+
 - Standard spinner: `⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏`
 - Shows success checkmark when complete
 
 **After:**
+
 - Claude Code style: `∴ ∴ ∴ ✻ ✻ ✻`
 - Simply clears when complete (no checkmark)
 
 **Changes:**
+
 - ✅ Custom spinner frames (`∴` and `✻`)
 - ✅ 80ms frame interval
 - ✅ Clean exit (clear instead of success)
@@ -91,6 +100,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ### 4. Thought Display
 
 **Before:**
+
 ```
 •  I'll analyze the workspace to identify a file
    that could benefit from simplification and
@@ -98,11 +108,13 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ```
 
 **After:**
+
 ```
 ⏺ I'll look at the file you have open and identify an opportunity to simplify it while improving correctness.
 ```
 
 **Changes:**
+
 - ✅ Compact `⏺` prefix (muted color)
 - ✅ Simpler wrapping
 - ✅ No bullet/branch tree structure
@@ -111,6 +123,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ### 5. Tool Action Display
 
 **Before:**
+
 ```
 ⏺ Read src/shell/interactiveShell.ts (1859 lines)
 ⏺ Executed: npm test
@@ -118,6 +131,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ```
 
 **After:**
+
 ```
 ⏺ Read(src/shell/interactiveShell.ts)
   ⎿  Read 1859 lines
@@ -130,6 +144,7 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ```
 
 **Changes:**
+
 - ✅ Format: `ToolName(args)` on first line
 - ✅ Details on second line with `⎿` connector
 - ✅ Matches Claude Code's structured format
@@ -138,14 +153,17 @@ Bo CLI has been redesigned to closely match Claude Code's elegant, minimal aesth
 ### 6. Action Icons
 
 **Before:**
+
 - Various icons for different statuses
 - Different symbols for different actions
 
 **After:**
+
 - Consistent `⏺` for all completed actions
 - Simple, unified indicator
 
 **Changes:**
+
 - ✅ Single `⏺` symbol for all actions
 - ✅ Status-based coloring maintained
 - ✅ Clean, minimal aesthetic
@@ -237,49 +255,49 @@ The spinner system now integrates seamlessly with Claude Code styling:
 onToolStart: (call) => {
   display.updateThinking(`📖 Reading ${path}`);
   // Shows: ∴ 📖 Reading src/main.ts
-}
+};
 
 onToolResult: (call, output) => {
   display.updateThinking('Analyzing results...');
   display.showAction(summary, 'success');
   // Shows: ⏺ Read(src/main.ts)
   //          ⎿  Read 1859 lines
-}
+};
 ```
 
 ## Visual Comparison
 
 ### Startup Comparison
 
-| Element | Bo (Before) | Claude Code (After) |
-|---------|-------------------|---------------------|
-| Banner Layout | Left-aligned, compact | Centered, spacious |
-| Tool Listing | Verbose (11 tools) | Hidden |
-| Visual Density | High | Minimal |
-| Greeting | None | Personalized |
-| Logo | None | ASCII art |
+| Element        | Bo (Before)           | Claude Code (After) |
+| -------------- | --------------------- | ------------------- |
+| Banner Layout  | Left-aligned, compact | Centered, spacious  |
+| Tool Listing   | Verbose (11 tools)    | Hidden              |
+| Visual Density | High                  | Minimal             |
+| Greeting       | None                  | Personalized        |
+| Logo           | None                  | ASCII art           |
 
 ### During Processing
 
-| Element | Bo (Before) | Claude Code (After) |
-|---------|-------------------|---------------------|
-| Spinner | `⠋` rotating dots | `∴` and `✻` |
-| Thoughts | `•` bullet tree | `⏺` compact |
-| Tool Actions | `⏺ Description` | `⏺ Tool(args)\n  ⎿ Details` |
-| Exit | Success checkmark | Silent clear |
+| Element      | Bo (Before)       | Claude Code (After)          |
+| ------------ | ----------------- | ---------------------------- |
+| Spinner      | `⠋` rotating dots | `∴` and `✻`                  |
+| Thoughts     | `•` bullet tree   | `⏺` compact                 |
+| Tool Actions | `⏺ Description`  | `⏺ Tool(args)\n  ⎿ Details` |
+| Exit         | Success checkmark | Silent clear                 |
 
 ## Symbol Reference
 
 ### New Symbols Used
 
-| Symbol | Unicode | Usage | Example |
-|--------|---------|-------|---------|
-| ∴ | U+2234 | Thinking spinner (frame 1-3) | `∴ Thinking…` |
-| ✻ | U+273B | Thinking spinner (frame 4-6) | `✻ Pontificating…` |
-| ⏺ | U+23FA | All actions and thoughts | `⏺ Read(file.ts)` |
-| ⎿ | U+23BF | Tool result connector | `  ⎿  Read 100 lines` |
-| ▐ | U+2590 | ASCII logo | `▐▛███▜▌` |
-| ▝ | U+259D | ASCII logo | `▝▜█████▛▘` |
+| Symbol | Unicode | Usage                        | Example               |
+| ------ | ------- | ---------------------------- | --------------------- |
+| ∴      | U+2234  | Thinking spinner (frame 1-3) | `∴ Thinking…`         |
+| ✻      | U+273B  | Thinking spinner (frame 4-6) | `✻ Pontificating…`    |
+| ⏺     | U+23FA  | All actions and thoughts     | `⏺ Read(file.ts)`    |
+| ⎿      | U+23BF  | Tool result connector        | `  ⎿  Read 100 lines` |
+| ▐      | U+2590  | ASCII logo                   | `▐▛███▜▌`             |
+| ▝      | U+259D  | ASCII logo                   | `▝▜█████▛▘`           |
 
 ## Testing
 
@@ -290,6 +308,7 @@ node examples/test-claude-code-style.js
 ```
 
 This demonstrates:
+
 1. ✅ Centered welcome banner
 2. ✅ No tool listing
 3. ✅ Claude-style spinner (∴ and ✻)
@@ -320,18 +339,21 @@ showAvailableTools(tools: Array<{ name: string; description: string }>) {
 ## Benefits
 
 ### User Experience
+
 - **Cleaner Interface**: Less visual clutter on startup
 - **Better Focus**: Attention on conversation, not tooling
 - **Familiar**: Matches Claude Code's proven UX
 - **Professional**: Polished, modern aesthetic
 
 ### Information Hierarchy
+
 - **Greeting**: Personal connection
 - **Model**: Prominent placement
 - **Workspace**: Contextual information
 - **Actions**: Structured, scannable format
 
 ### Visual Consistency
+
 - **Unified Icons**: Single `⏺` symbol throughout
 - **Consistent Formatting**: Predictable layout patterns
 - **Clean Spacing**: Appropriate whitespace
@@ -365,29 +387,31 @@ Potential additions to further match Claude Code:
 
 ### Feature Parity with Claude Code
 
-| Feature | Claude Code | Bo CLI | Status |
-|---------|-------------|--------------|--------|
-| Centered banner | ✅ | ✅ | ✅ Complete |
-| Personalized greeting | ✅ | ✅ | ✅ Complete |
-| ASCII logo | ✅ | ✅ | ✅ Complete |
-| Hidden tool list | ✅ | ✅ | ✅ Complete |
-| ∴/✻ spinner | ✅ | ✅ | ✅ Complete |
-| ⏺ thoughts | ✅ | ✅ | ✅ Complete |
-| Tool(args) format | ✅ | ✅ | ✅ Complete |
-| ⎿ result connector | ✅ | ✅ | ✅ Complete |
-| Status bar | ✅ | ⏳ | 🔜 Future |
-| Escape to cancel | ✅ | ⏳ | 🔜 Future |
-| Streaming responses | ✅ | ⏳ | 🔜 Future |
+| Feature               | Claude Code | Bo CLI | Status      |
+| --------------------- | ----------- | ------ | ----------- |
+| Centered banner       | ✅          | ✅     | ✅ Complete |
+| Personalized greeting | ✅          | ✅     | ✅ Complete |
+| ASCII logo            | ✅          | ✅     | ✅ Complete |
+| Hidden tool list      | ✅          | ✅     | ✅ Complete |
+| ∴/✻ spinner           | ✅          | ✅     | ✅ Complete |
+| ⏺ thoughts           | ✅          | ✅     | ✅ Complete |
+| Tool(args) format     | ✅          | ✅     | ✅ Complete |
+| ⎿ result connector    | ✅          | ✅     | ✅ Complete |
+| Status bar            | ✅          | ⏳     | 🔜 Future   |
+| Escape to cancel      | ✅          | ⏳     | 🔜 Future   |
+| Streaming responses   | ✅          | ⏳     | 🔜 Future   |
 
 ## Migration Notes
 
 ### Breaking Changes
+
 - **None** - All changes are visual only
 - Existing functionality preserved
 - APIs unchanged
 - Configuration compatible
 
 ### Deprecations
+
 - Legacy thought formatting methods (internal only)
 - Verbose tool listing (can be re-enabled)
 

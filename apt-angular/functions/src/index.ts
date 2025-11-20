@@ -4,13 +4,21 @@ import { setGlobalOptions } from 'firebase-functions/v2/options';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import type { Request, Response } from 'express';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { AgentCommandSchema, AgentRunCreateSchema, AgentRunFiltersSchema } from './lib/run-schemas.js';
-import { assertProjectMember, assertProjectRole, buildProjectRunRef } from './lib/project-access.js';
+import {
+  AgentCommandSchema,
+  AgentRunCreateSchema,
+  AgentRunFiltersSchema,
+} from './lib/run-schemas.js';
+import {
+  assertProjectMember,
+  assertProjectRole,
+  buildProjectRunRef,
+} from './lib/project-access.js';
 
 setGlobalOptions({
   region: 'us-central1',
   memory: '512MiB',
-  maxInstances: 20
+  maxInstances: 20,
 });
 
 if (admin.apps.length === 0) {
@@ -40,12 +48,12 @@ export const createAgentRun = onCall({ cors: true }, async (request) => {
     schedule: payload.schedule ?? null,
     prompt: payload.prompt,
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
   });
 
   return {
     id: runRef.id,
-    status: 'queued'
+    status: 'queued',
   };
 });
 
@@ -66,7 +74,7 @@ export const issueCommand = onCall({ cors: true }, async (request) => {
     kind: payload.kind,
     authorUid: request.auth.uid,
     status: 'pending',
-    createdAt: FieldValue.serverTimestamp()
+    createdAt: FieldValue.serverTimestamp(),
   });
 
   return { id: commandsRef.id };
@@ -114,29 +122,29 @@ export const demoAgentExecutor = onDocumentCreated(
     await runRef.update({
       status: 'running',
       startedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     await appendRunEvent(runRef, {
       type: 'log',
       level: 'info',
       message: `demo agent ${snapshot.id} booted via Cloud Functions`,
-      createdAt: FieldValue.serverTimestamp()
+      createdAt: FieldValue.serverTimestamp(),
     });
 
     await appendRunEvent(runRef, {
       type: 'message',
       role: 'assistant',
       content: `Pretending to work on: ${run.prompt}`,
-      createdAt: FieldValue.serverTimestamp()
+      createdAt: FieldValue.serverTimestamp(),
     });
 
     await runRef.update({
       status: 'succeeded',
       completedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     });
-  }
+  },
 );
 
 async function appendRunEvent(runRef: DocumentReference, payload: Record<string, unknown>) {

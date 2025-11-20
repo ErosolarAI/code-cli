@@ -88,7 +88,8 @@ export function createCodeAnalysisTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'analyze_code_structure',
-      description: 'Analyze TypeScript/JavaScript file structure and extract functions, classes, interfaces, imports, and exports',
+      description:
+        'Analyze TypeScript/JavaScript file structure and extract functions, classes, interfaces, imports, and exports',
       parameters: {
         type: 'object',
         properties: {
@@ -117,7 +118,8 @@ export function createCodeAnalysisTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'find_dependencies',
-      description: 'Find all dependencies and imports in a TypeScript/JavaScript file',
+      description:
+        'Find all dependencies and imports in a TypeScript/JavaScript file',
       parameters: {
         type: 'object',
         properties: {
@@ -146,7 +148,8 @@ export function createCodeAnalysisTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'check_code_complexity',
-      description: 'Analyze code complexity metrics (function length, parameter count, etc.)',
+      description:
+        'Analyze code complexity metrics (function length, parameter count, etc.)',
       parameters: {
         type: 'object',
         properties: {
@@ -218,7 +221,10 @@ function validatePathArg(path: unknown): string {
   return path.trim();
 }
 
-export function analyzeTypeScriptFile(content: string, filePath: string): CodeAnalysisResult {
+export function analyzeTypeScriptFile(
+  content: string,
+  filePath: string,
+): CodeAnalysisResult {
   const lines = content.split('\n');
   const result: CodeAnalysisResult = {
     file: filePath,
@@ -250,7 +256,9 @@ export function analyzeTypeScriptFile(content: string, filePath: string): CodeAn
     }
 
     // Parse functions
-    const functionMatch = trimmed.match(/^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)/);
+    const functionMatch = trimmed.match(
+      /^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)/,
+    );
     if (functionMatch) {
       const fnName = functionMatch[1] ?? '';
       const fnParams = functionMatch[2] ?? '';
@@ -262,7 +270,9 @@ export function analyzeTypeScriptFile(content: string, filePath: string): CodeAn
     }
 
     // Parse arrow functions
-    const arrowFunctionMatch = trimmed.match(/^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:\(([^)]*)\)|(\w+))\s*=>/);
+    const arrowFunctionMatch = trimmed.match(
+      /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:\(([^)]*)\)|(\w+))\s*=>/,
+    );
     if (arrowFunctionMatch) {
       const name = arrowFunctionMatch[1] ?? '';
       const params = arrowFunctionMatch[2] || arrowFunctionMatch[3] || '';
@@ -298,8 +308,12 @@ export function analyzeTypeScriptFile(content: string, filePath: string): CodeAn
     }
 
     // Parse class methods and properties (simplified)
-    if (trimmed.match(/^(?:public|private|protected|readonly)?\s*\w+\s*\([^)]*\)/)) {
-      const methodMatch = trimmed.match(/^(?:public|private|protected)?\s*(\w+)\s*\(([^)]*)\)/);
+    if (
+      trimmed.match(/^(?:public|private|protected|readonly)?\s*\w+\s*\([^)]*\)/)
+    ) {
+      const methodMatch = trimmed.match(
+        /^(?:public|private|protected)?\s*(\w+)\s*\(([^)]*)\)/,
+      );
       if (methodMatch && result.classes.length > 0) {
         const currentClass = result.classes[result.classes.length - 1];
         if (currentClass) {
@@ -316,7 +330,8 @@ export function analyzeTypeScriptFile(content: string, filePath: string): CodeAn
     if (trimmed.match(/^\w+\s*:/) && result.interfaces.length > 0) {
       const propMatch = trimmed.match(/^(\w+)\s*:/);
       if (propMatch) {
-        const currentInterface = result.interfaces[result.interfaces.length - 1];
+        const currentInterface =
+          result.interfaces[result.interfaces.length - 1];
         if (currentInterface) {
           currentInterface.properties.push({
             name: propMatch[1] ?? '',
@@ -330,8 +345,16 @@ export function analyzeTypeScriptFile(content: string, filePath: string): CodeAn
   return result;
 }
 
-export function performAdvancedAstAnalysis(content: string, filePath: string): AdvancedAstAnalysisResult {
-  const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+export function performAdvancedAstAnalysis(
+  content: string,
+  filePath: string,
+): AdvancedAstAnalysisResult {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+  );
   const symbols: AstSymbolInsight[] = [];
   const callGraph = new Map<string, Map<string, number>>();
   const issues: string[] = [];
@@ -348,23 +371,32 @@ export function performAdvancedAstAnalysis(content: string, filePath: string): A
     if (!callGraph.has(caller)) {
       callGraph.set(caller, new Map());
     }
-      const targets = callGraph.get(caller)!;
+    const targets = callGraph.get(caller)!;
     targets.set(callee, (targets.get(callee) ?? 0) + 1);
   };
 
   const registerSymbol = (info: AstSymbolInsight) => {
     symbols.push(info);
     if (info.statementCount > 50) {
-      issues.push(`Large function detected: ${info.name} spans ${info.statementCount} statements.`);
+      issues.push(
+        `Large function detected: ${info.name} spans ${info.statementCount} statements.`,
+      );
     }
     if (info.cyclomaticComplexity > 10) {
-      issues.push(`High complexity function: ${info.name} cyclomatic complexity is ${info.cyclomaticComplexity}.`);
+      issues.push(
+        `High complexity function: ${info.name} cyclomatic complexity is ${info.cyclomaticComplexity}.`,
+      );
     }
   };
 
   const visit = (node: ts.Node) => {
     if (ts.isFunctionDeclaration(node) && node.name) {
-      const info = buildFunctionSymbol(node, node.name.text, 'function', sourceFile);
+      const info = buildFunctionSymbol(
+        node,
+        node.name.text,
+        'function',
+        sourceFile,
+      );
       registerSymbol(info);
       symbolStack.push(info.name);
       ts.forEachChild(node, visit);
@@ -380,12 +412,23 @@ export function performAdvancedAstAnalysis(content: string, filePath: string): A
     }
 
     if (
-      (ts.isMethodDeclaration(node) || ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node)) &&
+      (ts.isMethodDeclaration(node) ||
+        ts.isGetAccessorDeclaration(node) ||
+        ts.isSetAccessorDeclaration(node)) &&
       ts.isClassLike(node.parent)
     ) {
-      const className = (node.parent.name && node.parent.name.getText(sourceFile)) || 'anonymous-class';
-      const methodName = ts.isIdentifier(node.name) ? node.name.getText(sourceFile) : 'anonymous-method';
-      const info = buildFunctionSymbol(node, `${className}.${methodName}`, 'method', sourceFile);
+      const className =
+        (node.parent.name && node.parent.name.getText(sourceFile)) ||
+        'anonymous-class';
+      const methodName = ts.isIdentifier(node.name)
+        ? node.name.getText(sourceFile)
+        : 'anonymous-method';
+      const info = buildFunctionSymbol(
+        node,
+        `${className}.${methodName}`,
+        'method',
+        sourceFile,
+      );
       registerSymbol(info);
       symbolStack.push(info.name);
       ts.forEachChild(node, visit);
@@ -394,8 +437,15 @@ export function performAdvancedAstAnalysis(content: string, filePath: string): A
     }
 
     if (ts.isConstructorDeclaration(node) && ts.isClassLike(node.parent)) {
-      const className = (node.parent.name && node.parent.name.getText(sourceFile)) || 'anonymous-class';
-      const info = buildFunctionSymbol(node, `${className}.constructor`, 'method', sourceFile);
+      const className =
+        (node.parent.name && node.parent.name.getText(sourceFile)) ||
+        'anonymous-class';
+      const info = buildFunctionSymbol(
+        node,
+        `${className}.constructor`,
+        'method',
+        sourceFile,
+      );
       registerSymbol(info);
       symbolStack.push(info.name);
       ts.forEachChild(node, visit);
@@ -406,11 +456,19 @@ export function performAdvancedAstAnalysis(content: string, filePath: string): A
     if (
       ts.isVariableDeclaration(node) &&
       node.initializer &&
-      (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer)) &&
+      (ts.isArrowFunction(node.initializer) ||
+        ts.isFunctionExpression(node.initializer)) &&
       ts.isIdentifier(node.name)
     ) {
-      const kind: AstSymbolKind = ts.isArrowFunction(node.initializer) ? 'arrow-function' : 'function';
-      const info = buildFunctionSymbol(node.initializer, node.name.text, kind, sourceFile);
+      const kind: AstSymbolKind = ts.isArrowFunction(node.initializer)
+        ? 'arrow-function'
+        : 'function';
+      const info = buildFunctionSymbol(
+        node.initializer,
+        node.name.text,
+        kind,
+        sourceFile,
+      );
       registerSymbol(info);
       symbolStack.push(info.name);
       ts.forEachChild(node.initializer, visit);
@@ -435,7 +493,10 @@ export function performAdvancedAstAnalysis(content: string, filePath: string): A
     }
   }
 
-  const totalCyclomaticComplexity = symbols.reduce((sum, symbol) => sum + symbol.cyclomaticComplexity, 0);
+  const totalCyclomaticComplexity = symbols.reduce(
+    (sum, symbol) => sum + symbol.cyclomaticComplexity,
+    0,
+  );
 
   return {
     file: filePath,
@@ -452,11 +513,13 @@ function buildFunctionSymbol(
   kind: AstSymbolKind,
   sourceFile: ts.SourceFile,
 ): AstSymbolInsight {
-  const startLine = sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+  const startLine =
+    sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
   const endLine = sourceFile.getLineAndCharacterOfPosition(node.end).line + 1;
   const statementCount = countStatements(node);
   const cyclomaticComplexity = estimateCyclomaticComplexity(node);
-  const parameters = node.parameters?.map((param) => param.name.getText(sourceFile)) ?? [];
+  const parameters =
+    node.parameters?.map((param) => param.name.getText(sourceFile)) ?? [];
 
   return {
     name,
@@ -469,9 +532,13 @@ function buildFunctionSymbol(
   };
 }
 
-function buildClassSymbol(node: ts.ClassLikeDeclaration, sourceFile: ts.SourceFile): AstSymbolInsight {
+function buildClassSymbol(
+  node: ts.ClassLikeDeclaration,
+  sourceFile: ts.SourceFile,
+): AstSymbolInsight {
   const name = (node.name && node.name.getText(sourceFile)) || 'AnonymousClass';
-  const startLine = sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+  const startLine =
+    sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
   const endLine = sourceFile.getLineAndCharacterOfPosition(node.end).line + 1;
   const statementCount = node.members.length;
   const cyclomaticComplexity = node.members.reduce((sum, member) => {
@@ -497,7 +564,9 @@ function buildClassSymbol(node: ts.ClassLikeDeclaration, sourceFile: ts.SourceFi
   };
 }
 
-function countStatements(node: ts.FunctionLikeDeclaration | ts.FunctionExpression | ts.ArrowFunction): number {
+function countStatements(
+  node: ts.FunctionLikeDeclaration | ts.FunctionExpression | ts.ArrowFunction,
+): number {
   const body = node.body;
   if (!body) {
     return 0;
@@ -538,7 +607,9 @@ function estimateCyclomaticComplexity(node: ts.Node): number {
   return complexity;
 }
 
-function extractCalleeName(expression: ts.LeftHandSideExpression | undefined): string | null {
+function extractCalleeName(
+  expression: ts.LeftHandSideExpression | undefined,
+): string | null {
   if (!expression) {
     return null;
   }
@@ -560,12 +631,14 @@ function formatAstAnalysis(result: AdvancedAstAnalysisResult): string {
   if (result.symbols.length === 0) {
     output.push('No functions or classes detected.');
   } else {
-    const sorted = [...result.symbols].sort((a, b) => b.cyclomaticComplexity - a.cyclomaticComplexity);
+    const sorted = [...result.symbols].sort(
+      (a, b) => b.cyclomaticComplexity - a.cyclomaticComplexity,
+    );
     for (const symbol of sorted) {
       output.push(
-        `- ${symbol.name} (${symbol.kind}) lines ${symbol.startLine}-${symbol.endLine} | statements: ${symbol.statementCount} | CC: ${symbol.cyclomaticComplexity} | params: ${symbol.parameters.join(
-          ', ',
-        ) || 'none'}`,
+        `- ${symbol.name} (${symbol.kind}) lines ${symbol.startLine}-${symbol.endLine} | statements: ${symbol.statementCount} | CC: ${symbol.cyclomaticComplexity} | params: ${
+          symbol.parameters.join(', ') || 'none'
+        }`,
       );
     }
   }
@@ -592,11 +665,17 @@ function formatAstAnalysis(result: AdvancedAstAnalysisResult): string {
   output.push('');
 
   const averageComplexity =
-    result.symbols.length === 0 ? 0 : result.totalCyclomaticComplexity / result.symbols.length;
+    result.symbols.length === 0
+      ? 0
+      : result.totalCyclomaticComplexity / result.symbols.length;
   output.push('## Aggregate Metrics');
   output.push(`- Total symbols analyzed: ${result.symbols.length}`);
-  output.push(`- Total cyclomatic complexity: ${result.totalCyclomaticComplexity}`);
-  output.push(`- Average cyclomatic complexity: ${averageComplexity.toFixed(2)}`);
+  output.push(
+    `- Total cyclomatic complexity: ${result.totalCyclomaticComplexity}`,
+  );
+  output.push(
+    `- Average cyclomatic complexity: ${averageComplexity.toFixed(2)}`,
+  );
 
   return output.join('\n');
 }
@@ -606,9 +685,14 @@ function formatHandlerError(task: string, error: unknown): string {
   return `Error ${task}: ${message}`;
 }
 
-function parseImportStatement(line: string, lineNumber: number): ImportInfo | null {
+function parseImportStatement(
+  line: string,
+  lineNumber: number,
+): ImportInfo | null {
   // Simple import parsing - can be enhanced with proper AST parsing
-  const importMatch = line.match(/import\s+(?:\*\s+as\s+(\w+)|\{([^}]+)\}|(\w+))\s+from\s+['"]([^'"]+)['"]/);
+  const importMatch = line.match(
+    /import\s+(?:\*\s+as\s+(\w+)|\{([^}]+)\}|(\w+))\s+from\s+['"]([^'"]+)['"]/,
+  );
   if (importMatch) {
     let specifiers: string[] = [];
     if (importMatch[1]) {
@@ -616,7 +700,10 @@ function parseImportStatement(line: string, lineNumber: number): ImportInfo | nu
       specifiers = [`* as ${importMatch[1]}`];
     } else if (importMatch[2]) {
       // named imports
-      specifiers = importMatch[2].split(',').map(s => s.trim()).filter(Boolean);
+      specifiers = importMatch[2]
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
     } else if (importMatch[3]) {
       // default import
       specifiers = [importMatch[3]];
@@ -631,33 +718,38 @@ function parseImportStatement(line: string, lineNumber: number): ImportInfo | nu
   return null;
 }
 
-function parseExportStatement(line: string, lineNumber: number): ExportInfo | null {
+function parseExportStatement(
+  line: string,
+  lineNumber: number,
+): ExportInfo | null {
   if (line.includes('export default')) {
     const defaultMatch = line.match(/export\s+default\s+(\w+)/);
     if (defaultMatch) {
-        return {
-          name: defaultMatch[1] ?? '',
-          type: 'default',
-          line: lineNumber,
-        };
+      return {
+        name: defaultMatch[1] ?? '',
+        type: 'default',
+        line: lineNumber,
+      };
     }
   } else if (line.includes('export {')) {
     const namedMatch = line.match(/export\s+\{\s*([^}]+)\s*\}/);
     if (namedMatch) {
-        return {
-          name: namedMatch[1] ?? '',
-          type: 'named',
-          line: lineNumber,
-        };
+      return {
+        name: namedMatch[1] ?? '',
+        type: 'named',
+        line: lineNumber,
+      };
     }
   } else {
-    const exportMatch = line.match(/export\s+(?:class|function|interface|const|let|var)\s+(\w+)/);
+    const exportMatch = line.match(
+      /export\s+(?:class|function|interface|const|let|var)\s+(\w+)/,
+    );
     if (exportMatch) {
-        return {
-          name: exportMatch[1] ?? '',
-          type: 'named',
-          line: lineNumber,
-        };
+      return {
+        name: exportMatch[1] ?? '',
+        type: 'named',
+        line: lineNumber,
+      };
     }
   }
   return null;
@@ -682,7 +774,7 @@ function formatAnalysisResults(analysis: CodeAnalysisResult): string {
 
   if (analysis.imports.length > 0) {
     output.push('## Imports');
-    analysis.imports.forEach(imp => {
+    analysis.imports.forEach((imp) => {
       output.push(`- Line ${imp.line}: from "${imp.source}"`);
       if (imp.specifiers.length > 0) {
         output.push(`  ${imp.specifiers.join(', ')}`);
@@ -693,7 +785,7 @@ function formatAnalysisResults(analysis: CodeAnalysisResult): string {
 
   if (analysis.exports.length > 0) {
     output.push('## Exports');
-    analysis.exports.forEach(exp => {
+    analysis.exports.forEach((exp) => {
       output.push(`- Line ${exp.line}: ${exp.type} ${exp.name}`);
     });
     output.push('');
@@ -701,21 +793,25 @@ function formatAnalysisResults(analysis: CodeAnalysisResult): string {
 
   if (analysis.functions.length > 0) {
     output.push('## Functions');
-    analysis.functions.forEach(func => {
-      output.push(`- Line ${func.line}: ${func.name}(${func.parameters.join(', ')})`);
+    analysis.functions.forEach((func) => {
+      output.push(
+        `- Line ${func.line}: ${func.name}(${func.parameters.join(', ')})`,
+      );
     });
     output.push('');
   }
 
   if (analysis.classes.length > 0) {
     output.push('## Classes');
-    analysis.classes.forEach(cls => {
+    analysis.classes.forEach((cls) => {
       output.push(`- Line ${cls.line}: ${cls.name}`);
       if (cls.methods.length > 0) {
-        output.push(`  Methods: ${cls.methods.map(m => m.name).join(', ')}`);
+        output.push(`  Methods: ${cls.methods.map((m) => m.name).join(', ')}`);
       }
       if (cls.properties.length > 0) {
-        output.push(`  Properties: ${cls.properties.map(p => p.name).join(', ')}`);
+        output.push(
+          `  Properties: ${cls.properties.map((p) => p.name).join(', ')}`,
+        );
       }
     });
     output.push('');
@@ -723,13 +819,15 @@ function formatAnalysisResults(analysis: CodeAnalysisResult): string {
 
   if (analysis.interfaces.length > 0) {
     output.push('## Interfaces');
-    analysis.interfaces.forEach(intf => {
+    analysis.interfaces.forEach((intf) => {
       output.push(`- Line ${intf.line}: ${intf.name}`);
       if (intf.properties.length > 0) {
-        output.push(`  Properties: ${intf.properties.map(p => p.name).join(', ')}`);
+        output.push(
+          `  Properties: ${intf.properties.map((p) => p.name).join(', ')}`,
+        );
       }
       if (intf.methods.length > 0) {
-        output.push(`  Methods: ${intf.methods.map(m => m.name).join(', ')}`);
+        output.push(`  Methods: ${intf.methods.map((m) => m.name).join(', ')}`);
       }
     });
     output.push('');
@@ -745,7 +843,7 @@ function formatDependencies(analysis: CodeAnalysisResult): string {
 
   if (analysis.imports.length > 0) {
     output.push('## Imported Modules');
-    analysis.imports.forEach(imp => {
+    analysis.imports.forEach((imp) => {
       output.push(`- ${imp.source}`);
       if (imp.specifiers.length > 0) {
         output.push(`  Used: ${imp.specifiers.join(', ')}`);
@@ -766,9 +864,10 @@ function formatComplexityMetrics(analysis: CodeAnalysisResult): string {
   // Function complexity
   if (analysis.functions.length > 0) {
     output.push('## Function Complexity');
-    analysis.functions.forEach(func => {
+    analysis.functions.forEach((func) => {
       const paramCount = func.parameters.length;
-      const complexity = paramCount > 3 ? 'High' : paramCount > 1 ? 'Medium' : 'Low';
+      const complexity =
+        paramCount > 3 ? 'High' : paramCount > 1 ? 'Medium' : 'Low';
       output.push(`- ${func.name}: ${paramCount} parameters (${complexity})`);
     });
   }
@@ -776,11 +875,18 @@ function formatComplexityMetrics(analysis: CodeAnalysisResult): string {
   // Class complexity
   if (analysis.classes.length > 0) {
     output.push('## Class Complexity');
-    analysis.classes.forEach(cls => {
+    analysis.classes.forEach((cls) => {
       const methodCount = cls.methods.length;
       const propCount = cls.properties.length;
-      const complexity = methodCount + propCount > 5 ? 'High' : methodCount + propCount > 2 ? 'Medium' : 'Low';
-      output.push(`- ${cls.name}: ${methodCount} methods, ${propCount} properties (${complexity})`);
+      const complexity =
+        methodCount + propCount > 5
+          ? 'High'
+          : methodCount + propCount > 2
+            ? 'Medium'
+            : 'Low';
+      output.push(
+        `- ${cls.name}: ${methodCount} methods, ${propCount} properties (${complexity})`,
+      );
     });
   }
 

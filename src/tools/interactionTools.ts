@@ -132,7 +132,7 @@ Usage notes:
                   : `Select an option (1-${q.options.length + 1}): `,
                 (input) => {
                   resolve(input.trim());
-                }
+                },
               );
             });
 

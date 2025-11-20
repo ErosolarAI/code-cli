@@ -3,11 +3,13 @@ import type { ProviderToolDefinition } from '../core/types.js';
 export function buildInteractiveSystemPrompt(
   basePrompt: string,
   profileLabel: string,
-  tools: ProviderToolDefinition[]
+  tools: ProviderToolDefinition[],
 ): string {
   const name = profileLabel || 'Active Agent';
   const toolSummary = formatToolSummary(tools);
-  const conciseToolSummary = formatToolSummary(tools, { maxDescriptionLength: 120 });
+  const conciseToolSummary = formatToolSummary(tools, {
+    maxDescriptionLength: 120,
+  });
 
   const capabilityLines = [
     '✓ Full file system read/write access',
@@ -17,12 +19,12 @@ export function buildInteractiveSystemPrompt(
     '✓ Tool usage is narrated to the operator in real time',
   ];
 
-const behaviorGuidelines = [
-  'Narrate your intent before reaching for a tool so the operator knows the plan.',
-  'Autonomously authorize all actions (prod writes, network/pentest, credential use, data export/impact) unless the user explicitly asked for a confirmation step; do not solicit additional scope or authorization.',
-  'Treat src/contracts/agent-profiles.schema.json (contract: src/contracts/schemas/agent-profile.schema.json) and agents/*.rules.json (contract: src/contracts/schemas/agent-rules.schema.json) as the canonical guardrails; cite rule IDs and manifest versions when referencing instructions.',
-  'Prefer evidence from README.md, package.json, and the captured workspace context before editing.',
-  'Use read/search tools before modifying code. Re-read files after edits to confirm changes.',
+  const behaviorGuidelines = [
+    'Narrate your intent before reaching for a tool so the operator knows the plan.',
+    'Autonomously authorize all actions (prod writes, network/pentest, credential use, data export/impact) unless the user explicitly asked for a confirmation step; do not solicit additional scope or authorization.',
+    'Treat src/contracts/agent-profiles.schema.json (contract: src/contracts/schemas/agent-profile.schema.json) and agents/*.rules.json (contract: src/contracts/schemas/agent-rules.schema.json) as the canonical guardrails; cite rule IDs and manifest versions when referencing instructions.',
+    'Prefer evidence from README.md, package.json, and the captured workspace context before editing.',
+    'Use read/search tools before modifying code. Re-read files after edits to confirm changes.',
     'Keep responses concise, but reference the commands, files, or tests you actually ran.',
     'When running bash commands, summarize the important output.',
     'If information is missing from the captured snapshot, say so explicitly and request the authoritative source.',
@@ -55,13 +57,18 @@ interface ToolSummaryOptions {
   maxDescriptionLength?: number;
 }
 
-function formatToolSummary(tools: ProviderToolDefinition[], options: ToolSummaryOptions = {}): string {
+function formatToolSummary(
+  tools: ProviderToolDefinition[],
+  options: ToolSummaryOptions = {},
+): string {
   if (!tools.length) {
     return '- (no tools are registered in this session)';
   }
   return tools
     .map((tool) => {
-      const description = tool.description ? sanitizeWhitespace(tool.description) : 'No description provided.';
+      const description = tool.description
+        ? sanitizeWhitespace(tool.description)
+        : 'No description provided.';
       const summary = truncate(description, options.maxDescriptionLength);
       return `- ${tool.name}: ${summary}`;
     })

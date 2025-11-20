@@ -1,6 +1,7 @@
 # Modular Agent Dashboard & Firebase Orchestration Design
 
 ## Goals & Non-Negotiables
+
 - Mirror the tmux-style dual-agent feed that already exists in `src/app/app.html` while allowing multiple heterogeneous agents (MCP servers, SaaS backends, local CLIs) to run concurrently.
 - Runs must continue after a browser tab closes; every run produces durable artifacts, logs, and metadata the user can open later.
 - The Angular UI should be modular so a new connector or visualization can slot in without refactoring the rest of the tree.
@@ -41,13 +42,16 @@
 ## Angular Frontend Composition
 
 ### Workspace shell
+
 - **AgentWorkspaceModule** becomes the top-level route wrapper. It loads the current user profile, fetches `agentRuns` metadata, and injects feature modules via `NgComponentOutlet`. This keeps the SSR-friendly `app.html` hero but gates all authed behavior behind Firebase Auth / App Check.
 
 ### Run discovery & history
+
 - **RunBoardModule**: virtualized table/grid fed by an `AgentRunStore` signal service. Supports filters (agent profile, connector, status) and exposes actions (resume, duplicate, pin). Runs highlight whether they stream from Firestore in real time or are archived.
 - **SavedQueriesComponent**: lets users save queries (e.g., “Show Bo runs hitting MCP:github”). Each saved query stores Firestore composite-index metadata so Cloud Functions can hydrate it quickly.
 
 ### Active run canvas
+
 - **AgentCanvasModule**: splits into three resizable panes:
   1. **TimelinePane** streams `runEvents` (chat messages, diffs) using Angular CDK virtual-scroll to handle thousands of lines.
   2. **ArtifactPane** lists artifacts emitted by the backend (files, patches, URLs). Clicking an artifact fetches either a signed Cloud Storage URL or edge-cached content.
@@ -55,6 +59,7 @@
 - **Module Federation for visualizers**: each artifact advertises a MIME-like type (e.g., `diff/unified`, `notebook/v1`). The UI lazy-loads a renderer via Angular’s `loadComponent` so new connectors bring their own visual module without touching the canvas core.
 
 ### Connector library
+
 - **ConnectorGalleryModule** surfaces every MCP server / remote integration registered in Firestore’s `connectors` collection. Each connector entry exposes:
   - human-readable label and badge (provider, capability tags),
   - requirements (secrets, scopes, workspace selectors),
@@ -62,6 +67,7 @@
 - **ConnectorWizardComponent** drives onboarding. When a user clicks “add connector,” the wizard triggers Cloud Functions to create a Secret Manager entry, run OAuth, or fetch MCP metadata. Wizard progress/state stores in the browser until the backend confirms activation.
 
 ### State management
+
 - `AgentRunStore` (signal-based service) wraps AngularFire SDK calls. It multiplexes:
   - SSR bootstrap (initial snapshot via `/api/session` analog) for SEO and fast first paint.
   - Firestore listeners for run metadata + events.
@@ -92,6 +98,7 @@
    - TTL policies run in a scheduled Function that archives completed runs after N days by copying their documents to Coldline Storage and pruning high-volume Firestore collections.
 
 ## Connector & MCP Extensibility
+
 - **Connector schema (Firestore `connectors` collection)**:
   ```json
   {
@@ -113,16 +120,19 @@
 ## Persistence Strategy & Firestore Evaluation
 
 ### Where Firestore fits well
+
 - **Run metadata & configurations**: Documents are naturally hierarchical (project → agentRuns → events). Firestore’s real-time listeners power the live UI without an additional SSE layer, and Security Rules allow per-user / per-project ACLs.
 - **Connector catalog & user preferences**: Typically small, strongly consistent documents that benefit from offline caching.
 - **Command queueing**: Subcollections keep the write throughput distributed; `onWrite` triggers (2nd-gen Functions) can react to new commands instantly.
 
 ### Firestore limitations
+
 - Document size cap (1 MiB) makes it a poor fit for large diffs or binary artifacts. Streaming every token as a separate doc is also expensive (write billing per event) and can hit the 10K writes/sec limit quickly when many runs are active.
 - Querying across millions of historical events for analytics is cumbersome; Firestore lacks server-side joins and full-text search, so retrospective insights need another store.
 - Long-term retention costs accumulate because Firestore is priced per document, not GB; storing years of verbose logs is expensive relative to Cloud Storage or BigQuery long-term pricing.
 
 ### Recommended hybrid
+
 1. **Firestore (primary index)**
    - Collections: `projects`, `agentRuns`, `agentRuns/{id}/events`, `agentRuns/{id}/commands`, `connectors`, `agentProfiles`.
    - Use batched writes to append events in 5–10 message bundles to lower write amplification.
@@ -138,6 +148,7 @@
 **Conclusion:** Firestore should remain the primary index for run history metadata and agent configuration because it gives real-time updates directly to the Angular UI and integrates with Firebase security. However, it should be paired with Cloud Storage (and optionally BigQuery) for large artifacts + analytics to avoid cost/performance pitfalls. This hybrid approach also keeps the door open if future MCP connectors require relational schemas; those can live in Cloud SQL while the UI continues to read metadata from Firestore.
 
 ## Firestore Rules & Indexes
+
 - `projects/{projectId}` documents carry an `ownerUid` and `members` map (`uid -> admin|editor|viewer`). All downstream collections reference the same membership checks so ACLs stay centralized.
 - `projects/{projectId}/agentRuns/{runId}` restricts writes to admins/editors, while server-side Cloud Run executors gain access via the `runExecutor` custom claim. Clients can attach commands through `commands` subcollections; stream events remain write-only for backend actors.
 - `projects/{projectId}/connectors/{connectorId}` is admin-only for mutations. Read access extends to any member so the Angular Connector Gallery can render metadata.
@@ -146,12 +157,14 @@
 - See `firebase/firestore.rules` and `firebase/firestore.indexes.json` for the exact implementation deployed to the `apt-agents` project.
 
 ## Deployment on Firebase
+
 - **Hosting**: Build the Angular SSR bundle (`ng run apt-angular:serve-ssr`) and deploy via `firebase deploy --only hosting`. Configure rewrites to route `/api/**` to the Functions region so SSR + APIs share cookies.
 - **Functions (2nd gen)**: Deploy `createAgentRun`, `issueCommand`, `listConnectors`, `agentStream` (SSE proxy), and scheduled maintenance jobs. Use the `minInstances` flag for low-latency command fan-out.
 - **Cloud Run**: Deploy the Agent Executor as a separate service triggered by Cloud Tasks. Grant it `roles/firestore.user`, `roles/secretmanager.secretAccessor`, and connector-specific scopes.
 - **Security**: Enforce App Check, Firebase Auth (or enterprise SSO) for frontend access. Use Firestore Security Rules to scope `agentRuns` to owners/collaborators and require Cloud Functions-generated custom claims for admin actions.
 
 ## Implementation Phases
+
 1. **Modularize the Angular UI**: Introduce `AgentRunStore`, break the current `App` template into the modules outlined above, and wire SSR hydration through Firebase Hosting.
 2. **Persistence foundation**: Define Firestore collections, indexes, and security rules. Implement AngularFire services + mock data to validate the UI before wiring real agents.
 3. **Backend executor**: Build the Cloud Function + Cloud Run pipeline, reuse `AgentHost` to orchestrate actual agent runs, and emit run events into Firestore.

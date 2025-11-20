@@ -7,7 +7,9 @@ const PACKAGE_NAME = 'bo-cli';
 const REGISTRY_URL = `https://registry.npmjs.org/${PACKAGE_NAME}/latest`;
 const FETCH_TIMEOUT_MS = 4000;
 
-export async function maybeOfferCliUpdate(currentVersion: string): Promise<boolean> {
+export async function maybeOfferCliUpdate(
+  currentVersion: string,
+): Promise<boolean> {
   try {
     const latestVersion = await fetchLatestVersion();
     if (!latestVersion) {
@@ -23,12 +25,12 @@ export async function maybeOfferCliUpdate(currentVersion: string): Promise<boole
         `A new Bo CLI release is available.`,
         `Current version: ${currentVersion}`,
         `Latest version: ${latestVersion}`,
-      ].join('\n')
+      ].join('\n'),
     );
 
     if (!input.isTTY || !output.isTTY) {
       display.showInfo(
-        `Run "npm install -g ${PACKAGE_NAME}@latest" when you're ready to upgrade.`
+        `Run "npm install -g ${PACKAGE_NAME}@latest" when you're ready to upgrade.`,
       );
       return true;
     }
@@ -36,7 +38,7 @@ export async function maybeOfferCliUpdate(currentVersion: string): Promise<boole
     const shouldUpdate = await promptForUpdate();
     if (!shouldUpdate) {
       display.showInfo(
-        `Continuing with ${currentVersion}. You can upgrade later via "npm install -g ${PACKAGE_NAME}@latest".`
+        `Continuing with ${currentVersion}. You can upgrade later via "npm install -g ${PACKAGE_NAME}@latest".`,
       );
       return true;
     }
@@ -44,13 +46,13 @@ export async function maybeOfferCliUpdate(currentVersion: string): Promise<boole
     const success = await installLatestVersion();
     if (success) {
       display.showInfo(
-        `Update complete. Relaunch the CLI to start using ${PACKAGE_NAME}@${latestVersion}.`
+        `Update complete. Relaunch the CLI to start using ${PACKAGE_NAME}@${latestVersion}.`,
       );
       return false;
     }
 
     display.showWarning(
-      `Failed to install ${PACKAGE_NAME}@latest. Please run "npm install -g ${PACKAGE_NAME}@latest" manually.`
+      `Failed to install ${PACKAGE_NAME}@latest. Please run "npm install -g ${PACKAGE_NAME}@latest" manually.`,
     );
     return true;
   } catch {

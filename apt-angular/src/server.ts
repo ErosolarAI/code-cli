@@ -97,7 +97,7 @@ const handleSessionRequest = async (req: Request, res: Response) => {
   res.json({
     ...snapshot,
     source: handle.config.source,
-    sessionId: handle.config.sessionId
+    sessionId: handle.config.sessionId,
   });
 };
 
@@ -151,7 +151,8 @@ const handleAccessGrant = async (req: Request, res: Response) => {
 };
 
 const withErrorHandling =
-  (handler: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response, next: (error?: unknown) => void) =>
+  (handler: (req: Request, res: Response) => Promise<void>) =>
+  (req: Request, res: Response, next: (error?: unknown) => void) =>
     handler(req, res).catch((error) => {
       if (error instanceof Error && /passphrase|token|required/i.test(error.message)) {
         res.status(401).json({ error: error.message });
@@ -163,11 +164,20 @@ const withErrorHandling =
 
 app.get(['/api/session', '/api/session/:sessionId'], withErrorHandling(handleSessionRequest));
 
-app.post(['/api/session/commands', '/api/session/:sessionId/commands'], withErrorHandling(handleCommandRequest));
+app.post(
+  ['/api/session/commands', '/api/session/:sessionId/commands'],
+  withErrorHandling(handleCommandRequest),
+);
 
-app.get(['/api/session/stream', '/api/session/:sessionId/stream'], withErrorHandling(handleStreamRequest));
+app.get(
+  ['/api/session/stream', '/api/session/:sessionId/stream'],
+  withErrorHandling(handleStreamRequest),
+);
 
-app.post(['/api/session/access', '/api/session/:sessionId/access'], withErrorHandling(handleAccessGrant));
+app.post(
+  ['/api/session/access', '/api/session/:sessionId/access'],
+  withErrorHandling(handleAccessGrant),
+);
 
 /**
  * Example Express Rest API endpoints can be defined here.
@@ -198,9 +208,7 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 

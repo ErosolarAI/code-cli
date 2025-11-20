@@ -1,4 +1,8 @@
-import type { CapabilityModule, CapabilityContext, CapabilityContribution } from '../runtime/agentHost.js';
+import type {
+  CapabilityModule,
+  CapabilityContext,
+  CapabilityContribution,
+} from '../runtime/agentHost.js';
 import { createMissionTools } from '../tools/missionTools.js';
 import { getSharedMissionManager } from '../core/orchestrationContext.js';
 

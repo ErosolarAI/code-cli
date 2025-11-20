@@ -1,6 +1,6 @@
 /**
  * Provider Contract v1.0
- * 
+ *
  * Stable interface for LLM provider integration.
  */
 
@@ -54,7 +54,11 @@ export interface ToolMessage extends BaseMessage {
   toolCallId: string;
 }
 
-export type Message = SystemMessage | UserMessage | AssistantMessage | ToolMessage;
+export type Message =
+  | SystemMessage
+  | UserMessage
+  | AssistantMessage
+  | ToolMessage;
 
 /**
  * Tool definition for providers
@@ -92,7 +96,9 @@ export interface ProviderToolCallsResponse {
   usage?: ProviderUsage | null;
 }
 
-export type ProviderResponse = ProviderMessageResponse | ProviderToolCallsResponse;
+export type ProviderResponse =
+  | ProviderMessageResponse
+  | ProviderToolCallsResponse;
 
 /**
  * Streaming response
@@ -114,14 +120,17 @@ export interface ILLMProvider {
   /**
    * Generate a completion (non-streaming)
    */
-  generate(messages: Message[], tools: ProviderToolDefinition[]): Promise<ProviderResponse>;
+  generate(
+    messages: Message[],
+    tools: ProviderToolDefinition[],
+  ): Promise<ProviderResponse>;
 
   /**
    * Generate a streaming completion
    */
   generateStream?(
     messages: Message[],
-    tools: ProviderToolDefinition[]
+    tools: ProviderToolDefinition[],
   ): AsyncIterableIterator<StreamChunk>;
 
   /**

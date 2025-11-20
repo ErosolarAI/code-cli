@@ -11,12 +11,12 @@ test('ToolRuntime validates tool definitions', () => {
       parameters: {
         type: 'object',
         properties: {
-          input: { type: 'string' }
+          input: { type: 'string' },
         },
-        required: ['input']
+        required: ['input'],
       },
-      handler: async () => 'test result'
-    }
+      handler: async () => 'test result',
+    },
   ];
 
   const runtime = new ToolRuntime(validTools);
@@ -34,19 +34,19 @@ test('ToolRuntime rejects duplicate tool names', () => {
       description: 'First tool',
       parameters: {
         type: 'object',
-        properties: {}
+        properties: {},
       },
-      handler: async () => 'first'
+      handler: async () => 'first',
     },
     {
       name: 'duplicate_tool',
       description: 'Second tool',
       parameters: {
         type: 'object',
-        properties: {}
+        properties: {},
       },
-      handler: async () => 'second'
-    }
+      handler: async () => 'second',
+    },
   ];
 
   assert.throws(() => {
@@ -62,24 +62,25 @@ test('ToolRuntime executes tools correctly', async () => {
       parameters: {
         type: 'object',
         properties: {
-          message: { type: 'string' }
+          message: { type: 'string' },
         },
-        required: ['message']
+        required: ['message'],
       },
       handler: async (args: Record<string, unknown>) => {
-        const message = typeof args['message'] === 'string' ? args['message'] : '';
+        const message =
+          typeof args['message'] === 'string' ? args['message'] : '';
         return `Echo: ${message}`;
-      }
-    }
+      },
+    },
   ];
 
   const runtime = new ToolRuntime(testTools);
   const result = await runtime.execute({
     id: 'call-1',
     name: 'echo_tool',
-    arguments: { message: 'hello world' }
+    arguments: { message: 'hello world' },
   });
-  
+
   assert.equal(result, 'Echo: hello world');
 });
 
@@ -91,15 +92,16 @@ test('ToolRuntime normalizes tool call arguments from strings and maps', async (
       parameters: {
         type: 'object',
         properties: {
-          message: { type: 'string' }
+          message: { type: 'string' },
         },
-        required: ['message']
+        required: ['message'],
       },
       handler: async (args: Record<string, unknown>) => {
-        const message = typeof args['message'] === 'string' ? args['message'] : '';
+        const message =
+          typeof args['message'] === 'string' ? args['message'] : '';
         return `Echo: ${message}`;
-      }
-    }
+      },
+    },
   ];
 
   const runtime = new ToolRuntime(tools);
@@ -108,7 +110,7 @@ test('ToolRuntime normalizes tool call arguments from strings and maps', async (
   const stringResult = await runtime.execute({
     id: 'call-string',
     name: 'echo_tool',
-    arguments: stringArgs as unknown as Record<string, unknown>
+    arguments: stringArgs as unknown as Record<string, unknown>,
   });
   assert.equal(stringResult, 'Echo: from string');
 
@@ -116,7 +118,7 @@ test('ToolRuntime normalizes tool call arguments from strings and maps', async (
   const mapResult = await runtime.execute({
     id: 'call-map',
     name: 'echo_tool',
-    arguments: mapArgs as unknown as Record<string, unknown>
+    arguments: mapArgs as unknown as Record<string, unknown>,
   });
   assert.equal(mapResult, 'Echo: from map');
 });

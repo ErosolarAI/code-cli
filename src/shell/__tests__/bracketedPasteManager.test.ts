@@ -13,7 +13,7 @@ test('combines bracketed paste across multiple lines', () => {
   assert.equal(result.handled, true);
   assert.equal(result.result, undefined);
 
-  result = manager.process(`  Trump\'s 2025 trip to${END}`);
+  result = manager.process(`  Trump's 2025 trip to${END}`);
   assert.equal(result.handled, true);
   assert.equal(result.result, "what happened in\n  Trump's 2025 trip to");
 });

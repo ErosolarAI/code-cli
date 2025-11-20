@@ -3,7 +3,8 @@ import { CodeIntelligenceCapabilityModule } from '../../../capabilities/codeInte
 
 export const codeIntelligencePlugin: ToolPlugin = {
   id: 'tool.code-intelligence.analysis',
-  description: 'Advanced code intelligence tools for complexity analysis, metrics, and quality assessment',
+  description:
+    'Advanced code intelligence tools for complexity analysis, metrics, and quality assessment',
   targets: ['node'],
   create: () => new CodeIntelligenceCapabilityModule(),
 };

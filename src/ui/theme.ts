@@ -95,8 +95,8 @@ export const icons = {
   user: '❯',
   assistant: '◆',
   loading: '⣾',
-  action: '⏺',      // Claude Code: tool actions and thoughts
-  subaction: '⎿',   // Claude Code: results and details
+  action: '⏺', // Claude Code: tool actions and thoughts
+  subaction: '⎿', // Claude Code: results and details
 };
 
 export function formatBanner(profileLabel: string, model: string): string {
@@ -116,16 +116,30 @@ export function formatUserPrompt(_profile?: string): string {
   return `${border}${tinted} `;
 }
 
-export function formatToolCall(name: string, status: 'running' | 'success' | 'error'): string {
-  const statusIcon = status === 'running' ? icons.thinking :
-                     status === 'success' ? icons.success : icons.error;
-  const statusColor = status === 'running' ? theme.info :
-                      status === 'success' ? theme.success : theme.error;
+export function formatToolCall(
+  name: string,
+  status: 'running' | 'success' | 'error',
+): string {
+  const statusIcon =
+    status === 'running'
+      ? icons.thinking
+      : status === 'success'
+        ? icons.success
+        : icons.error;
+  const statusColor =
+    status === 'running'
+      ? theme.info
+      : status === 'success'
+        ? theme.success
+        : theme.error;
 
   return `${statusColor(statusIcon)} ${theme.tool(name)}`;
 }
 
-export function formatMessage(role: 'user' | 'assistant' | 'system', content: string): string {
+export function formatMessage(
+  role: 'user' | 'assistant' | 'system',
+  content: string,
+): string {
   switch (role) {
     case 'user':
       return `${theme.user('You:')} ${content}`;
@@ -143,12 +157,15 @@ export interface ProviderAccent {
   panel?: Colorize;
 }
 
-export function pickProviderAccent(provider: string | undefined | null): ProviderAccent {
+export function pickProviderAccent(
+  provider: string | undefined | null,
+): ProviderAccent {
   const normalized = provider?.toLowerCase() ?? '';
   const baseEdge = (value: string) => value;
 
   if (normalized.includes('anthropic') || normalized.includes('claude')) {
-    const chroma = (theme.gradient?.warm as Colorize | undefined) ?? theme.secondary;
+    const chroma =
+      (theme.gradient?.warm as Colorize | undefined) ?? theme.secondary;
     return {
       edge: chroma,
       text: theme.secondary,
@@ -168,7 +185,8 @@ export function pickProviderAccent(provider: string | undefined | null): Provide
   }
 
   if (normalized.includes('google') || normalized.includes('gemini')) {
-    const chroma = (theme.gradient?.horizon as Colorize | undefined) ?? theme.warning;
+    const chroma =
+      (theme.gradient?.horizon as Colorize | undefined) ?? theme.warning;
     return {
       edge: chroma,
       text: theme.warning,
@@ -178,7 +196,8 @@ export function pickProviderAccent(provider: string | undefined | null): Provide
   }
 
   if (normalized.includes('azure')) {
-    const chroma = (theme.gradient?.primary as Colorize | undefined) ?? theme.primary;
+    const chroma =
+      (theme.gradient?.primary as Colorize | undefined) ?? theme.primary;
     return {
       edge: chroma,
       text: theme.primary,

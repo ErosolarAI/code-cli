@@ -15,7 +15,10 @@ export const LEGACY_UI_DOT_DIRS = ['.bo-ui', '.erosolar-ui'] as const;
 
 const ENV_PREFIXES = ['BO', 'APT', 'EROSOLAR'] as const;
 
-export function pickBrandEnv(env: NodeJS.ProcessEnv, suffix: string): string | null {
+export function pickBrandEnv(
+  env: NodeJS.ProcessEnv,
+  suffix: string,
+): string | null {
   for (const prefix of ENV_PREFIXES) {
     const value = env[`${prefix}_${suffix}`];
     if (value && value.trim()) {
@@ -63,7 +66,9 @@ export function resolveUiDataDir(env: NodeJS.ProcessEnv = process.env): string {
   return preferred;
 }
 
-export function resolveCommandsDir(env: NodeJS.ProcessEnv = process.env): string {
+export function resolveCommandsDir(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
   const override = pickBrandEnv(env, 'COMMANDS_DIR');
   if (override) {
     return override;
@@ -75,7 +80,9 @@ export function resolveTasksDir(env: NodeJS.ProcessEnv = process.env): string {
   return join(resolveDataDir(env), 'tasks');
 }
 
-export function resolveSkillSearchDirs(env: NodeJS.ProcessEnv = process.env): string[] {
+export function resolveSkillSearchDirs(
+  env: NodeJS.ProcessEnv = process.env,
+): string[] {
   const envDirs = (pickBrandEnv(env, 'SKILLS_DIRS') ?? '')
     .split(':')
     .map((dir) => dir.trim())
@@ -90,7 +97,9 @@ export function resolveSkillSearchDirs(env: NodeJS.ProcessEnv = process.env): st
   ]);
 }
 
-export function resolveProfileOverride(env: NodeJS.ProcessEnv = process.env): string | null {
+export function resolveProfileOverride(
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
   return pickBrandEnv(env, 'PROFILE');
 }
 

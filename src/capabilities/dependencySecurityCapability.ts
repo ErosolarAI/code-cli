@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createDependencyTools } from '../tools/dependencyTools.js';
 
 export interface DependencySecurityCapabilityOptions {
@@ -20,7 +24,8 @@ export class DependencySecurityCapabilityModule implements CapabilityModule {
     return {
       id: this.options.id ?? 'dependency.tools.health',
       description:
-        this.options.description ?? 'Dependency insight, npm audit orchestration, and lockfile health summaries.',
+        this.options.description ??
+        'Dependency insight, npm audit orchestration, and lockfile health summaries.',
       toolSuite: {
         id: 'dependency-security',
         description: 'Dependency analysis & security scanning',

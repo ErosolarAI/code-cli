@@ -30,9 +30,9 @@ export class FirebaseLoginService {
       return null;
     }
 
-    const [{ initializeApp, getApps, getApp }, authModule] = await Promise.all([
+    const [{ initializeApp, getApps }, authModule] = await Promise.all([
       import('firebase/app'),
-      import('firebase/auth')
+      import('firebase/auth'),
     ]);
 
     let app;

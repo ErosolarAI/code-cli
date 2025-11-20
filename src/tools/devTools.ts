@@ -36,10 +36,16 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
       handler: async (args) => {
         const testPatternArg = args['testPattern'];
         const testPattern =
-          typeof testPatternArg === 'string' && testPatternArg.trim() ? testPatternArg.trim() : undefined;
+          typeof testPatternArg === 'string' && testPatternArg.trim()
+            ? testPatternArg.trim()
+            : undefined;
         const timeoutArg = args['timeout'];
         const timeout =
-          typeof timeoutArg === 'number' && Number.isFinite(timeoutArg) && timeoutArg > 0 ? timeoutArg : 60000;
+          typeof timeoutArg === 'number' &&
+          Number.isFinite(timeoutArg) &&
+          timeoutArg > 0
+            ? timeoutArg
+            : 60000;
 
         try {
           // Check if package.json exists
@@ -52,7 +58,9 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
           let command = 'npm test';
           if (testPattern) {
             // Try to detect test runner and build appropriate command
-            const packageInfo = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageInfo;
+            const packageInfo = JSON.parse(
+              readFileSync(packageJsonPath, 'utf-8'),
+            ) as PackageInfo;
             const scripts = packageInfo.scripts || {};
             const testScript = scripts['test'] ?? '';
 
@@ -106,7 +114,10 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
         additionalProperties: false,
       },
       handler: async (args) => {
-        const packageManager = typeof args['packageManager'] === 'string' ? args['packageManager'] : 'npm';
+        const packageManager =
+          typeof args['packageManager'] === 'string'
+            ? args['packageManager']
+            : 'npm';
         const production = args['production'] === true;
 
         try {
@@ -142,7 +153,8 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'check_package_info',
-      description: 'Get information about project dependencies and scripts from package.json',
+      description:
+        'Get information about project dependencies and scripts from package.json',
       parameters: {
         type: 'object',
         properties: {
@@ -156,7 +168,10 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
       },
       handler: async (args) => {
         const detailArg = args['detail'];
-        const detail = typeof detailArg === 'string' && detailArg.trim() ? detailArg : 'basic';
+        const detail =
+          typeof detailArg === 'string' && detailArg.trim()
+            ? detailArg
+            : 'basic';
 
         try {
           const packageJsonPath = join(workingDir, 'package.json');
@@ -164,10 +179,14 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
             return 'Error: package.json not found';
           }
 
-          const packageInfo = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageInfo;
+          const packageInfo = JSON.parse(
+            readFileSync(packageJsonPath, 'utf-8'),
+          ) as PackageInfo;
           const output: string[] = [];
 
-          output.push(`# Package Info: ${packageInfo.name || 'Unnamed'} v${packageInfo.version || 'Unknown'}`);
+          output.push(
+            `# Package Info: ${packageInfo.name || 'Unnamed'} v${packageInfo.version || 'Unknown'}`,
+          );
           output.push('');
 
           if (detail === 'basic' || detail === 'full') {
@@ -177,7 +196,10 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
             output.push('');
           }
 
-          if ((detail === 'scripts' || detail === 'full') && packageInfo.scripts) {
+          if (
+            (detail === 'scripts' || detail === 'full') &&
+            packageInfo.scripts
+          ) {
             output.push('## Scripts');
             Object.entries(packageInfo.scripts).forEach(([name, script]) => {
               output.push(`- ${name}: ${script}`);
@@ -185,19 +207,29 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
             output.push('');
           }
 
-          if ((detail === 'dependencies' || detail === 'full') && packageInfo.dependencies) {
+          if (
+            (detail === 'dependencies' || detail === 'full') &&
+            packageInfo.dependencies
+          ) {
             output.push('## Dependencies');
-            Object.entries(packageInfo.dependencies).forEach(([name, version]) => {
-              output.push(`- ${name}: ${version}`);
-            });
+            Object.entries(packageInfo.dependencies).forEach(
+              ([name, version]) => {
+                output.push(`- ${name}: ${version}`);
+              },
+            );
             output.push('');
           }
 
-          if ((detail === 'dependencies' || detail === 'full') && packageInfo.devDependencies) {
+          if (
+            (detail === 'dependencies' || detail === 'full') &&
+            packageInfo.devDependencies
+          ) {
             output.push('## Dev Dependencies');
-            Object.entries(packageInfo.devDependencies).forEach(([name, version]) => {
-              output.push(`- ${name}: ${version}`);
-            });
+            Object.entries(packageInfo.devDependencies).forEach(
+              ([name, version]) => {
+                output.push(`- ${name}: ${version}`);
+              },
+            );
             output.push('');
           }
 
@@ -209,7 +241,8 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'run_build',
-      description: 'Execute build process using npm run build or other build commands',
+      description:
+        'Execute build process using npm run build or other build commands',
       parameters: {
         type: 'object',
         properties: {
@@ -232,7 +265,11 @@ export function createDevTools(workingDir: string): ToolDefinition[] {
             : 'npm run build';
         const timeoutArg = args['timeout'];
         const timeout =
-          typeof timeoutArg === 'number' && Number.isFinite(timeoutArg) && timeoutArg > 0 ? timeoutArg : 300000; // 5 minutes
+          typeof timeoutArg === 'number' &&
+          Number.isFinite(timeoutArg) &&
+          timeoutArg > 0
+            ? timeoutArg
+            : 300000; // 5 minutes
 
         try {
           const { stdout, stderr } = await execAsync(buildCommand, {

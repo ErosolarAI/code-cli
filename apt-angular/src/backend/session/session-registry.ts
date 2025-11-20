@@ -47,7 +47,7 @@ export class SessionRegistry {
     const handlePromise = createSessionOrchestrator(config).then(({ orchestrator }) => ({
       orchestrator,
       config,
-      access: new SessionAccessController(config.access)
+      access: new SessionAccessController(config.access),
     }));
 
     handlePromise.catch((error) => {

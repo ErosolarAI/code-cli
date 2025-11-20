@@ -26,24 +26,32 @@ export class MessageRendererRegistryService {
   ensureFallback(component: Type<object>): void {
     const existing = this.entries.find((entry) => entry.fallback);
     if (!existing) {
-      this.register({ id: 'default', component, priority: -100, fallback: true, predicate: () => true });
+      this.register({
+        id: 'default',
+        component,
+        priority: -100,
+        fallback: true,
+        predicate: () => true,
+      });
     }
   }
 
   resolve(message: ChatMessage): RendererEntry | undefined {
-    return this.entries
-      .slice()
-      .sort((a, b) => b.priority - a.priority)
-      .find((entry) => {
-        if (entry.predicate) {
-          return entry.predicate(message);
-        }
+    return (
+      this.entries
+        .slice()
+        .sort((a, b) => b.priority - a.priority)
+        .find((entry) => {
+          if (entry.predicate) {
+            return entry.predicate(message);
+          }
 
-        if (entry.kinds?.length) {
-          return entry.kinds.includes(message.kind ?? '');
-        }
+          if (entry.kinds?.length) {
+            return entry.kinds.includes(message.kind ?? '');
+          }
 
-        return false;
-      }) ?? this.entries.find((entry) => entry.fallback);
+          return false;
+        }) ?? this.entries.find((entry) => entry.fallback)
+    );
   }
 }

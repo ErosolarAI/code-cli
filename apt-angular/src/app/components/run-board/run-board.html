@@ -50,7 +50,9 @@
 
   <ng-template #emptyRuns>
     <p class="run-board__empty">
-      {{ isLoading() ? 'Loading your previous runs…' : 'No runs yet. Launch your first agent above.' }}
+      {{
+        isLoading() ? 'Loading your previous runs…' : 'No runs yet. Launch your first agent above.'
+      }}
     </p>
   </ng-template>
 </section>

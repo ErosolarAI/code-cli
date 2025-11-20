@@ -13,8 +13,12 @@ export function registerGoogleProviderPlugin(): void {
       apiKey: requireEnv('GEMINI_API_KEY'),
       model: config.model,
       providerId: 'google',
-      ...(typeof config.temperature === 'number' ? { temperature: config.temperature } : {}),
-      ...(typeof config.maxTokens === 'number' ? { maxOutputTokens: config.maxTokens } : {}),
+      ...(typeof config.temperature === 'number'
+        ? { temperature: config.temperature }
+        : {}),
+      ...(typeof config.maxTokens === 'number'
+        ? { maxOutputTokens: config.maxTokens }
+        : {}),
     };
     return new GoogleGenAIProvider(options);
   });

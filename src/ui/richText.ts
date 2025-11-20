@@ -81,7 +81,7 @@ export function formatRichContent(content: string, width: number): string[] {
 
 export function renderMessagePanel(
   content: string,
-  options: PanelOptions
+  options: PanelOptions,
 ): string {
   const width = normalizePanelWidth(options.width ?? getContentWidth());
   const lines = formatRichContent(content, width);
@@ -135,13 +135,15 @@ function parseBlocks(content: string): Block[] {
     }
 
     const isList = trimmedLines.every((line) =>
-      /^(\*|-|•|\d+\.)\s+/.test(line)
+      /^(\*|-|•|\d+\.)\s+/.test(line),
     );
 
     if (isList) {
       blocks.push({
         type: 'list',
-        items: trimmedLines.map((line) => line.replace(/^(\*|-|•|\d+\.)\s+/, '')),
+        items: trimmedLines.map((line) =>
+          line.replace(/^(\*|-|•|\d+\.)\s+/, ''),
+        ),
       });
     } else {
       blocks.push({ type: 'paragraph', text: trimmedLines.join(' ') });
@@ -165,7 +167,11 @@ function parseBlocks(content: string): Block[] {
         blocks.push(
           fence.language.includes('diff')
             ? { type: 'diff', content: fence.buffer.join('\n') }
-            : { type: 'code', content: fence.buffer.join('\n'), language: fence.language }
+            : {
+                type: 'code',
+                content: fence.buffer.join('\n'),
+                language: fence.language,
+              },
         );
         fence = null;
         continue;
@@ -244,15 +250,25 @@ function formatList(items: string[], width: number): string[] {
   return lines;
 }
 
-function formatCodeBlock(code: string, width: number, language?: string): string[] {
+function formatCodeBlock(
+  code: string,
+  width: number,
+  language?: string,
+): string[] {
   const gutterRaw = '│ ';
   const gutter = theme.ui.muted(gutterRaw);
   const available = Math.max(16, width - measure(gutterRaw));
-  const { lines, languageLabel } = highlightAndWrapCode(code, language, available);
+  const { lines, languageLabel } = highlightAndWrapCode(
+    code,
+    language,
+    available,
+  );
   const headerLabel = (languageLabel ?? 'CODE').toUpperCase();
   const result: string[] = [];
 
-  result.push(`${gutter}${theme.ui.muted(buildCodeDivider(headerLabel, available))}`);
+  result.push(
+    `${gutter}${theme.ui.muted(buildCodeDivider(headerLabel, available))}`,
+  );
   for (const line of lines) {
     result.push(`${gutter}${line}`);
   }
@@ -260,7 +276,10 @@ function formatCodeBlock(code: string, width: number, language?: string): string
   return result;
 }
 
-function formatHeadingBlock(block: { level: number; text: string }, width: number): string[] {
+function formatHeadingBlock(
+  block: { level: number; text: string },
+  width: number,
+): string[] {
   const wrapped = wrapParagraph(formatInlineText(block.text), width);
   if (!wrapped.length) {
     return [];
@@ -351,7 +370,10 @@ function formatInlineText(text: string): string {
   result = result.replace(/__(.+?)__/g, formatBold);
 
   const formatItalics = (_match: string, value: string) => theme.italic(value);
-  result = result.replace(/(?<!\*)\*(?!\*)([^*]+?)(?<!\*)\*(?!\*)/g, formatItalics);
+  result = result.replace(
+    /(?<!\*)\*(?!\*)([^*]+?)(?<!\*)\*(?!\*)/g,
+    formatItalics,
+  );
   result = result.replace(/(?<!_)_(?!_)([^_]+?)(?<!_)_(?!_)/g, formatItalics);
 
   result = result.replace(/~~(.+?)~~/g, (_match, value) => theme.dim(value));
@@ -361,18 +383,21 @@ function formatInlineText(text: string): string {
     return `${LINK_PLACEHOLDER}${linkSpans.length - 1}${LINK_PLACEHOLDER}`;
   });
 
-  result = result.replace(/(\bhttps?:\/\/[^\s)]+)([)\]}>,.;:!?"]*)/g, (_match, url, trailing = '') => {
-    linkSpans.push(`${formatBareLink(url)}${trailing}`);
-    return `${LINK_PLACEHOLDER}${linkSpans.length - 1}${LINK_PLACEHOLDER}`;
-  });
+  result = result.replace(
+    /(\bhttps?:\/\/[^\s)]+)([)\]}>,.;:!?"]*)/g,
+    (_match, url, trailing = '') => {
+      linkSpans.push(`${formatBareLink(url)}${trailing}`);
+      return `${LINK_PLACEHOLDER}${linkSpans.length - 1}${LINK_PLACEHOLDER}`;
+    },
+  );
 
   result = result.replace(
     new RegExp(`${LINK_PLACEHOLDER}(\\d+)${LINK_PLACEHOLDER}`, 'g'),
-    (_match, index) => linkSpans[Number.parseInt(index, 10)] ?? ''
+    (_match, index) => linkSpans[Number.parseInt(index, 10)] ?? '',
   );
 
   result = result.replace(/\u0000(\d+)\u0000/g, (_match, index) =>
-    formatInlineCode(codeSpans[Number.parseInt(index, 10)] ?? '')
+    formatInlineCode(codeSpans[Number.parseInt(index, 10)] ?? ''),
   );
 
   return result;

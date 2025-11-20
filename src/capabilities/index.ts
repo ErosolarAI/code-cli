@@ -1,8 +1,17 @@
-export { FilesystemCapabilityModule, type FilesystemCapabilityOptions } from './filesystemCapability.js';
+export {
+  FilesystemCapabilityModule,
+  type FilesystemCapabilityOptions,
+} from './filesystemCapability.js';
 export { EditCapabilityModule } from './editCapability.js';
 export { NotebookCapabilityModule } from './notebookCapability.js';
-export { BashCapabilityModule, type BashCapabilityOptions } from './bashCapability.js';
-export { SearchCapabilityModule, type SearchCapabilityOptions } from './searchCapability.js';
+export {
+  BashCapabilityModule,
+  type BashCapabilityOptions,
+} from './bashCapability.js';
+export {
+  SearchCapabilityModule,
+  type SearchCapabilityOptions,
+} from './searchCapability.js';
 export { GlobCapabilityModule } from './globCapability.js';
 export {
   CodeAnalysisCapabilityModule,
@@ -29,7 +38,10 @@ export {
   type TestingCapabilityOptions,
 } from './testingCapability.js';
 export { McpCapabilityModule } from './mcpCapability.js';
-export { PentestCapabilityModule, type PentestCapabilityOptions } from './pentestCapability.js';
+export {
+  PentestCapabilityModule,
+  type PentestCapabilityOptions,
+} from './pentestCapability.js';
 export {
   TaskManagementCapabilityModule,
   type TaskManagementCapabilityOptions,

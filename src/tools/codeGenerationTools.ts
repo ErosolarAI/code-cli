@@ -2,11 +2,14 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { ToolDefinition } from '../core/toolRuntime.js';
 
-export function createCodeGenerationTools(workingDir: string): ToolDefinition[] {
+export function createCodeGenerationTools(
+  workingDir: string,
+): ToolDefinition[] {
   return [
     {
       name: 'generate_component',
-      description: 'Generate a React/TypeScript component with proper structure and exports',
+      description:
+        'Generate a React/TypeScript component with proper structure and exports',
       parameters: {
         type: 'object',
         properties: {
@@ -38,7 +41,8 @@ export function createCodeGenerationTools(workingDir: string): ToolDefinition[] 
       handler: async (args) => {
         try {
           const componentName = validateComponentName(args['name']);
-          const componentType = args['type'] === 'class' ? 'class' : 'functional';
+          const componentType =
+            args['type'] === 'class' ? 'class' : 'functional';
           const withProps = args['withProps'] !== false;
           const withStyles = args['withStyles'] === true;
           const outputPath = resolveFilePath(workingDir, args['outputPath']);
@@ -61,7 +65,8 @@ export function createCodeGenerationTools(workingDir: string): ToolDefinition[] 
     },
     {
       name: 'generate_utility_function',
-      description: 'Generate a TypeScript utility function with proper typing and documentation',
+      description:
+        'Generate a TypeScript utility function with proper typing and documentation',
       parameters: {
         type: 'object',
         properties: {
@@ -101,9 +106,15 @@ export function createCodeGenerationTools(workingDir: string): ToolDefinition[] 
       handler: async (args) => {
         try {
           const functionName = validateFunctionName(args['name']);
-          const description = typeof args['description'] === 'string' ? args['description'].trim() : '';
+          const description =
+            typeof args['description'] === 'string'
+              ? args['description'].trim()
+              : '';
           const parameters = normalizeFunctionParameters(args['parameters']);
-          const returnType = typeof args['returnType'] === 'string' ? args['returnType'] : 'void';
+          const returnType =
+            typeof args['returnType'] === 'string'
+              ? args['returnType']
+              : 'void';
           const outputPath = resolveFilePath(workingDir, args['outputPath']);
 
           const functionCode = generateUtilityFunctionCode({
@@ -203,7 +214,9 @@ interface TypeOptions {
   properties: Array<{ name: string; type: string; optional?: boolean }>;
 }
 
-function normalizeFunctionParameters(value: unknown): FunctionOptions['parameters'] {
+function normalizeFunctionParameters(
+  value: unknown,
+): FunctionOptions['parameters'] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -213,8 +226,10 @@ function normalizeFunctionParameters(value: unknown): FunctionOptions['parameter
       continue;
     }
     const record = entry as Record<string, unknown>;
-    const name = typeof record['name'] === 'string' ? record['name'].trim() : '';
-    const type = typeof record['type'] === 'string' ? record['type'].trim() : '';
+    const name =
+      typeof record['name'] === 'string' ? record['name'].trim() : '';
+    const type =
+      typeof record['type'] === 'string' ? record['type'].trim() : '';
     if (!name || !type) {
       continue;
     }
@@ -237,8 +252,10 @@ function normalizeTypeProperties(value: unknown): TypeOptions['properties'] {
       continue;
     }
     const record = entry as Record<string, unknown>;
-    const name = typeof record['name'] === 'string' ? record['name'].trim() : '';
-    const type = typeof record['type'] === 'string' ? record['type'].trim() : '';
+    const name =
+      typeof record['name'] === 'string' ? record['name'].trim() : '';
+    const type =
+      typeof record['type'] === 'string' ? record['type'].trim() : '';
     if (!name || !type) {
       continue;
     }
@@ -265,7 +282,9 @@ function validateComponentName(name: unknown): string {
   }
   const value = name.trim();
   if (!/^[A-Z][a-zA-Z0-9]*$/.test(value)) {
-    throw new Error('Component name must be PascalCase (start with capital letter, no special characters).');
+    throw new Error(
+      'Component name must be PascalCase (start with capital letter, no special characters).',
+    );
   }
   return value;
 }
@@ -276,7 +295,9 @@ function validateFunctionName(name: unknown): string {
   }
   const value = name.trim();
   if (!/^[a-z][a-zA-Z0-9]*$/.test(value)) {
-    throw new Error('Function name must be camelCase (start with lowercase letter, no special characters).');
+    throw new Error(
+      'Function name must be camelCase (start with lowercase letter, no special characters).',
+    );
   }
   return value;
 }
@@ -287,7 +308,9 @@ function validateTypeName(name: unknown): string {
   }
   const value = name.trim();
   if (!/^[A-Z][a-zA-Z0-9]*$/.test(value)) {
-    throw new Error('Type name must be PascalCase (start with capital letter, no special characters).');
+    throw new Error(
+      'Type name must be PascalCase (start with capital letter, no special characters).',
+    );
   }
   return value;
 }
@@ -317,7 +340,9 @@ function generateComponentCode(options: ComponentOptions): string {
   }
 
   if (type === 'class') {
-    lines.push(`class ${name} extends React.Component${withProps ? `<${name}Props>` : ''} {`);
+    lines.push(
+      `class ${name} extends React.Component${withProps ? `<${name}Props>` : ''} {`,
+    );
     lines.push('  render() {');
     lines.push('    return (');
     lines.push('      <div>');
@@ -327,7 +352,9 @@ function generateComponentCode(options: ComponentOptions): string {
     lines.push('  }');
     lines.push('}');
   } else {
-    lines.push(`const ${name}: React.FC${withProps ? `<${name}Props>` : ''} = (${withProps ? 'props' : ''}) => {`);
+    lines.push(
+      `const ${name}: React.FC${withProps ? `<${name}Props>` : ''} = (${withProps ? 'props' : ''}) => {`,
+    );
     lines.push('  return (');
     lines.push('    <div>');
     lines.push(`      <h1>${name} Component</h1>`);
@@ -349,15 +376,17 @@ function generateUtilityFunctionCode(options: FunctionOptions): string {
   lines.push('/**');
   lines.push(` * ${description}`);
   if (parameters.length > 0) {
-    parameters.forEach(param => {
-      lines.push(` * @param ${param.name} - ${param.type}${param.optional ? ' (optional)' : ''}`);
+    parameters.forEach((param) => {
+      lines.push(
+        ` * @param ${param.name} - ${param.type}${param.optional ? ' (optional)' : ''}`,
+      );
     });
   }
   lines.push(` * @returns ${returnType}`);
   lines.push(' */');
 
   const paramString = parameters
-    .map(param => `${param.name}${param.optional ? '?' : ''}: ${param.type}`)
+    .map((param) => `${param.name}${param.optional ? '?' : ''}: ${param.type}`)
     .join(', ');
 
   lines.push(`export function ${name}(${paramString}): ${returnType} {`);
@@ -383,7 +412,7 @@ function generateTypeDefinitionCode(options: TypeOptions): string {
   if (properties.length === 0) {
     lines.push('  // Add properties here');
   } else {
-    properties.forEach(prop => {
+    properties.forEach((prop) => {
       lines.push(`  ${prop.name}${prop.optional ? '?' : ''}: ${prop.type};`);
     });
   }

@@ -163,7 +163,14 @@
     },
     "profile": {
       "type": "object",
-      "required": ["name", "label", "defaultProvider", "defaultModel", "systemPrompt", "rulebook"],
+      "required": [
+        "name",
+        "label",
+        "defaultProvider",
+        "defaultModel",
+        "systemPrompt",
+        "rulebook"
+      ],
       "properties": {
         "name": {
           "type": "string",

@@ -1,0 +1,10 @@
+# Ignore artifacts
+dist
+node_modules
+coverage
+
+# Ignore configuration files
+.DS_Store
+
+# Ignore specific files
+apt-angular/src/app/app.html

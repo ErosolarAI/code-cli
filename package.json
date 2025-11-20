@@ -10,8 +10,7 @@
     "agents",
     "LICENSE",
     "scripts/preinstall-clean-bins.mjs",
-    "scripts/health-check.mjs",
-    "scripts/complexity-validation.mjs"
+    "scripts/health-check.mjs"
   ],
   "bin": {
     "bo": "dist/bin/bo.js",
@@ -29,13 +28,11 @@
     "start": "node dist/bin/bo.js",
     "test": "node --loader ts-node/esm --test test/*.test.ts",
     "test:watch": "node --watch --loader ts-node/esm --test test/*.test.ts",
-    "lint": "eslint src/**/*.ts --max-warnings 0",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "eslint . --ext .ts --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "health-check": "node scripts/health-check.mjs",
-    "complexity-check": "node scripts/complexity-validation.mjs",
-    "complexity-check:legacy": "npm run lint && npm run type-check",
-    "quality-gate": "npm run complexity-check && npm run health-check && npm run type-check"
+    "health-check": "node scripts/health-check.mjs"
   },
   "bo": {
     "rulebookSchema": "src/contracts/schemas/agent-rules.schema.json"
@@ -64,11 +61,13 @@
   "devDependencies": {
     "@types/gradient-string": "^1.1.6",
     "@types/node": "^20.11.24",
-    "ts-node": "^10.9.2",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.45.0",
-    "eslint-plugin-complexity": "^3.0.0"
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-complexity": "^1.0.2",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",

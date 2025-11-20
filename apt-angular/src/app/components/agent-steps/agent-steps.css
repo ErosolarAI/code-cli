@@ -3,11 +3,8 @@
 }
 
 .neon-grid {
-  background-image: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.07) 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 120px 120px;
   transform: perspective(800px) rotateX(32deg);
@@ -33,7 +30,8 @@
 
 .progress-orb {
   border-radius: 999px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.22), transparent),
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.22), transparent),
     radial-gradient(circle at 70% 70%, rgba(14, 251, 255, 0.15), transparent);
   box-shadow: 0 25px 90px rgba(0, 0, 0, 0.5);
 }

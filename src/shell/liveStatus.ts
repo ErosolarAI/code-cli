@@ -38,7 +38,11 @@ export class LiveStatusTracker {
     this.emit();
   }
 
-  pushOverride(id: string, text: string, options: LiveStatusOptions = {}): void {
+  pushOverride(
+    id: string,
+    text: string,
+    options: LiveStatusOptions = {},
+  ): void {
     if (!id?.trim() || !text?.trim()) {
       return;
     }
@@ -83,7 +87,10 @@ export class LiveStatusTracker {
     return this.base;
   }
 
-  private buildState(text: string, options: LiveStatusOptions): LiveStatusState {
+  private buildState(
+    text: string,
+    options: LiveStatusOptions,
+  ): LiveStatusState {
     return {
       text: text.trim(),
       detail: options.detail?.trim() || undefined,

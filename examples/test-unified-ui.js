@@ -17,7 +17,7 @@ class TestStream extends Writable {
 }
 
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function demonstrateUnifiedUI() {
@@ -65,7 +65,12 @@ async function demonstrateUnifiedUI() {
 
     // 3. Demonstrate status overrides
     console.log('\n📊 Testing status overrides...\n');
-    controller.pushStatusOverride('analysis', 'Analyzing code', 'Found 3 issues', 'warning');
+    controller.pushStatusOverride(
+      'analysis',
+      'Analyzing code',
+      'Found 3 issues',
+      'warning',
+    );
     await sleep(1500);
     controller.clearStatusOverride('analysis');
 
@@ -73,8 +78,12 @@ async function demonstrateUnifiedUI() {
     console.log('\n💾 Testing context usage display...\n');
     const contextLevels = [25, 50, 75, 92];
     for (const level of contextLevels) {
-      controller.pushStatusOverride('context', `Context ${level}% used`, undefined,
-        level > 90 ? 'danger' : level > 70 ? 'warning' : 'info');
+      controller.pushStatusOverride(
+        'context',
+        `Context ${level}% used`,
+        undefined,
+        level > 90 ? 'danger' : level > 70 ? 'warning' : 'info',
+      );
       await sleep(800);
     }
     controller.clearStatusOverride('context');
@@ -84,7 +93,7 @@ async function demonstrateUnifiedUI() {
     const interruptId = controller.queueInterrupt(
       'alert',
       'Important: System update available',
-      InterruptPriority.HIGH
+      InterruptPriority.HIGH,
     );
     await sleep(2000);
     controller.completeInterrupt(interruptId);
@@ -95,7 +104,11 @@ async function demonstrateUnifiedUI() {
 
     // Simulate multiple tools running
     const tools = [
-      { id: 'scan-001', name: 'security_scan', desc: 'Scanning for vulnerabilities' },
+      {
+        id: 'scan-001',
+        name: 'security_scan',
+        desc: 'Scanning for vulnerabilities',
+      },
       { id: 'test-001', name: 'run_tests', desc: 'Running test suite' },
       { id: 'lint-001', name: 'lint_code', desc: 'Checking code style' },
     ];
@@ -132,7 +145,6 @@ async function demonstrateUnifiedUI() {
     await sleep(1000);
 
     console.log('\n✅ Unified UI System demo completed successfully!\n');
-
   } catch (error) {
     console.error('❌ Error during demo:', error);
   } finally {

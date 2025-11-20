@@ -31,16 +31,16 @@ export class LocalCliGateway implements AgentGateway {
           label: 'Bo CLI',
           value: 'starting',
           detail: this.config.command,
-          tone: 'info'
-        }
+          tone: 'info',
+        },
       ],
       opsEvents: [],
       shortcuts: [],
       status: {
         label: 'local CLI bridge',
         detail: `watching: ${this.config.command}`,
-        tone: 'info'
-      }
+        tone: 'info',
+      },
     };
   }
 
@@ -48,7 +48,7 @@ export class LocalCliGateway implements AgentGateway {
     this.child = spawn(this.config.command, {
       cwd: this.config.cwd,
       env: { ...process.env, ...this.config.env },
-      shell: true
+      shell: true,
     });
 
     const stdout = createInterface({ input: this.child.stdout });
@@ -62,7 +62,7 @@ export class LocalCliGateway implements AgentGateway {
     this.child.stderr?.on('data', (chunk) => {
       eventHandler({
         type: 'chat-message',
-        payload: this.buildMessage(chunk.toString(), 'bo', 'stderr')
+        payload: this.buildMessage(chunk.toString(), 'bo', 'stderr'),
       });
     });
 
@@ -72,8 +72,8 @@ export class LocalCliGateway implements AgentGateway {
         payload: {
           label: 'CLI exited',
           detail: `process finished with code ${code ?? 'unknown'}`,
-          tone: 'warn'
-        }
+          tone: 'warn',
+        },
       });
     });
 
@@ -104,12 +104,13 @@ export class LocalCliGateway implements AgentGateway {
           return parsed as SessionEvent;
         }
       } catch {
+        // ignore parse errors
       }
     }
 
     return {
       type: 'chat-message',
-      payload: this.buildMessage(trimmed, 'bo', 'stdout')
+      payload: this.buildMessage(trimmed, 'bo', 'stdout'),
     };
   }
 
@@ -121,7 +122,7 @@ export class LocalCliGateway implements AgentGateway {
       title: `${agent} · ${stream}`,
       caption: this.config.command,
       status: 'stream',
-      body: text.split(/\r?\n/)
+      body: text.split(/\r?\n/),
     };
   }
 }

@@ -22,13 +22,13 @@ interface ConnectorViewModel extends AgentConnector {
   standalone: true,
   imports: [NgIf, NgFor, NgClass],
   templateUrl: './connector-gallery.html',
-  styleUrls: ['./connector-gallery.css']
+  styleUrls: ['./connector-gallery.css'],
 })
 export class ConnectorGalleryComponent {
   private readonly store = inject(AgentConnectorStore);
 
   protected readonly connectors = computed<ConnectorViewModel[]>(() =>
-    this.store.connectors().map((connector) => this.decorateConnector(connector))
+    this.store.connectors().map((connector) => this.decorateConnector(connector)),
   );
   protected readonly isLoading = this.store.isLoading;
   protected readonly error = this.store.error;
@@ -57,7 +57,7 @@ export class ConnectorGalleryComponent {
     return {
       ...connector,
       highlights: this.buildHighlights(metadata),
-      playbooks: this.extractPlaybooks(metadata)
+      playbooks: this.extractPlaybooks(metadata),
     };
   }
 
@@ -81,7 +81,7 @@ export class ConnectorGalleryComponent {
       ['runtime', 'Runtime'],
       ['taskQueue', 'Task queue'],
       ['command', 'Command'],
-      ['cwd', 'Working dir']
+      ['cwd', 'Working dir'],
     ];
 
     for (const [key, label] of stringKeys) {
@@ -141,7 +141,8 @@ export class ConnectorGalleryComponent {
           const record = entry as Record<string, unknown>;
           return {
             id: String(record['id']),
-            description: typeof record['description'] === 'string' ? record['description'] : undefined
+            description:
+              typeof record['description'] === 'string' ? record['description'] : undefined,
           } satisfies ConnectorPlaybook;
         }
 

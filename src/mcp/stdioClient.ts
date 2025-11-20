@@ -1,6 +1,10 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { once } from 'node:events';
-import type { McpServerConfig, McpToolCallResult, McpToolDescription } from './types.js';
+import type {
+  McpServerConfig,
+  McpToolCallResult,
+  McpToolDescription,
+} from './types.js';
 
 interface PendingRequest {
   resolve: (value: unknown) => void;
@@ -37,8 +41,12 @@ export class McpStdioClient {
       env: { ...process.env, ...config.env },
       stdio: ['pipe', 'pipe', 'pipe'],
     });
-    this.process.stdout.on('data', (chunk) => this.handleStdout(chunk as Buffer));
-    this.process.stderr.on('data', (chunk) => this.handleStderr(chunk as Buffer));
+    this.process.stdout.on('data', (chunk) =>
+      this.handleStdout(chunk as Buffer),
+    );
+    this.process.stderr.on('data', (chunk) =>
+      this.handleStderr(chunk as Buffer),
+    );
     this.process.on('exit', (code, signal) => {
       if (!this.disposed) {
         const message = signal
@@ -53,11 +61,16 @@ export class McpStdioClient {
 
   async listTools(): Promise<McpToolDescription[]> {
     await this.ready;
-    const response = (await this.sendRequest('tools/list', {})) as { tools?: McpToolDescription[] };
+    const response = (await this.sendRequest('tools/list', {})) as {
+      tools?: McpToolDescription[];
+    };
     return response?.tools ?? [];
   }
 
-  async callTool(toolName: string, args: Record<string, unknown>): Promise<McpToolCallResult> {
+  async callTool(
+    toolName: string,
+    args: Record<string, unknown>,
+  ): Promise<McpToolCallResult> {
     await this.ready;
     const response = (await this.sendRequest('tools/call', {
       name: toolName,
@@ -108,13 +121,19 @@ export class McpStdioClient {
       params,
     };
     const serialized = JSON.stringify(payload);
-    this.process.stdin.write(`Content-Length: ${Buffer.byteLength(serialized, 'utf8')}\r\n\r\n${serialized}`);
+    this.process.stdin.write(
+      `Content-Length: ${Buffer.byteLength(serialized, 'utf8')}\r\n\r\n${serialized}`,
+    );
 
     return await new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         if (this.pending.has(id)) {
           this.pending.delete(id);
-          reject(new Error(`Timed out waiting for "${method}" from MCP server "${this.id}".`));
+          reject(
+            new Error(
+              `Timed out waiting for "${method}" from MCP server "${this.id}".`,
+            ),
+          );
         }
       }, 60_000);
 
@@ -122,7 +141,10 @@ export class McpStdioClient {
     });
   }
 
-  private async sendNotification(method: string, params: unknown): Promise<void> {
+  private async sendNotification(
+    method: string,
+    params: unknown,
+  ): Promise<void> {
     if (this.disposed) {
       return;
     }
@@ -132,11 +154,14 @@ export class McpStdioClient {
       params,
     };
     const serialized = JSON.stringify(payload);
-    this.process.stdin.write(`Content-Length: ${Buffer.byteLength(serialized, 'utf8')}\r\n\r\n${serialized}`);
+    this.process.stdin.write(
+      `Content-Length: ${Buffer.byteLength(serialized, 'utf8')}\r\n\r\n${serialized}`,
+    );
   }
 
   private handleStdout(chunk: Buffer): void {
     this.buffer = Buffer.concat([this.buffer, chunk]);
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       let headerIndex = this.buffer.indexOf('\r\n\r\n');
       let delimiterLength = 4;
@@ -158,7 +183,9 @@ export class McpStdioClient {
       if (this.buffer.length < totalLength) {
         break;
       }
-      const body = this.buffer.slice(headerIndex + delimiterLength, totalLength).toString('utf8');
+      const body = this.buffer
+        .slice(headerIndex + delimiterLength, totalLength)
+        .toString('utf8');
       this.buffer = this.buffer.slice(totalLength);
       this.handleMessage(body);
     }
@@ -183,8 +210,12 @@ export class McpStdioClient {
         this.pending.delete(message.id);
         clearTimeout(pending.timer);
         if (message.error) {
-          const errorMessage = message.error.message || `MCP server "${this.id}" returned an error.`;
-          const details = this.stderrLog.length ? `\n${this.stderrLog.join('\n')}` : '';
+          const errorMessage =
+            message.error.message ||
+            `MCP server "${this.id}" returned an error.`;
+          const details = this.stderrLog.length
+            ? `\n${this.stderrLog.join('\n')}`
+            : '';
           pending.reject(new Error(`${errorMessage}${details}`));
         } else {
           pending.resolve(message.result);

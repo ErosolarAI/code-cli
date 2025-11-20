@@ -24,6 +24,7 @@ This document outlines the advanced Claude Code features that have been successf
 10. **MCP Connectors** - Load Model Context Protocol servers via `.mcp.json`
 
 ### Platform Enhancements
+
 - **Session persistence & autosave** powered by the new session store + `/sessions` command set
 - **Custom slash commands** loaded from `~/.bo/commands/*.json` with template tokens
 - **Provider-backed WebSearch** using Brave Search (preferred) or SerpAPI with domain filtering and metadata
@@ -37,11 +38,13 @@ This document outlines the advanced Claude Code features that have been successf
 
 **Status:** ✅ Fully Implemented
 **Files Created:**
+
 - `src/tools/editTools.ts` - Core implementation
 - `src/capabilities/editCapability.ts` - Capability module
 - `src/plugins/tools/edit/editPlugin.ts` - Plugin registration
 
 **Features:**
+
 - Exact string replacement without full file rewrites
 - Enforces uniqueness or allows replace_all mode
 - Shows unified diff preview
@@ -49,6 +52,7 @@ This document outlines the advanced Claude Code features that have been successf
 - Error handling for missing strings or multiple matches
 
 **Usage Example:**
+
 ```typescript
 {
   name: 'Edit',
@@ -62,12 +66,14 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Benefits:**
+
 - 🚀 **Faster than write_file** for targeted changes
 - 📝 **Better git diffs** - surgical changes only
 - 🎯 **Precise control** - exact string matching
 - ⚡ **Lower overhead** - no full file rewrite
 
 **Integration:**
+
 - Registered in `tools.schema.json` as "edit" capability
 - Scope: `filesystem:write`
 - Available in node and cloud runtimes
@@ -78,11 +84,13 @@ This document outlines the advanced Claude Code features that have been successf
 
 **Status:** ✅ Fully Implemented
 **Files Created:**
+
 - `src/tools/notebookEditTools.ts` - Notebook editing logic
 - `src/capabilities/notebookCapability.ts` - Capability module
 - `src/plugins/tools/notebook/notebookPlugin.ts` - Plugin registration
 
 **Features:**
+
 - Replace cell content
 - Insert new cells (code or markdown)
 - Delete cells
@@ -93,6 +101,7 @@ This document outlines the advanced Claude Code features that have been successf
 **Usage Examples:**
 
 **Replace a cell:**
+
 ```typescript
 {
   name: 'NotebookEdit',
@@ -106,6 +115,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Insert a new cell:**
+
 ```typescript
 {
   name: 'NotebookEdit',
@@ -120,6 +130,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Delete a cell:**
+
 ```typescript
 {
   name: 'NotebookEdit',
@@ -133,12 +144,14 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Benefits:**
+
 - 📓 **Full .ipynb support** - edit notebooks programmatically
 - 🔧 **Cell-level operations** - precise control
 - 🎨 **Type conversion** - switch between code and markdown
 - ✅ **Validation** - ensures notebook structure integrity
 
 **Integration:**
+
 - Registered in `tools.schema.json` as "notebook" capability
 - Scopes: `filesystem:write`, `analysis:notebook`
 - Available in node and cloud runtimes
@@ -149,11 +162,13 @@ This document outlines the advanced Claude Code features that have been successf
 
 **Status:** ✅ Fully Implemented
 **Files Created:**
+
 - `src/tools/globTools.ts` - Pattern matching engine
 - `src/capabilities/globCapability.ts` - Capability module
 - `src/plugins/tools/glob/globPlugin.ts` - Plugin registration
 
 **Features:**
+
 - Full glob pattern support (`**/*.ts`, `src/**/*.js`)
 - Sorted by modification time (newest first)
 - Intelligent directory filtering
@@ -161,6 +176,7 @@ This document outlines the advanced Claude Code features that have been successf
 - Relative path output
 
 **Usage Examples:**
+
 ```typescript
 // Find all TypeScript files
 {
@@ -189,17 +205,20 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Ignored Directories:**
+
 - `.git`, `node_modules`, `dist`, `.next`, `build`, `coverage`
 - `.turbo`, `.cache`, `__pycache__`, `.pytest_cache`
 - `.venv`, `venv`
 
 **Benefits:**
+
 - ⚡ **Fast** - optimized traversal algorithm
 - 🎯 **Precise** - full glob syntax support
 - 📊 **Smart sorting** - newest files first
 - 🗂️ **Filtered** - skips irrelevant directories
 
 **Integration:**
+
 - Registered in `tools.schema.json` as "glob" capability
 - Scope: `filesystem:read`
 - Available in node and cloud runtimes
@@ -210,10 +229,12 @@ This document outlines the advanced Claude Code features that have been successf
 
 **Status:** ✅ Fully Implemented
 **Files Created:**
+
 - `src/tools/grepTools.ts` - Advanced search engine
 - Integrated into `src/tools/searchTools.ts`
 
 **Features:**
+
 - Full regex syntax support
 - **Three output modes:**
   - `content` - Show matching lines with context
@@ -230,6 +251,7 @@ This document outlines the advanced Claude Code features that have been successf
 **Usage Examples:**
 
 **Find files containing a pattern:**
+
 ```typescript
 {
   name: 'Grep',
@@ -241,6 +263,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Show matching lines with context:**
+
 ```typescript
 {
   name: 'Grep',
@@ -254,6 +277,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Count matches per file:**
+
 ```typescript
 {
   name: 'Grep',
@@ -266,6 +290,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Case insensitive multiline search:**
+
 ```typescript
 {
   name: 'Grep',
@@ -279,6 +304,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Benefits:**
+
 - 🔍 **Powerful regex** - full pattern support
 - 📊 **Multiple modes** - flexible output formats
 - 🎯 **Context aware** - see surrounding code
@@ -286,10 +312,12 @@ This document outlines the advanced Claude Code features that have been successf
 - 📈 **Pagination** - head_limit and offset support
 
 **Supported File Types:**
+
 - js, ts, py, rust, go, java, cpp, c, ruby, php
 - html, css, json, yaml, md
 
 **Integration:**
+
 - Added to existing "search" capability
 - Scope: `analysis:code`
 - Available in node and cloud runtimes
@@ -300,23 +328,27 @@ This document outlines the advanced Claude Code features that have been successf
 
 **Status:** ✅ Fully Implemented
 **Files Created:**
+
 - `src/tools/backgroundBashTools.ts` - Background process management
 - Integrated into `src/tools/bashTools.ts`
 
 **Features:**
 
 **execute_bash with run_in_background:**
+
 - Start long-running commands in background
 - Returns shell ID for monitoring
 - Non-blocking execution
 
 **BashOutput Tool:**
+
 - Retrieve output from background shells
 - Shows only new output since last check
 - Optional regex filtering
 - Status reporting (running/exited)
 
 **KillShell Tool:**
+
 - Terminate background shells
 - SIGTERM followed by SIGKILL if needed
 - Cleanup and resource management
@@ -324,6 +356,7 @@ This document outlines the advanced Claude Code features that have been successf
 **Usage Examples:**
 
 **Start a background process:**
+
 ```typescript
 {
   name: 'execute_bash',
@@ -336,6 +369,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Monitor output:**
+
 ```typescript
 {
   name: 'BashOutput',
@@ -347,6 +381,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Kill a background shell:**
+
 ```typescript
 {
   name: 'KillShell',
@@ -357,12 +392,14 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Benefits:**
+
 - 🔄 **Non-blocking** - run commands without waiting
 - 📊 **Incremental output** - see new output only
 - 🎯 **Filtered monitoring** - regex-based filtering
 - 🛑 **Clean termination** - graceful SIGTERM → SIGKILL
 
 **Integration:**
+
 - Added to existing "bash" capability
 - Scope: `process:exec`
 - Available in node runtime only (requires child_process)
@@ -373,17 +410,20 @@ This document outlines the advanced Claude Code features that have been successf
 
 **Status:** ✅ Fully Implemented
 **Files Created:**
+
 - `src/tools/planningTools.ts` - Planning workflow tools
 - `src/capabilities/planningCapability.ts` - Capability module
 - `src/plugins/tools/planning/planningPlugin.ts` - Plugin registration
 
 **Features:**
+
 - Signal completion of planning phase
 - Present plan for user approval
 - Markdown-formatted output
 - Clear visual separation
 
 **Usage Example:**
+
 ```typescript
 {
   name: 'ExitPlanMode',
@@ -410,6 +450,7 @@ This document outlines the advanced Claude Code features that have been successf
 ```
 
 **Output:**
+
 ```
 ======================================================================
 PLAN READY FOR APPROVAL
@@ -439,26 +480,29 @@ Ready to proceed? If you approve this plan, I will begin implementation.
 ```
 
 **When to Use:**
+
 - ✅ Planning implementation steps for coding tasks
 - ✅ Presenting architectural decisions
 - ✅ Outlining refactoring strategies
 
 **When NOT to Use:**
+
 - ❌ Research tasks (gathering information)
 - ❌ Reading files / understanding codebase
 - ❌ Answering questions
 
 **Benefits:**
+
 - 📋 **Structured planning** - explicit planning phase
 - 👁️ **User visibility** - clear plan presentation
 - ✅ **Approval workflow** - user can approve before implementation
 - 🎯 **Focus** - separate planning from execution
 
 **Integration:**
+
 - Registered in `tools.schema.json` as "planning" capability
 - Scope: `planning:workflow`
 - Available in node and cloud runtimes
-
 
 ### 7. Task Tool Sub-Agents - Autonomous Parallel Work
 
@@ -466,11 +510,13 @@ Ready to proceed? If you approve this plan, I will begin implementation.
 **Files Updated:** `src/capabilities/agentSpawningCapability.ts`, `src/subagents/taskRunner.ts`
 
 **Highlights:**
+
 - Launch specialized agents (`general-purpose`, `Explore`, `Plan`) that inherit the full filesystem/search/bash suite.
 - Every run streams progress, produces a Markdown task report, and emits a stable `Resume ID` so subsequent calls can continue the same sub-agent.
 - Tool context (enabled suites + secret requirements) is re-evaluated per sub-agent so permissions always match the operator’s `/tools` selections.
 
 **Usage Example:**
+
 ```json
 {
   "name": "Task",
@@ -483,6 +529,7 @@ Ready to proceed? If you approve this plan, I will begin implementation.
 ```
 
 **Features:**
+
 - Deterministic runtime spawning via the same modular adapter system used by the CLI.
 - Automatic tool usage narration so operators can audit the sub-agent’s actions.
 - Resumable transcripts stored under `~/.bo/tasks/task_<uuid>.json`.
@@ -494,16 +541,22 @@ Ready to proceed? If you approve this plan, I will begin implementation.
 **Files Created:** `src/mcp/config.ts`, `src/mcp/stdioClient.ts`, `src/mcp/toolBridge.ts`, `src/capabilities/mcpCapability.ts`, `src/plugins/tools/mcp/mcpPlugin.ts`
 
 **Highlights:**
+
 - Discovers `.mcp.json` files in the workspace, `.bo/mcp.d/*.json` (legacy `.apt/mcp.d` still works), `~/.bo/mcp*.json`, or paths declared in `BO_MCP_CONFIG` (`APT_MCP_CONFIG` legacy accepted).
 - Spawns stdio transports, performs JSON-RPC/Content-Length framing, and exposes each remote tool as `mcp__<server>__<tool>`.
 - Automatically tears down child processes when the runtime exits and surfaces stderr output when MCP servers fail.
 
 **Sample `.mcp.json`:**
+
 ```json
 {
   "filesystem": {
     "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-filesystem", "${WORKSPACE_ROOT}"],
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "${WORKSPACE_ROOT}"
+    ],
     "description": "Full repo access"
   },
   "asana": {
@@ -517,37 +570,39 @@ Ready to proceed? If you approve this plan, I will begin implementation.
 ```
 
 **Benefits:**
+
 - Instantly mirrors Claude Code’s MCP story—connectors ship with the repo instead of living in handwritten docs.
 - Built-in variable expansion (`${WORKSPACE_ROOT}`, `${BO_HOME}`, `${MCP_CONFIG_DIR}`, plus process env) keeps configs portable (legacy `${APT_HOME}` respected).
 - Tool suites update automatically whenever an MCP server emits `tools/list_changed`.
 
 ## 📊 Feature Comparison: Bo CLI vs Claude Code
 
-| Feature | Claude Code | Bo CLI | Status |
-|---------|-------------|--------------|--------|
-| **Edit Tool** | ✅ | ✅ | Fully Implemented |
-| **NotebookEdit** | ✅ | ✅ | Fully Implemented |
-| **Glob Tool** | ✅ | ✅ | Fully Implemented |
-| **Grep Tool** | ✅ | ✅ | Enhanced with more features |
-| **BashOutput** | ✅ | ✅ | Fully Implemented |
-| **KillShell** | ✅ | ✅ | Fully Implemented |
-| **ExitPlanMode** | ✅ | ✅ | Fully Implemented |
-| **TodoWrite** | ✅ | ✅ | Already Implemented |
-| **AskUserQuestion** | ✅ | ✅ | Already Implemented |
-| **WebFetch** | ✅ | ✅ | Already Implemented |
-| **WebSearch** | ✅ | ⚠️ | Placeholder (needs API integration) |
-| **Streaming Responses** | ✅ | ✅ | Already Implemented |
-| **Parallel Tool Execution** | ✅ | ✅ | Already Implemented |
-| **Prompt Caching** | ✅ | ✅ | Already Implemented (Anthropic) |
-| **Tool Result Caching** | ✅ | ✅ | Already Implemented |
-| **Context Management** | ✅ | ✅ | Already Implemented |
-| **MCP Integration** | ✅ | ✅ | Fully Implemented |
-| **Task/Agent Tool** | ✅ | ❌ | Not Implemented |
-| **Extended Thinking** | ✅ | ❌ | Not Implemented |
-| **Skill System** | ✅ | ✅ | Fully Implemented |
-| **Slash Commands** | ✅ | ⚠️ | Partial (built-in only) |
+| Feature                     | Claude Code | Bo CLI | Status                              |
+| --------------------------- | ----------- | ------ | ----------------------------------- |
+| **Edit Tool**               | ✅          | ✅     | Fully Implemented                   |
+| **NotebookEdit**            | ✅          | ✅     | Fully Implemented                   |
+| **Glob Tool**               | ✅          | ✅     | Fully Implemented                   |
+| **Grep Tool**               | ✅          | ✅     | Enhanced with more features         |
+| **BashOutput**              | ✅          | ✅     | Fully Implemented                   |
+| **KillShell**               | ✅          | ✅     | Fully Implemented                   |
+| **ExitPlanMode**            | ✅          | ✅     | Fully Implemented                   |
+| **TodoWrite**               | ✅          | ✅     | Already Implemented                 |
+| **AskUserQuestion**         | ✅          | ✅     | Already Implemented                 |
+| **WebFetch**                | ✅          | ✅     | Already Implemented                 |
+| **WebSearch**               | ✅          | ⚠️     | Placeholder (needs API integration) |
+| **Streaming Responses**     | ✅          | ✅     | Already Implemented                 |
+| **Parallel Tool Execution** | ✅          | ✅     | Already Implemented                 |
+| **Prompt Caching**          | ✅          | ✅     | Already Implemented (Anthropic)     |
+| **Tool Result Caching**     | ✅          | ✅     | Already Implemented                 |
+| **Context Management**      | ✅          | ✅     | Already Implemented                 |
+| **MCP Integration**         | ✅          | ✅     | Fully Implemented                   |
+| **Task/Agent Tool**         | ✅          | ❌     | Not Implemented                     |
+| **Extended Thinking**       | ✅          | ❌     | Not Implemented                     |
+| **Skill System**            | ✅          | ✅     | Fully Implemented                   |
+| **Slash Commands**          | ✅          | ⚠️     | Partial (built-in only)             |
 
 ### Legend:
+
 - ✅ Fully Implemented
 - ⚠️ Partially Implemented
 - ❌ Not Implemented
@@ -559,25 +614,33 @@ Ready to proceed? If you approve this plan, I will begin implementation.
 All new tools follow Bo CLI's three-layer architecture:
 
 ### Layer 1: Tool Implementation (`src/tools/`)
+
 Pure functions that create `ToolDefinition[]` arrays with:
+
 - JSON Schema parameter definitions
 - Type-safe handlers
 - Error handling
 
 ### Layer 2: Capability Module (`src/capabilities/`)
+
 `CapabilityModule` implementations that:
+
 - Wrap tool implementations
 - Provide metadata and descriptions
 - Return `CapabilityContribution` objects
 
 ### Layer 3: Plugin Registration (`src/plugins/tools/`)
+
 `ToolPlugin` implementations that:
+
 - Create capability module instances
 - Specify target runtimes (node, cloud, browser)
 - Register via `registerToolPlugin()`
 
 ### Central Configuration
+
 All tools are registered in:
+
 - `src/contracts/tools.schema.json` - Tool metadata and scopes
 - `src/plugins/tools/nodeDefaults.ts` - Auto-registration
 - `src/capabilities/index.ts` - Module exports
@@ -588,18 +651,19 @@ All tools are registered in:
 
 ### New Tools Performance Characteristics
 
-| Tool | Avg Execution Time | Memory Impact | Notes |
-|------|-------------------|---------------|-------|
-| Edit | 50-150ms | Minimal | Faster than write_file |
-| NotebookEdit | 100-300ms | Low | JSON parsing overhead |
-| Glob | 200-500ms | Low | Depends on file count |
-| Grep (content) | 300-1000ms | Moderate | Regex complexity dependent |
-| Grep (files) | 200-600ms | Low | Returns paths only |
-| BashOutput | < 10ms | Minimal | Incremental read |
-| KillShell | < 50ms | Minimal | Process termination |
-| ExitPlanMode | < 5ms | Minimal | Formatting only |
+| Tool           | Avg Execution Time | Memory Impact | Notes                      |
+| -------------- | ------------------ | ------------- | -------------------------- |
+| Edit           | 50-150ms           | Minimal       | Faster than write_file     |
+| NotebookEdit   | 100-300ms          | Low           | JSON parsing overhead      |
+| Glob           | 200-500ms          | Low           | Depends on file count      |
+| Grep (content) | 300-1000ms         | Moderate      | Regex complexity dependent |
+| Grep (files)   | 200-600ms          | Low           | Returns paths only         |
+| BashOutput     | < 10ms             | Minimal       | Incremental read           |
+| KillShell      | < 50ms             | Minimal       | Process termination        |
+| ExitPlanMode   | < 5ms              | Minimal       | Formatting only            |
 
 **Overall Impact:** Negligible to positive
+
 - Edit tool reduces write overhead
 - Grep/Glob are optimized with smart caching
 - Background bash enables parallel workflows
@@ -649,6 +713,7 @@ bo
 ## 🧪 Testing & Validation
 
 ### Build Status
+
 ✅ All files compile successfully
 ✅ TypeScript strict mode passes
 ✅ No linting errors
@@ -757,6 +822,7 @@ npm run quality-gate
 ## 📚 Resources
 
 ### Tool Documentation
+
 - Edit: `src/tools/editTools.ts:1-132`
 - NotebookEdit: `src/tools/notebookEditTools.ts:1-232`
 - Glob: `src/tools/globTools.ts:1-137`
@@ -765,11 +831,13 @@ npm run quality-gate
 - ExitPlanMode: `src/tools/planningTools.ts:1-42`
 
 ### Schema Definitions
+
 - Tool Schema: `src/contracts/tools.schema.json`
 - Agent Profile Schema: `src/contracts/schemas/agent-profile.schema.json`
 - Agent Rules Schema: `src/contracts/schemas/agent-rules.schema.json`
 
 ### Implementation Guides
+
 - ADVANCED_FEATURES.md - Performance optimizations
 - CLAUDE_CODE_FEATURES.md - Previously implemented features
 - README.md - Main documentation
@@ -781,6 +849,7 @@ npm run quality-gate
 Bo CLI now includes **all major Claude Code tools** for file operations, searching, background process management, and workflow planning. The implementation follows Bo's modular architecture (with legacy APT compatibility), maintaining compatibility with all existing features while adding powerful new capabilities.
 
 **Key Achievements:**
+
 - 🎯 **8 new tool suites** fully implemented
 - 📦 **Zero breaking changes** to existing code
 - ⚡ **Production-ready** - tested and validated
@@ -788,6 +857,7 @@ Bo CLI now includes **all major Claude Code tools** for file operations, searchi
 - 📚 **Fully documented** - comprehensive guides
 
 **Total Implementation:**
+
 - **20 new files created**
 - **~2,500 lines of code added**
 - **6 capability modules** registered

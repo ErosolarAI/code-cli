@@ -1,6 +1,9 @@
 import readline from 'node:readline';
 import { stdin as input, stdout as output, exit } from 'node:process';
-import { type AssistantMessageMetadata, type AgentRuntime } from '../core/agent.js';
+import {
+  type AssistantMessageMetadata,
+  type AgentRuntime,
+} from '../core/agent.js';
 import type {
   ConversationMessage,
   ProviderId,
@@ -45,11 +48,21 @@ import {
 import { AgentSession, type ModelSelection } from '../runtime/agentSession.js';
 import { BracketedPasteManager } from './bracketedPasteManager.js';
 import { PromptSkin } from './promptSkin.js';
-import { detectApiKeyError, type ApiKeyErrorInfo } from '../core/errors/apiKeyErrors.js';
+import {
+  detectApiKeyError,
+  type ApiKeyErrorInfo,
+} from '../core/errors/apiKeyErrors.js';
 import { LiveStatusTracker } from './liveStatus.js';
-import { buildWorkspaceContext, type WorkspaceCaptureOptions } from '../workspace.js';
+import {
+  buildWorkspaceContext,
+  type WorkspaceCaptureOptions,
+} from '../workspace.js';
 import { buildInteractiveSystemPrompt } from './systemPrompt.js';
-import { getModels, getSlashCommands, getProviders } from '../core/agentSchemaLoader.js';
+import {
+  getModels,
+  getSlashCommands,
+  getProviders,
+} from '../core/agentSchemaLoader.js';
 import { ShellUIAdapter } from '../ui/ShellUIAdapter.js';
 import {
   clearAutosaveSnapshot,
@@ -66,7 +79,10 @@ import {
   loadCustomSlashCommands,
   type LoadedCustomCommand,
 } from '../core/customCommands.js';
-import { getSharedMissionManager, getSharedTimeline } from '../core/orchestrationContext.js';
+import {
+  getSharedMissionManager,
+  getSharedTimeline,
+} from '../core/orchestrationContext.js';
 import { existsSync, readFileSync } from 'node:fs';
 
 export interface ShellConfig {
@@ -155,14 +171,16 @@ const MODEL_PRESETS: ModelPreset[] = getModels().map((model) => ({
 }));
 
 // Load BASE_SLASH_COMMANDS from centralized schema
-const BASE_SLASH_COMMANDS: SlashCommandDefinition[] = getSlashCommands().map((cmd) => ({
-  command: cmd.command,
-  description: cmd.description,
-}));
+const BASE_SLASH_COMMANDS: SlashCommandDefinition[] = getSlashCommands().map(
+  (cmd) => ({
+    command: cmd.command,
+    description: cmd.description,
+  }),
+);
 
 // Load PROVIDER_LABELS from centralized schema
 const PROVIDER_LABELS: Record<ProviderId, string> = Object.fromEntries(
-  getProviders().map((provider) => [provider.id, provider.label])
+  getProviders().map((provider) => [provider.id, provider.label]),
 ) as Record<ProviderId, string>;
 
 const MULTILINE_INPUT_FLUSH_DELAY_MS = 30;
@@ -205,7 +223,8 @@ export class InteractiveShell {
   private thinkingMode: ThinkingMode = 'balanced';
   private readonly agentMenu: AgentSelectionConfig | null;
   private readonly slashCommands: SlashCommandDefinition[];
-  private bannerSessionState: { model: string; provider: ProviderId } | null = null;
+  private bannerSessionState: { model: string; provider: ProviderId } | null =
+    null;
   private readonly promptSkin: PromptSkin;
   private readonly statusTracker: LiveStatusTracker;
   private readonly uiAdapter: ShellUIAdapter;
@@ -251,11 +270,14 @@ export class InteractiveShell {
     if (this.agentMenu) {
       this.slashCommands.push({
         command: '/agents',
-        description: 'Select the default agent profile (applies on next launch)',
+        description:
+          'Select the default agent profile (applies on next launch)',
       });
     }
     this.customCommands = loadCustomSlashCommands();
-    this.customCommandMap = new Map(this.customCommands.map((command) => [command.command, command]));
+    this.customCommandMap = new Map(
+      this.customCommands.map((command) => [command.command, command]),
+    );
     for (const custom of this.customCommands) {
       this.slashCommands.push({
         command: custom.command,
@@ -263,9 +285,19 @@ export class InteractiveShell {
       });
     }
     this.slashCommands.push(
-      { command: '/feedback', description: 'Show the latest feedback packet (deltas, errors, timeline refs)' },
-      { command: '/accept', description: 'Accept a delta by id or target (e.g., /accept step_1)' },
-      { command: '/reject', description: 'Reject a delta by id or target (e.g., /reject step_1)' },
+      {
+        command: '/feedback',
+        description:
+          'Show the latest feedback packet (deltas, errors, timeline refs)',
+      },
+      {
+        command: '/accept',
+        description: 'Accept a delta by id or target (e.g., /accept step_1)',
+      },
+      {
+        command: '/reject',
+        description: 'Reject a delta by id or target (e.g., /reject step_1)',
+      },
     );
 
     this.statusTracker = config.statusTracker;
@@ -301,7 +333,10 @@ export class InteractiveShell {
     this.activeSessionTitle = null;
     this.sessionResumeNotice = null;
 
-    if (this.sessionPreferences.autoResume && this.sessionPreferences.lastSessionId) {
+    if (
+      this.sessionPreferences.autoResume &&
+      this.sessionPreferences.lastSessionId
+    ) {
       const stored = loadSessionById(this.sessionPreferences.lastSessionId);
       if (stored) {
         this.cachedHistory = stored.messages;
@@ -339,7 +374,9 @@ export class InteractiveShell {
     if (initialPrompt) {
       display.newLine();
       this.promptSkin.beginOutput();
-      console.log(`${formatUserPrompt(this.profileLabel || this.profile)}${initialPrompt}`);
+      console.log(
+        `${formatUserPrompt(this.profileLabel || this.profile)}${initialPrompt}`,
+      );
       this.promptSkin.endOutput();
       await this.processInputBlock(initialPrompt);
       return;
@@ -405,7 +442,9 @@ export class InteractiveShell {
     this.rl.prompt();
   }
 
-  private async persistToolSelection(interaction: ToolSettingsInteraction): Promise<void> {
+  private async persistToolSelection(
+    interaction: ToolSettingsInteraction,
+  ): Promise<void> {
     if (setsEqual(interaction.selection, interaction.initialSelection)) {
       display.showInfo('No changes to save.');
       return;
@@ -414,7 +453,9 @@ export class InteractiveShell {
     const defaults = buildEnabledToolSet(null);
     if (setsEqual(interaction.selection, defaults)) {
       clearToolSettings();
-      display.showInfo('Tool settings cleared. Defaults will be used on the next launch.');
+      display.showInfo(
+        'Tool settings cleared. Defaults will be used on the next launch.',
+      );
       return;
     }
 
@@ -476,10 +517,11 @@ export class InteractiveShell {
       return;
     }
 
-    const currentDefault = this.agentMenu.persistedProfile ?? this.agentMenu.defaultProfile;
+    const currentDefault =
+      this.agentMenu.persistedProfile ?? this.agentMenu.defaultProfile;
     if (profileName === currentDefault) {
       display.showInfo(
-        `${this.agentMenuLabel(profileName)} is already configured for the next launch.`
+        `${this.agentMenuLabel(profileName)} is already configured for the next launch.`,
       );
       return;
     }
@@ -488,7 +530,7 @@ export class InteractiveShell {
       clearActiveProfilePreference();
       this.agentMenu.persistedProfile = null;
       display.showInfo(
-        `${this.agentMenuLabel(profileName)} restored as the default agent. Restart the CLI to switch.`
+        `${this.agentMenuLabel(profileName)} restored as the default agent. Restart the CLI to switch.`,
       );
       return;
     }
@@ -496,7 +538,7 @@ export class InteractiveShell {
     saveActiveProfilePreference(profileName);
     this.agentMenu.persistedProfile = profileName;
     display.showInfo(
-      `${this.agentMenuLabel(profileName)} will load the next time you start the CLI. Restart to switch now.`
+      `${this.agentMenuLabel(profileName)} will load the next time you start the CLI. Restart to switch now.`,
     );
   }
 
@@ -546,7 +588,11 @@ export class InteractiveShell {
 
   private setupSlashCommandPreviewHandler(): void {
     const inputStream = input as NodeJS.ReadStream | undefined;
-    if (!inputStream || typeof inputStream.on !== 'function' || !inputStream.isTTY) {
+    if (
+      !inputStream ||
+      typeof inputStream.on !== 'function' ||
+      !inputStream.isTTY
+    ) {
       return;
     }
 
@@ -636,8 +682,8 @@ export class InteractiveShell {
     const trimmed = line.trimStart();
 
     // Filter commands that match the current input
-    const filtered = this.slashCommands.filter(cmd =>
-      cmd.command.startsWith(trimmed) || trimmed === '/'
+    const filtered = this.slashCommands.filter(
+      (cmd) => cmd.command.startsWith(trimmed) || trimmed === '/',
     );
 
     // Show in the unified UI with dynamic overlay
@@ -654,7 +700,8 @@ export class InteractiveShell {
     // Build profile options with current/next indicators
     const profiles = this.agentMenu.options.map((option, index) => {
       const badges: string[] = [];
-      const nextProfile = this.agentMenu!.persistedProfile ?? this.agentMenu!.defaultProfile;
+      const nextProfile =
+        this.agentMenu!.persistedProfile ?? this.agentMenu!.defaultProfile;
 
       if (option.name === this.profile) {
         badges.push('current');
@@ -715,7 +762,10 @@ export class InteractiveShell {
     }
   }
 
-  private async processInputBlock(line: string, wasRapidMultiLine = false): Promise<void> {
+  private async processInputBlock(
+    line: string,
+    wasRapidMultiLine = false,
+  ): Promise<void> {
     this.slashPreviewVisible = false;
     this.uiAdapter.hideSlashCommandPreview();
     const trimmed = line.trim();
@@ -777,7 +827,9 @@ export class InteractiveShell {
     if (wasRapidMultiLine && trimmed) {
       this.pendingPasteInput = trimmed;
       this.awaitingPasteConfirmation = true;
-      display.showInfo('Multi-line paste captured. Press Enter to submit it, or type /cancel to discard.');
+      display.showInfo(
+        'Multi-line paste captured. Press Enter to submit it, or type /cancel to discard.',
+      );
       this.rl.prompt();
       return;
     }
@@ -882,7 +934,10 @@ export class InteractiveShell {
     this.rl.prompt();
   }
 
-  private async tryCustomSlashCommand(command: string, fullInput: string): Promise<boolean> {
+  private async tryCustomSlashCommand(
+    command: string,
+    fullInput: string,
+  ): Promise<boolean> {
     const custom = this.customCommandMap.get(command);
     if (!custom) {
       return false;
@@ -903,7 +958,7 @@ export class InteractiveShell {
 
     if (!prompt) {
       display.showWarning(
-        `Custom command ${command} did not produce any text. Check ${custom.source} for errors.`
+        `Custom command ${command} did not produce any text. Check ${custom.source} for errors.`,
       );
       return true;
     }
@@ -925,18 +980,25 @@ export class InteractiveShell {
   private async showFeedbackPacket(pageArg?: string): Promise<void> {
     const page = pageArg ? Number(pageArg) : 0;
     if (pageArg && (!Number.isFinite(page) || page < 0)) {
-      display.showWarning('Invalid page. Use /feedback or /feedback <pageNumber>.');
+      display.showWarning(
+        'Invalid page. Use /feedback or /feedback <pageNumber>.',
+      );
       return;
     }
     const packet = getSharedMissionManager().getFeedbackPacket();
     if (!packet.deltas?.length && !packet.errors?.length) {
-      display.showInfo('No feedback available yet. Trigger a tool or plan update first.');
+      display.showInfo(
+        'No feedback available yet. Trigger a tool or plan update first.',
+      );
       return;
     }
     this.uiAdapter.showFeedbackPacket(packet, page);
   }
 
-  private async handleDeltaDecision(input: string, decision: 'accept' | 'reject'): Promise<void> {
+  private async handleDeltaDecision(
+    input: string,
+    decision: 'accept' | 'reject',
+  ): Promise<void> {
     const parts = input.trim().split(/\s+/);
     const target = parts[1];
     if (!target) {
@@ -945,8 +1007,11 @@ export class InteractiveShell {
     }
     const feedback = this.uiAdapter.getLastFeedback();
     const candidateDelta = feedback?.deltas?.find((delta: any) => {
-      const matchId = delta.id && String(delta.id).toLowerCase() === target.toLowerCase();
-      const matchTarget = delta.target && String(delta.target).toLowerCase() === target.toLowerCase();
+      const matchId =
+        delta.id && String(delta.id).toLowerCase() === target.toLowerCase();
+      const matchTarget =
+        delta.target &&
+        String(delta.target).toLowerCase() === target.toLowerCase();
       return matchId || matchTarget;
     });
 
@@ -961,7 +1026,10 @@ export class InteractiveShell {
     if (updated) {
       const lines: string[] = [`Marked ${target} as ${decision}.`];
       if (decision === 'accept' && candidateDelta) {
-        const artifact = (candidateDelta as any).artifact ?? (candidateDelta as any).diff ?? (candidateDelta as any).details;
+        const artifact =
+          (candidateDelta as any).artifact ??
+          (candidateDelta as any).diff ??
+          (candidateDelta as any).details;
         const artifacts = (candidateDelta as any).artifacts;
         if (artifact || (Array.isArray(artifacts) && artifacts.length)) {
           lines.push('Attached artifacts:');
@@ -992,10 +1060,14 @@ export class InteractiveShell {
     if (existsSync(trimmed)) {
       try {
         const content = readFileSync(trimmed, 'utf8');
-        display.showSystemMessage([`Artifact ${trimmed}:`, '```', content, '```'].join('\n'));
+        display.showSystemMessage(
+          [`Artifact ${trimmed}:`, '```', content, '```'].join('\n'),
+        );
         return;
       } catch (error) {
-        display.showWarning(`Failed to read ${trimmed}: ${error instanceof Error ? error.message : String(error)}`);
+        display.showWarning(
+          `Failed to read ${trimmed}: ${error instanceof Error ? error.message : String(error)}`,
+        );
         return;
       }
     }
@@ -1004,8 +1076,18 @@ export class InteractiveShell {
     const allDeltas = feedback?.deltas ?? [];
     const allErrors = feedback?.errors ?? [];
     const match = [...allDeltas, ...allErrors].find((entry: any) => {
-      const fields = [entry.id, entry.target, entry.artifact, entry.diff, ...(entry.artifacts ?? [])];
-      return fields.some((value: unknown) => typeof value === 'string' && value.toLowerCase() === trimmed.toLowerCase());
+      const fields = [
+        entry.id,
+        entry.target,
+        entry.artifact,
+        entry.diff,
+        ...(entry.artifacts ?? []),
+      ];
+      return fields.some(
+        (value: unknown) =>
+          typeof value === 'string' &&
+          value.toLowerCase() === trimmed.toLowerCase(),
+      );
     });
     if (match) {
       const lines = ['Artifact from feedback:'];
@@ -1015,7 +1097,10 @@ export class InteractiveShell {
         }
       }
       if (Array.isArray((match as any).artifacts)) {
-        lines.push('artifacts:', ...(match as any).artifacts.map((a: any) => `- ${a}`));
+        lines.push(
+          'artifacts:',
+          ...(match as any).artifacts.map((a: any) => `- ${a}`),
+        );
       }
       display.showSystemMessage(lines.filter(Boolean).join('\n'));
       return;
@@ -1031,12 +1116,14 @@ export class InteractiveShell {
           event.message ? `Message: ${event.message}` : null,
         ]
           .filter(Boolean)
-          .join('\n')
+          .join('\n'),
       );
       return;
     }
 
-    display.showWarning(`Artifact "${trimmed}" not found in feedback, files, or timeline.`);
+    display.showWarning(
+      `Artifact "${trimmed}" not found in feedback, files, or timeline.`,
+    );
   }
 
   private async applyArtifact(id?: string): Promise<void> {
@@ -1055,16 +1142,24 @@ export class InteractiveShell {
     lines.push(`${theme.secondary('Workspace')}: ${this.workingDir}`);
     lines.push('');
     lines.push(theme.bold('Provider credentials'));
-    const providerDefinition = getSecretDefinitionForProvider(this.sessionState.provider);
+    const providerDefinition = getSecretDefinitionForProvider(
+      this.sessionState.provider,
+    );
     if (providerDefinition) {
       const currentValue = getSecretValue(providerDefinition.id);
       if (currentValue) {
-        lines.push(`${theme.success('✓')} ${providerDefinition.label} configured (${providerDefinition.envVar}).`);
+        lines.push(
+          `${theme.success('✓')} ${providerDefinition.label} configured (${providerDefinition.envVar}).`,
+        );
       } else {
-        lines.push(`${theme.warning('⚠')} Missing ${providerDefinition.label} (${providerDefinition.envVar}). Run /secrets to configure it.`);
+        lines.push(
+          `${theme.warning('⚠')} Missing ${providerDefinition.label} (${providerDefinition.envVar}). Run /secrets to configure it.`,
+        );
       }
     } else {
-      lines.push(`${theme.secondary('•')} ${this.providerLabel(this.sessionState.provider)} does not require an API key.`);
+      lines.push(
+        `${theme.secondary('•')} ${this.providerLabel(this.sessionState.provider)} does not require an API key.`,
+      );
     }
     lines.push('');
     lines.push(theme.bold('Tool suites'));
@@ -1075,7 +1170,9 @@ export class InteractiveShell {
     const enabledLabels = options
       .filter((option) => selection.has(option.id))
       .map((option) => option.label);
-    lines.push(`Enabled: ${enabledLabels.length ? enabledLabels.join(', ') : 'none'}`);
+    lines.push(
+      `Enabled: ${enabledLabels.length ? enabledLabels.join(', ') : 'none'}`,
+    );
     if (!permissions.warnings.length) {
       lines.push(theme.success('All enabled suites loaded successfully.'));
     } else {
@@ -1090,7 +1187,9 @@ export class InteractiveShell {
 
   private async runRepoChecksCommand(): Promise<void> {
     if (this.isProcessing) {
-      display.showWarning('Wait for the active response to finish before running checks.');
+      display.showWarning(
+        'Wait for the active response to finish before running checks.',
+      );
       return;
     }
 
@@ -1100,14 +1199,18 @@ export class InteractiveShell {
       arguments: {},
     };
 
-    display.showInfo('Running repo checks (npm test/build/lint when available)...');
+    display.showInfo(
+      'Running repo checks (npm test/build/lint when available)...',
+    );
     const output = await this.runtimeSession.toolRuntime.execute(call);
     display.showSystemMessage(output);
   }
 
   private async refreshWorkspaceContextCommand(input: string): Promise<void> {
     if (this.isProcessing) {
-      display.showWarning('Wait for the active response to finish before refreshing the snapshot.');
+      display.showWarning(
+        'Wait for the active response to finish before refreshing the snapshot.',
+      );
       return;
     }
 
@@ -1122,31 +1225,36 @@ export class InteractiveShell {
     }
 
     display.showInfo('Refreshing workspace snapshot...');
-    const context = buildWorkspaceContext(this.workingDir, this.workspaceOptions);
+    const context = buildWorkspaceContext(
+      this.workingDir,
+      this.workspaceOptions,
+    );
     const profileConfig = this.runtimeSession.refreshWorkspaceContext(context);
     const tools = this.runtimeSession.toolRuntime.listProviderTools();
     this.baseSystemPrompt = buildInteractiveSystemPrompt(
       profileConfig.systemPrompt,
       profileConfig.label,
-      tools
+      tools,
     );
 
     if (this.rebuildAgent()) {
-      display.showInfo(`Workspace snapshot refreshed (${this.describeWorkspaceOptions()}).`);
+      display.showInfo(
+        `Workspace snapshot refreshed (${this.describeWorkspaceOptions()}).`,
+      );
     } else {
-      display.showWarning('Workspace snapshot refreshed, but the agent failed to rebuild. Run /doctor for details.');
+      display.showWarning(
+        'Workspace snapshot refreshed, but the agent failed to rebuild. Run /doctor for details.',
+      );
     }
   }
 
-  private parseContextOverrideTokens(
-    input: string
-  ): { overrides: WorkspaceCaptureOptions | null; error?: string } {
+  private parseContextOverrideTokens(input: string): {
+    overrides: WorkspaceCaptureOptions | null;
+    error?: string;
+  } {
     const overrides: WorkspaceCaptureOptions = {};
     let hasOverride = false;
-    const tokens = input
-      .trim()
-      .split(/\s+/)
-      .slice(1);
+    const tokens = input.trim().split(/\s+/).slice(1);
 
     for (const token of tokens) {
       if (!token) {
@@ -1160,7 +1268,10 @@ export class InteractiveShell {
       const key = rawKey.toLowerCase();
       const value = Number.parseInt(rawValue, 10);
       if (!Number.isFinite(value) || value <= 0) {
-        return { overrides: null, error: `Value for "${key}" must be a positive integer.` };
+        return {
+          overrides: null,
+          error: `Value for "${key}" must be a positive integer.`,
+        };
       }
 
       switch (key) {
@@ -1187,10 +1298,7 @@ export class InteractiveShell {
   }
 
   private async handleSessionCommand(input: string): Promise<void> {
-    const tokens = input
-      .trim()
-      .split(/\s+/)
-      .slice(1);
+    const tokens = input.trim().split(/\s+/).slice(1);
     const action = (tokens.shift() ?? 'list').toLowerCase();
     switch (action) {
       case '':
@@ -1218,7 +1326,7 @@ export class InteractiveShell {
         return;
       default:
         display.showWarning(
-          'Usage: /sessions [list|save <title>|load <id>|delete <id>|new <title>|autosave on|off|clear]'
+          'Usage: /sessions [list|save <title>|load <id>|delete <id>|new <title>|autosave on|off|clear]',
         );
         return;
     }
@@ -1228,7 +1336,7 @@ export class InteractiveShell {
     const value = input.slice('/thinking'.length).trim().toLowerCase();
     if (!value) {
       display.showInfo(
-        `Thinking mode is currently ${theme.info(this.thinkingMode)}. Usage: /thinking [concise|balanced|extended]`
+        `Thinking mode is currently ${theme.info(this.thinkingMode)}. Usage: /thinking [concise|balanced|extended]`,
       );
       return;
     }
@@ -1237,7 +1345,9 @@ export class InteractiveShell {
       return;
     }
     if (this.isProcessing) {
-      display.showWarning('Wait until the current request finishes before changing thinking mode.');
+      display.showWarning(
+        'Wait until the current request finishes before changing thinking mode.',
+      );
       return;
     }
     this.thinkingMode = value as ThinkingMode;
@@ -1248,14 +1358,18 @@ export class InteractiveShell {
       balanced: 'Shows short thoughts only when helpful.',
       extended: 'Always emits a <thinking> block before the final response.',
     };
-    display.showInfo(`Thinking mode set to ${theme.info(value)} – ${descriptions[this.thinkingMode]}`);
+    display.showInfo(
+      `Thinking mode set to ${theme.info(value)} – ${descriptions[this.thinkingMode]}`,
+    );
   }
 
   private showSessionList(): void {
     const sessions = listSessions(this.profile);
     const lines: string[] = [];
     lines.push(theme.bold('Saved sessions'));
-    lines.push('Use "/sessions save <title>" to persist history or "/sessions load <id>" to resume.');
+    lines.push(
+      'Use "/sessions save <title>" to persist history or "/sessions load <id>" to resume.',
+    );
     lines.push('');
 
     if (!sessions.length) {
@@ -1272,7 +1386,7 @@ export class InteractiveShell {
         const messageCount = `${session.messageCount} msg`;
         const shortId = this.formatSessionId(session.id);
         lines.push(
-          `${prefix.padEnd(3)} ${label} ${theme.secondary(`(${messageCount}, ${relative}, ${shortId})`)}${active}`
+          `${prefix.padEnd(3)} ${label} ${theme.secondary(`(${messageCount}, ${relative}, ${shortId})`)}${active}`,
         );
       });
     }
@@ -1281,7 +1395,7 @@ export class InteractiveShell {
     lines.push(
       `Autosave: ${
         this.autosaveEnabled ? theme.success('on') : theme.warning('off')
-      } (toggle via "/sessions autosave on|off")`
+      } (toggle via "/sessions autosave on|off")`,
     );
     display.showSystemMessage(lines.join('\n'));
   }
@@ -1295,7 +1409,9 @@ export class InteractiveShell {
 
     const history = agent.getHistory();
     if (!history || history.length <= 1) {
-      display.showWarning('You need at least one user message before saving a session.');
+      display.showWarning(
+        'You need at least one user message before saving a session.',
+      );
       return;
     }
 
@@ -1313,7 +1429,9 @@ export class InteractiveShell {
     this.updateActiveSession(summary, true);
     this.sessionResumeNotice = null;
     this.autosaveIfEnabled();
-    display.showInfo(`Session saved as "${summary.title}" (id ${this.formatSessionId(summary.id)}).`);
+    display.showInfo(
+      `Session saved as "${summary.title}" (id ${this.formatSessionId(summary.id)}).`,
+    );
   }
 
   private async loadSessionCommand(selector: string): Promise<void> {
@@ -1325,7 +1443,9 @@ export class InteractiveShell {
 
     const stored = loadSessionById(summary.id);
     if (!stored) {
-      display.showWarning('Failed to load that session. It may have been corrupted or deleted.');
+      display.showWarning(
+        'Failed to load that session. It may have been corrupted or deleted.',
+      );
       return;
     }
 
@@ -1341,7 +1461,9 @@ export class InteractiveShell {
       this.pendingHistoryLoad = null;
     } else {
       this.pendingHistoryLoad = stored.messages;
-      display.showInfo(`Session "${summary.title}" queued to load once the agent is ready.`);
+      display.showInfo(
+        `Session "${summary.title}" queued to load once the agent is ready.`,
+      );
     }
     this.autosaveIfEnabled();
   }
@@ -1395,7 +1517,9 @@ export class InteractiveShell {
     }
     this.autosaveEnabled = normalized === 'on';
     saveSessionPreferences({ autosave: this.autosaveEnabled });
-    display.showInfo(`Autosave ${this.autosaveEnabled ? 'enabled' : 'disabled'}.`);
+    display.showInfo(
+      `Autosave ${this.autosaveEnabled ? 'enabled' : 'disabled'}.`,
+    );
     if (!this.autosaveEnabled) {
       clearAutosaveSnapshot(this.profile);
     } else {
@@ -1408,7 +1532,10 @@ export class InteractiveShell {
     display.showInfo('Cleared autosave history.');
   }
 
-  private updateActiveSession(summary: SessionSummary | null, remember = false): void {
+  private updateActiveSession(
+    summary: SessionSummary | null,
+    remember = false,
+  ): void {
     this.activeSessionId = summary?.id ?? null;
     this.activeSessionTitle = summary?.title ?? null;
     if (remember) {
@@ -1525,7 +1652,7 @@ export class InteractiveShell {
         const countLabel = `${option.modelCount} model${option.modelCount === 1 ? '' : 's'}`;
         const label = this.colorizeDropdownLine(
           `${index + 1}. ${option.label} — ${countLabel}`,
-          index
+          index,
         );
         const suffix = isCurrent ? ` ${theme.primary('• current')}` : '';
         return `${label}${suffix}`;
@@ -1533,7 +1660,10 @@ export class InteractiveShell {
       'Type the number of the provider to continue, or type "cancel".',
     ];
     display.showSystemMessage(lines.join('\n'));
-    this.pendingInteraction = { type: 'model-provider', options: providerOptions };
+    this.pendingInteraction = {
+      type: 'model-provider',
+      options: providerOptions,
+    };
   }
 
   private buildProviderOptions(): ModelProviderOption[] {
@@ -1560,7 +1690,9 @@ export class InteractiveShell {
   }
 
   private showProviderModels(option: ModelProviderOption): void {
-    const models = MODEL_PRESETS.filter((preset) => preset.provider === option.provider);
+    const models = MODEL_PRESETS.filter(
+      (preset) => preset.provider === option.provider,
+    );
     if (!models.length) {
       display.showWarning(`No models available for ${option.label}.`);
       this.pendingInteraction = null;
@@ -1571,15 +1703,25 @@ export class InteractiveShell {
       theme.bold(`Select a model from ${option.label}:`),
       ...models.map((preset, index) => {
         const isCurrent = preset.id === this.sessionState.model;
-        const label = this.colorizeDropdownLine(`${index + 1}. ${preset.label}`, index);
+        const label = this.colorizeDropdownLine(
+          `${index + 1}. ${preset.label}`,
+          index,
+        );
         const suffix = isCurrent ? ` ${theme.primary('• current')}` : '';
-        const description = this.colorizeDropdownLine(`   ${preset.description}`, index);
+        const description = this.colorizeDropdownLine(
+          `   ${preset.description}`,
+          index,
+        );
         return `${label}${suffix}\n${description}`;
       }),
       'Type the number of the model to select it, type "back" to change provider, or type "cancel".',
     ];
     display.showSystemMessage(lines.join('\n'));
-    this.pendingInteraction = { type: 'model', provider: option.provider, options: models };
+    this.pendingInteraction = {
+      type: 'model',
+      provider: option.provider,
+      options: models,
+    };
   }
 
   private showSecretsMenu(): void {
@@ -1589,10 +1731,12 @@ export class InteractiveShell {
       ...definitions.map((definition, index) => {
         const value = getSecretValue(definition.id);
         const status = value ? maskSecret(value) : theme.warning('not set');
-        const providers = definition.providers.map((id) => this.providerLabel(id)).join(', ');
+        const providers = definition.providers
+          .map((id) => this.providerLabel(id))
+          .join(', ');
         const label = this.colorizeDropdownLine(
           `${index + 1}. ${definition.label} (${providers})`,
-          index
+          index,
         );
         return `${label} — ${status}`;
       }),
@@ -1623,9 +1767,11 @@ export class InteractiveShell {
 
   private renderToolMenu(interaction: ToolSettingsInteraction): void {
     const lines = [
-      theme.bold('Select which tools are enabled (changes apply on next launch):'),
+      theme.bold(
+        'Select which tools are enabled (changes apply on next launch):',
+      ),
       ...interaction.options.map((option, index) =>
-        this.formatToolOptionLine(option, index, interaction.selection)
+        this.formatToolOptionLine(option, index, interaction.selection),
       ),
       '',
       'Enter the number to toggle, "save" to persist, "defaults" to restore recommended tools, or "cancel".',
@@ -1636,19 +1782,24 @@ export class InteractiveShell {
   private formatToolOptionLine(
     option: ToolToggleOption,
     index: number,
-    selection: Set<ToolToggleId>
+    selection: Set<ToolToggleId>,
   ): string {
     const enabled = selection.has(option.id);
     const checkbox = enabled ? theme.primary('[x]') : theme.ui.muted('[ ]');
     const details = [option.description];
     if (option.requiresSecret) {
       const hasSecret = Boolean(getSecretValue(option.requiresSecret));
-      const status = hasSecret ? theme.success('API key set') : theme.warning('API key missing');
+      const status = hasSecret
+        ? theme.success('API key set')
+        : theme.warning('API key missing');
       details.push(status);
     }
     const numberLabel = this.colorizeDropdownLine(`${index + 1}.`, index);
     const optionLabel = this.colorizeDropdownLine(option.label, index);
-    const detailLine = this.colorizeDropdownLine(`   ${details.join(' • ')}`, index);
+    const detailLine = this.colorizeDropdownLine(
+      `   ${details.join(' • ')}`,
+      index,
+    );
     return `${numberLabel} ${checkbox} ${optionLabel}\n${detailLine}`;
   }
 
@@ -1659,25 +1810,37 @@ export class InteractiveShell {
     }
 
     const lines = [
-      theme.bold('Select the default agent profile (changes apply on next launch):'),
+      theme.bold(
+        'Select the default agent profile (changes apply on next launch):',
+      ),
       ...this.agentMenu.options.map((option, index) =>
-        this.formatAgentOptionLine(option, index)
+        this.formatAgentOptionLine(option, index),
       ),
       '',
       'Enter the number to save it, or type "cancel".',
     ];
     display.showSystemMessage(lines.join('\n'));
-    this.pendingInteraction = { type: 'agent-selection', options: this.agentMenu.options };
+    this.pendingInteraction = {
+      type: 'agent-selection',
+      options: this.agentMenu.options,
+    };
   }
 
-  private formatAgentOptionLine(option: AgentProfileBlueprint, index: number): string {
-    const numberLabel = this.colorizeDropdownLine(`${index + 1}. ${option.label}`, index);
+  private formatAgentOptionLine(
+    option: AgentProfileBlueprint,
+    index: number,
+  ): string {
+    const numberLabel = this.colorizeDropdownLine(
+      `${index + 1}. ${option.label}`,
+      index,
+    );
     if (!this.agentMenu) {
       return numberLabel;
     }
 
     const badges: string[] = [];
-    const nextProfile = this.agentMenu.persistedProfile ?? this.agentMenu.defaultProfile;
+    const nextProfile =
+      this.agentMenu.persistedProfile ?? this.agentMenu.defaultProfile;
     if (option.name === nextProfile) {
       badges.push(theme.primary('next launch'));
     }
@@ -1783,7 +1946,11 @@ export class InteractiveShell {
     try {
       ensureSecretForProvider(preset.provider);
     } catch (error) {
-      this.handleAgentSetupError(error, () => this.applyModelPreset(preset), preset.provider);
+      this.handleAgentSetupError(
+        error,
+        () => this.applyModelPreset(preset),
+        preset.provider,
+      );
       return;
     }
 
@@ -1837,7 +2004,9 @@ export class InteractiveShell {
       return;
     }
 
-    display.showSystemMessage(`Enter a new value for ${secret.label} or type "cancel".`);
+    display.showSystemMessage(
+      `Enter a new value for ${secret.label} or type "cancel".`,
+    );
     this.pendingInteraction = { type: 'secret-input', secret };
     this.rl.prompt();
   }
@@ -1894,7 +2063,9 @@ export class InteractiveShell {
     }
 
     if (!this.agent && !this.rebuildAgent()) {
-      display.showWarning('Configure an API key via /secrets before sending requests.');
+      display.showWarning(
+        'Configure an API key via /secrets before sending requests.',
+      );
       return;
     }
 
@@ -1916,9 +2087,13 @@ export class InteractiveShell {
       this.captureHistorySnapshot();
       this.autosaveIfEnabled();
     } catch (error) {
-      const handled = this.handleProviderError(error, () => this.processRequest(request));
+      const handled = this.handleProviderError(error, () =>
+        this.processRequest(request),
+      );
       if (!handled) {
-        display.showError(error instanceof Error ? error.message : String(error));
+        display.showError(
+          error instanceof Error ? error.message : String(error),
+        );
       }
     } finally {
       display.stopThinking(IDLE_PROMPT_MESSAGE);
@@ -1945,7 +2120,9 @@ export class InteractiveShell {
   }
 
   private rebuildAgent(): boolean {
-    const previousHistory = this.agent ? this.agent.getHistory() : this.cachedHistory;
+    const previousHistory = this.agent
+      ? this.agent.getHistory()
+      : this.cachedHistory;
     try {
       ensureSecretForProvider(this.sessionState.provider);
       this.runtimeSession.updateToolContext(this.sessionState);
@@ -1970,7 +2147,10 @@ export class InteractiveShell {
               if (summary) {
                 display.updateThinking(`💭 ${summary}`);
               }
-              display.showAssistantMessage(parsed.thinking, { ...enriched, isFinal: false });
+              display.showAssistantMessage(parsed.thinking, {
+                ...enriched,
+                isFinal: false,
+              });
             }
             display.updateThinking('Formulating response...');
             const finalContent = parsed?.response?.trim() || content;
@@ -2010,7 +2190,11 @@ export class InteractiveShell {
       return true;
     } catch (error) {
       this.agent = null;
-      this.handleAgentSetupError(error, () => this.rebuildAgent(), this.sessionState.provider);
+      this.handleAgentSetupError(
+        error,
+        () => this.rebuildAgent(),
+        this.sessionState.provider,
+      );
       return false;
     }
   }
@@ -2036,7 +2220,7 @@ export class InteractiveShell {
 
     lines.push(
       '',
-      'Use these values when describing your identity or answering model/provider questions. If anything feels stale, call the `profile_details` tool before responding.'
+      'Use these values when describing your identity or answering model/provider questions. If anything feels stale, call the `profile_details` tool before responding.',
     );
 
     const thinkingDirective = this.buildThinkingDirective();
@@ -2067,7 +2251,9 @@ export class InteractiveShell {
     }
   }
 
-  private buildDisplayMetadata(metadata: AssistantMessageMetadata): DisplayMessageMetadata {
+  private buildDisplayMetadata(
+    metadata: AssistantMessageMetadata,
+  ): DisplayMessageMetadata {
     return {
       ...metadata,
       contextWindowTokens: this.activeContextWindowTokens,
@@ -2076,7 +2262,7 @@ export class InteractiveShell {
 
   private handleContextTelemetry(
     metadata: AssistantMessageMetadata,
-    displayMetadata: DisplayMessageMetadata
+    displayMetadata: DisplayMessageMetadata,
   ): Promise<void> | null {
     if (!metadata.isFinal) {
       return null;
@@ -2108,16 +2294,23 @@ export class InteractiveShell {
     if (!usage) {
       return null;
     }
-    if (typeof usage.totalTokens === 'number' && Number.isFinite(usage.totalTokens)) {
+    if (
+      typeof usage.totalTokens === 'number' &&
+      Number.isFinite(usage.totalTokens)
+    ) {
       return usage.totalTokens;
     }
     const input = typeof usage.inputTokens === 'number' ? usage.inputTokens : 0;
-    const output = typeof usage.outputTokens === 'number' ? usage.outputTokens : 0;
+    const output =
+      typeof usage.outputTokens === 'number' ? usage.outputTokens : 0;
     const sum = input + output;
     return sum > 0 ? sum : null;
   }
 
-  private async runContextCleanup(windowTokens: number, totalTokens: number): Promise<void> {
+  private async runContextCleanup(
+    windowTokens: number,
+    totalTokens: number,
+  ): Promise<void> {
     if (!this.agent) {
       return;
     }
@@ -2131,17 +2324,27 @@ export class InteractiveShell {
         return;
       }
 
-      const preserveCount = Math.min(conversation.length, CONTEXT_RECENT_MESSAGE_COUNT);
+      const preserveCount = Math.min(
+        conversation.length,
+        CONTEXT_RECENT_MESSAGE_COUNT,
+      );
       const preserved = conversation.slice(conversation.length - preserveCount);
-      const toSummarize = conversation.slice(0, conversation.length - preserveCount);
+      const toSummarize = conversation.slice(
+        0,
+        conversation.length - preserveCount,
+      );
       if (!toSummarize.length) {
         return;
       }
       cleanupOverlayActive = true;
-      this.statusTracker.pushOverride(cleanupStatusId, 'Running context cleanup', {
-        detail: `Summarizing ${toSummarize.length} earlier messages`,
-        tone: 'warning',
-      });
+      this.statusTracker.pushOverride(
+        cleanupStatusId,
+        'Running context cleanup',
+        {
+          detail: `Summarizing ${toSummarize.length} earlier messages`,
+          tone: 'warning',
+        },
+      );
 
       const percentUsed = Math.round((totalTokens / windowTokens) * 100);
 
@@ -2152,7 +2355,7 @@ export class InteractiveShell {
         [
           `Context usage: ${totalTokens.toLocaleString('en-US')} of ${windowTokens.toLocaleString('en-US')} tokens`,
           `(${percentUsed}% full). Running automatic cleanup...`,
-        ].join(' ')
+        ].join(' '),
       );
 
       const summary = await this.buildContextSummary(toSummarize);
@@ -2164,7 +2367,7 @@ export class InteractiveShell {
       this.agent.loadHistory(trimmed);
 
       display.showSystemMessage(
-        `Context cleanup complete. Summarized ${toSummarize.length} earlier messages and preserved the latest ${preserved.length}.`
+        `Context cleanup complete. Summarized ${toSummarize.length} earlier messages and preserved the latest ${preserved.length}.`,
       );
     } finally {
       if (cleanupOverlayActive) {
@@ -2192,7 +2395,9 @@ export class InteractiveShell {
     return { system, conversation };
   }
 
-  private async buildContextSummary(messages: ConversationMessage[]): Promise<string | null> {
+  private async buildContextSummary(
+    messages: ConversationMessage[],
+  ): Promise<string | null> {
     const chunks = this.buildSummaryChunks(messages);
     if (!chunks.length) {
       return null;
@@ -2203,10 +2408,13 @@ export class InteractiveShell {
         provider: this.sessionState.provider,
         model: this.sessionState.model,
         temperature: 0,
-        maxTokens: Math.min(this.sessionState.maxTokens ?? CONTEXT_CLEANUP_MAX_OUTPUT_TOKENS, CONTEXT_CLEANUP_MAX_OUTPUT_TOKENS),
+        maxTokens: Math.min(
+          this.sessionState.maxTokens ?? CONTEXT_CLEANUP_MAX_OUTPUT_TOKENS,
+          CONTEXT_CLEANUP_MAX_OUTPUT_TOKENS,
+        ),
         systemPrompt: CONTEXT_CLEANUP_SYSTEM_PROMPT,
       },
-      {}
+      {},
     );
 
     let runningSummary = '';
@@ -2220,7 +2428,9 @@ export class InteractiveShell {
   }
 
   private buildSummaryChunks(messages: ConversationMessage[]): string[] {
-    const serialized = messages.map((message) => this.serializeMessage(message)).filter((text) => text.length > 0);
+    const serialized = messages
+      .map((message) => this.serializeMessage(message))
+      .filter((text) => text.length > 0);
     if (!serialized.length) {
       return [];
     }
@@ -2230,7 +2440,10 @@ export class InteractiveShell {
 
     for (const entry of serialized) {
       const segment = buffer ? `\n\n${entry}` : entry;
-      if (buffer && buffer.length + segment.length > CONTEXT_CLEANUP_CHARS_PER_CHUNK) {
+      if (
+        buffer &&
+        buffer.length + segment.length > CONTEXT_CLEANUP_CHARS_PER_CHUNK
+      ) {
         chunks.push(buffer.trim());
         buffer = entry;
         continue;
@@ -2252,13 +2465,17 @@ export class InteractiveShell {
     if (content) {
       parts.push(content);
     }
-    if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
+    if (
+      message.role === 'assistant' &&
+      message.toolCalls &&
+      message.toolCalls.length > 0
+    ) {
       parts.push(
         'Tool calls:',
         ...message.toolCalls.map((call) => {
           const args = JSON.stringify(call.arguments ?? {});
           return `- ${call.name} ${args}`;
-        })
+        }),
       );
     }
     return parts.join('\n').trim();
@@ -2291,7 +2508,7 @@ export class InteractiveShell {
         '- Preserve critical TODOs, bugs, test gaps, and file references.',
         '- Call out what is resolved vs. still pending.',
         '- Keep the output concise (<= 200 words) using short headings or bullets.',
-      ].join('\n')
+      ].join('\n'),
     );
     return sections.join('\n\n');
   }
@@ -2299,7 +2516,7 @@ export class InteractiveShell {
   private buildTrimmedHistory(
     systemMessages: ConversationMessage[],
     summary: string,
-    preserved: ConversationMessage[]
+    preserved: ConversationMessage[],
   ): ConversationMessage[] {
     const history: ConversationMessage[] = [];
     if (systemMessages.length > 0) {
@@ -2324,7 +2541,7 @@ export class InteractiveShell {
   private handleAgentSetupError(
     error: unknown,
     retryAction?: () => unknown | Promise<unknown>,
-    providerOverride?: ProviderId | null
+    providerOverride?: ProviderId | null,
   ): void {
     this.pendingInteraction = null;
 
@@ -2342,7 +2559,7 @@ export class InteractiveShell {
 
   private handleProviderError(
     error: unknown,
-    retryAction?: () => unknown | Promise<unknown>
+    retryAction?: () => unknown | Promise<unknown>,
   ): boolean {
     const apiKeyIssue = detectApiKeyError(error, this.sessionState.provider);
     if (!apiKeyIssue) {
@@ -2353,9 +2570,14 @@ export class InteractiveShell {
     return true;
   }
 
-  private handleApiKeyIssue(info: ApiKeyErrorInfo, retryAction?: () => unknown | Promise<unknown>): void {
+  private handleApiKeyIssue(
+    info: ApiKeyErrorInfo,
+    retryAction?: () => unknown | Promise<unknown>,
+  ): void {
     const secret = info.secret ?? null;
-    const providerLabel = info.provider ? this.providerLabel(info.provider) : 'the selected provider';
+    const providerLabel = info.provider
+      ? this.providerLabel(info.provider)
+      : 'the selected provider';
 
     if (!secret) {
       this.pendingSecretRetry = null;
@@ -2384,15 +2606,20 @@ export class InteractiveShell {
     this.showSecretGuidance(secret, isMissing);
   }
 
-  private showSecretGuidance(secret: SecretDefinition, promptForInput: boolean): void {
+  private showSecretGuidance(
+    secret: SecretDefinition,
+    promptForInput: boolean,
+  ): void {
     const lines: string[] = [];
     if (promptForInput) {
       lines.push(`Enter a new value for ${secret.label} or type "cancel".`);
     } else {
-      lines.push(`Update the stored value for ${secret.label} or type "cancel".`);
+      lines.push(
+        `Update the stored value for ${secret.label} or type "cancel".`,
+      );
     }
     lines.push(
-      `Tip: run "/secrets" anytime to manage credentials or export ${secret.envVar}=<value> before launching the CLI.`
+      `Tip: run "/secrets" anytime to manage credentials or export ${secret.envVar}=<value> before launching the CLI.`,
     );
     display.showSystemMessage(lines.join('\n'));
   }
@@ -2426,7 +2653,11 @@ export class InteractiveShell {
     };
 
     const previous = this.bannerSessionState;
-    if (previous && previous.model === nextState.model && previous.provider === nextState.provider) {
+    if (
+      previous &&
+      previous.model === nextState.model &&
+      previous.provider === nextState.provider
+    ) {
       return;
     }
 
@@ -2452,7 +2683,7 @@ export class InteractiveShell {
 
   private extractThoughtSummary(thought: string): string | null {
     // Extract first non-empty line
-    const lines = thought?.split('\n').filter(line => line.trim()) ?? [];
+    const lines = thought?.split('\n').filter((line) => line.trim()) ?? [];
     if (!lines.length) {
       return null;
     }
@@ -2460,7 +2691,10 @@ export class InteractiveShell {
     // Remove common thought prefixes
     const cleaned = lines[0]!
       .trim()
-      .replace(/^(Thinking|Analyzing|Considering|Looking at|Let me)[:.\s]+/i, '')
+      .replace(
+        /^(Thinking|Analyzing|Considering|Looking at|Let me)[:.\s]+/i,
+        '',
+      )
       .replace(/^I (should|need to|will|am)[:.\s]+/i, '')
       .trim();
 
@@ -2475,7 +2709,9 @@ export class InteractiveShell {
       : cleaned;
   }
 
-  private splitThinkingResponse(content: string): { thinking: string | null; response: string } | null {
+  private splitThinkingResponse(
+    content: string,
+  ): { thinking: string | null; response: string } | null {
     if (!content?.includes('<thinking') && !content?.includes('<response')) {
       return null;
     }

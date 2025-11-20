@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createTodoTools } from '../tools/todoTools.js';
 
 export interface TaskManagementCapabilityOptions {
@@ -16,7 +20,7 @@ export class TaskManagementCapabilityModule implements CapabilityModule {
 
   async create(_context: CapabilityContext): Promise<CapabilityContribution> {
     const todoTools = createTodoTools();
-    
+
     return {
       id: this.options.id ?? 'task-management.tools.todos',
       description:

@@ -106,7 +106,8 @@ Usage notes:
         required: ['query'],
       },
       handler: async (args: Record<string, unknown>) => {
-        const query = typeof args['query'] === 'string' ? args['query'].trim() : '';
+        const query =
+          typeof args['query'] === 'string' ? args['query'].trim() : '';
         const allowed = parseDomainList(args['allowed_domains']);
         const blocked = parseDomainList(args['blocked_domains']);
 
@@ -134,7 +135,13 @@ Usage notes:
             return `No web results found for "${query}" ${formatFilterSummary(allowed, blocked)}.`;
           }
 
-          return formatSearchResults(query, results, provider.label, allowed, blocked);
+          return formatSearchResults(
+            query,
+            results,
+            provider.label,
+            allowed,
+            blocked,
+          );
         } catch (error) {
           return `Error performing web search: ${error instanceof Error ? error.message : String(error)}`;
         }
@@ -172,7 +179,10 @@ function resolveSearchProvider(): SearchProvider | null {
   return null;
 }
 
-async function performBraveSearch(params: SearchParams, apiKey: string): Promise<WebSearchResult[]> {
+async function performBraveSearch(
+  params: SearchParams,
+  apiKey: string,
+): Promise<WebSearchResult[]> {
   const url = new URL('https://api.search.brave.com/res/v1/web/search');
   url.searchParams.set('q', params.query);
   url.searchParams.set('count', String(Math.min(params.maxResults * 2, 20)));
@@ -189,21 +199,34 @@ async function performBraveSearch(params: SearchParams, apiKey: string): Promise
   }
 
   const payload = (await response.json()) as BraveSearchResponse;
-  const entries = Array.isArray(payload?.web?.results) ? payload.web.results : [];
+  const entries = Array.isArray(payload?.web?.results)
+    ? payload.web.results
+    : [];
   const mapped = entries
     .map((entry) => ({
       title: entry.title || entry.url,
       url: entry.url,
       snippet: entry.description || entry.snippet || '',
-      source: entry.profile?.name || entry.source || safeHostname(entry.url) || undefined,
+      source:
+        entry.profile?.name ||
+        entry.source ||
+        safeHostname(entry.url) ||
+        undefined,
       published: entry.publishedDate || entry.subtype,
     }))
     .filter((result) => Boolean(result.url));
 
-  return applyDomainFilters(mapped, params.allowedDomains, params.blockedDomains).slice(0, params.maxResults);
+  return applyDomainFilters(
+    mapped,
+    params.allowedDomains,
+    params.blockedDomains,
+  ).slice(0, params.maxResults);
 }
 
-async function performSerpApiSearch(params: SearchParams, apiKey: string): Promise<WebSearchResult[]> {
+async function performSerpApiSearch(
+  params: SearchParams,
+  apiKey: string,
+): Promise<WebSearchResult[]> {
   const url = new URL('https://serpapi.com/search.json');
   url.searchParams.set('engine', 'google');
   url.searchParams.set('q', params.query);
@@ -216,21 +239,39 @@ async function performSerpApiSearch(params: SearchParams, apiKey: string): Promi
   }
 
   const payload = (await response.json()) as SerpApiResponse;
-  const entries = Array.isArray(payload?.organic_results) ? payload.organic_results : [];
+  const entries = Array.isArray(payload?.organic_results)
+    ? payload.organic_results
+    : [];
   const mapped = entries
     .map((entry) => ({
       title: entry.title || entry.link,
       url: entry.link,
-      snippet: entry.snippet || (Array.isArray(entry.snippet_highlighted_words) ? entry.snippet_highlighted_words.join(' ') : ''),
-      source: entry.source || entry.display_link || entry.displayed_link || safeHostname(entry.link) || undefined,
+      snippet:
+        entry.snippet ||
+        (Array.isArray(entry.snippet_highlighted_words)
+          ? entry.snippet_highlighted_words.join(' ')
+          : ''),
+      source:
+        entry.source ||
+        entry.display_link ||
+        entry.displayed_link ||
+        safeHostname(entry.link) ||
+        undefined,
       published: entry.date || entry.snippet_date,
     }))
     .filter((result) => Boolean(result.url));
 
-  return applyDomainFilters(mapped, params.allowedDomains, params.blockedDomains).slice(0, params.maxResults);
+  return applyDomainFilters(
+    mapped,
+    params.allowedDomains,
+    params.blockedDomains,
+  ).slice(0, params.maxResults);
 }
 
-async function performTavilySearch(params: SearchParams, apiKey: string): Promise<WebSearchResult[]> {
+async function performTavilySearch(
+  params: SearchParams,
+  apiKey: string,
+): Promise<WebSearchResult[]> {
   const body: TavilySearchRequest = {
     api_key: apiKey,
     query: params.query,
@@ -273,7 +314,11 @@ async function performTavilySearch(params: SearchParams, apiKey: string): Promis
     }))
     .filter((result) => Boolean(result.url));
 
-  return applyDomainFilters(mapped, params.allowedDomains, params.blockedDomains).slice(0, params.maxResults);
+  return applyDomainFilters(
+    mapped,
+    params.allowedDomains,
+    params.blockedDomains,
+  ).slice(0, params.maxResults);
 }
 
 function parseDomainList(value: unknown): string[] {
@@ -281,27 +326,42 @@ function parseDomainList(value: unknown): string[] {
     return [];
   }
   return value
-    .map((entry) => (typeof entry === 'string' ? entry.trim().toLowerCase() : ''))
+    .map((entry) =>
+      typeof entry === 'string' ? entry.trim().toLowerCase() : '',
+    )
     .filter(Boolean);
 }
 
 function applyDomainFilters(
   results: WebSearchResult[],
   allowedDomains: string[],
-  blockedDomains: string[]
+  blockedDomains: string[],
 ): WebSearchResult[] {
-  const normalizedAllowed = allowedDomains.map((domain) => domain.startsWith('.') ? domain.slice(1) : domain);
-  const normalizedBlocked = blockedDomains.map((domain) => domain.startsWith('.') ? domain.slice(1) : domain);
+  const normalizedAllowed = allowedDomains.map((domain) =>
+    domain.startsWith('.') ? domain.slice(1) : domain,
+  );
+  const normalizedBlocked = blockedDomains.map((domain) =>
+    domain.startsWith('.') ? domain.slice(1) : domain,
+  );
 
   return results.filter((result) => {
     const hostname = safeHostname(result.url);
     if (!hostname) {
       return false;
     }
-    if (normalizedAllowed.length && !normalizedAllowed.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`))) {
+    if (
+      normalizedAllowed.length &&
+      !normalizedAllowed.some(
+        (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+      )
+    ) {
       return false;
     }
-    if (normalizedBlocked.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`))) {
+    if (
+      normalizedBlocked.some(
+        (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+      )
+    ) {
       return false;
     }
     return true;
@@ -313,9 +373,9 @@ function formatSearchResults(
   results: WebSearchResult[],
   providerLabel: string,
   allowed: string[],
-  blocked: string[]
+  blocked: string[],
 ): string {
-  const lines = [`Web Search Results for "${query}" (${providerLabel})`, '' ];
+  const lines = [`Web Search Results for "${query}" (${providerLabel})`, ''];
   results.forEach((result, index) => {
     lines.push(`${index + 1}. ${result.title || result.url}`, result.url);
     if (result.snippet) {
@@ -338,7 +398,11 @@ function formatSearchResults(
   return lines.join('\n').trim();
 }
 
-function formatFilterSummary(allowed: string[], blocked: string[], providerLabel?: string): string {
+function formatFilterSummary(
+  allowed: string[],
+  blocked: string[],
+  providerLabel?: string,
+): string {
   const segments: string[] = [];
   if (allowed.length) {
     segments.push(`allowed: ${allowed.join(', ')}`);
@@ -450,10 +514,13 @@ function fetchUrl(url: string): Promise<string> {
         let data = '';
 
         // Handle redirects
-        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          fetchUrl(res.headers.location)
-            .then(resolve)
-            .catch(reject);
+        if (
+          res.statusCode &&
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          fetchUrl(res.headers.location).then(resolve).catch(reject);
           return;
         }
 
@@ -485,7 +552,10 @@ function htmlToMarkdown(html: string): string {
   let text = html;
 
   // Remove script and style tags
-  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  text = text.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    '',
+  );
   text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
 
   // Convert common HTML tags

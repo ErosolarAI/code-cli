@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -13,7 +17,8 @@ export class EnhancedGitCapabilityModule implements CapabilityModule {
       description: 'Enhanced git workflow with smart commits and PR creation',
       toolSuite: {
         id: 'enhanced-git',
-        description: 'Advanced git operations including smart commits and PR management',
+        description:
+          'Advanced git operations including smart commits and PR management',
         tools: [
           {
             name: 'git_smart_commit',
@@ -65,7 +70,8 @@ Important notes:
                 files: {
                   type: 'array',
                   items: { type: 'string' },
-                  description: 'Optional specific files to commit. If not provided, commits all staged changes.',
+                  description:
+                    'Optional specific files to commit. If not provided, commits all staged changes.',
                 },
               },
               required: ['message'],
@@ -79,9 +85,12 @@ Important notes:
 
               try {
                 // Check for changes
-                const { stdout: statusOutput } = await execAsync('git status --porcelain', {
-                  cwd: context.workingDir,
-                });
+                const { stdout: statusOutput } = await execAsync(
+                  'git status --porcelain',
+                  {
+                    cwd: context.workingDir,
+                  },
+                );
 
                 if (!statusOutput.trim()) {
                   return 'No changes to commit';
@@ -90,7 +99,9 @@ Important notes:
                 // Add files
                 if (files && files.length > 0) {
                   for (const file of files) {
-                    await execAsync(`git add "${file}"`, { cwd: context.workingDir });
+                    await execAsync(`git add "${file}"`, {
+                      cwd: context.workingDir,
+                    });
                   }
                 } else {
                   await execAsync('git add -A', { cwd: context.workingDir });
@@ -111,7 +122,8 @@ EOF
 
                 return `Commit created successfully:\n\n${stdout}\n${stderr}`;
               } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
+                const message =
+                  error instanceof Error ? error.message : String(error);
                 return `Error creating commit: ${message}`;
               }
             },
@@ -166,7 +178,12 @@ Important:
               required: ['title', 'body'],
             },
             handler: async (args: Record<string, unknown>) => {
-              const { title, body, base = 'main', draft = false } = args as {
+              const {
+                title,
+                body,
+                base = 'main',
+                draft = false,
+              } = args as {
                 title: string;
                 body: string;
                 base?: string;
@@ -182,9 +199,12 @@ Important:
                 }
 
                 // Check current branch
-                const { stdout: branchName } = await execAsync('git rev-parse --abbrev-ref HEAD', {
-                  cwd: context.workingDir,
-                });
+                const { stdout: branchName } = await execAsync(
+                  'git rev-parse --abbrev-ref HEAD',
+                  {
+                    cwd: context.workingDir,
+                  },
+                );
 
                 const currentBranch = branchName.trim();
 
@@ -196,7 +216,7 @@ Important:
                 try {
                   const { stdout: trackingOutput } = await execAsync(
                     'git rev-parse --abbrev-ref --symbolic-full-name @{u}',
-                    { cwd: context.workingDir }
+                    { cwd: context.workingDir },
                   );
 
                   if (!trackingOutput.trim()) {
@@ -218,11 +238,14 @@ ${body}
 EOF
 )"`;
 
-                const { stdout } = await execAsync(prCommand, { cwd: context.workingDir });
+                const { stdout } = await execAsync(prCommand, {
+                  cwd: context.workingDir,
+                });
 
                 return `Pull request created successfully:\n\n${stdout}`;
               } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
+                const message =
+                  error instanceof Error ? error.message : String(error);
                 return `Error creating pull request: ${message}`;
               }
             },
@@ -241,7 +264,9 @@ EOF
     }
 
     parts.push('');
-    parts.push('🤖 Generated with [Claude Code](https://claude.com/claude-code)');
+    parts.push(
+      '🤖 Generated with [Claude Code](https://claude.com/claude-code)',
+    );
     parts.push('');
     parts.push('Co-Authored-By: Claude <noreply@anthropic.com>');
 

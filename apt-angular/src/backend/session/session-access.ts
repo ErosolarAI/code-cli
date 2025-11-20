@@ -87,7 +87,9 @@ export class SessionAccessController {
   private extractPassphraseFromRequest(req: Request): string | undefined {
     return (
       req.header(PASS_HEADER) ??
-      (typeof req.query[PASS_QUERY_KEY] === 'string' ? (req.query[PASS_QUERY_KEY] as string) : undefined)
+      (typeof req.query[PASS_QUERY_KEY] === 'string'
+        ? (req.query[PASS_QUERY_KEY] as string)
+        : undefined)
     );
   }
 

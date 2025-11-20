@@ -10,19 +10,23 @@ type RawToolManifest = ToolSelectionManifest & { $schema?: string };
 
 const require = createRequire(import.meta.url);
 const manifest = normalizeManifest(
-  require('../contracts/tools.schema.json') as Partial<RawToolManifest>
+  require('../contracts/tools.schema.json') as Partial<RawToolManifest>,
 );
 
 export function getToolManifest(): ToolSelectionManifest {
   return manifest;
 }
 
-function normalizeManifest(raw: Partial<RawToolManifest>): ToolSelectionManifest {
+function normalizeManifest(
+  raw: Partial<RawToolManifest>,
+): ToolSelectionManifest {
   if (!raw || typeof raw !== 'object') {
     throw new Error('Tool manifest is malformed: expected an object.');
   }
 
-  const options = Array.isArray(raw.options) ? raw.options.map(normalizeOption) : null;
+  const options = Array.isArray(raw.options)
+    ? raw.options.map(normalizeOption)
+    : null;
   if (!options?.length) {
     throw new Error('Tool manifest must include at least one tool option.');
   }
@@ -57,7 +61,10 @@ function normalizeManifest(raw: Partial<RawToolManifest>): ToolSelectionManifest
 function normalizeOption(raw: ToolAvailabilityOption): ToolAvailabilityOption {
   const id = requireString(raw.id, 'option.id');
   const label = requireString(raw.label, `option("${id}").label`);
-  const description = requireString(raw.description, `option("${id}").description`);
+  const description = requireString(
+    raw.description,
+    `option("${id}").description`,
+  );
 
   const pluginIds = dedupeStrings(raw.pluginIds);
   if (!pluginIds.length) {
@@ -92,7 +99,9 @@ function normalizeOption(raw: ToolAvailabilityOption): ToolAvailabilityOption {
   return option;
 }
 
-function normalizePresets(entries: ToolSelectionPreset[] | undefined): ToolSelectionPreset[] | undefined {
+function normalizePresets(
+  entries: ToolSelectionPreset[] | undefined,
+): ToolSelectionPreset[] | undefined {
   if (!entries?.length) {
     return undefined;
   }
@@ -127,7 +136,9 @@ function normalizePresets(entries: ToolSelectionPreset[] | undefined): ToolSelec
   });
 }
 
-function normalizeTargets(targets: ToolSelectionTarget[] | undefined): ToolSelectionTarget[] | undefined {
+function normalizeTargets(
+  targets: ToolSelectionTarget[] | undefined,
+): ToolSelectionTarget[] | undefined {
   if (!targets?.length) {
     return undefined;
   }

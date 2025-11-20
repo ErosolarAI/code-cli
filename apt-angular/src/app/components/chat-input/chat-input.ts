@@ -7,7 +7,7 @@ import {
   computed,
   effect,
   inject,
-  signal
+  signal,
 } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
@@ -27,7 +27,7 @@ interface PastedBlock {
   standalone: true,
   imports: [NgIf, NgFor],
   templateUrl: './chat-input.html',
-  styleUrl: './chat-input.css'
+  styleUrl: './chat-input.css',
 })
 export class ChatInputComponent implements AfterViewInit, OnDestroy {
   private readonly session = inject(AgentSessionService);
@@ -41,7 +41,7 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
   protected readonly error = signal<string | null>(null);
   protected readonly pastedBlocks = signal<PastedBlock[]>([]);
   protected readonly canSend = computed(
-    () => !!this.draft().trim() || this.pastedBlocks().length > 0
+    () => !!this.draft().trim() || this.pastedBlocks().length > 0,
   );
   private readonly draftStorageKey = 'bo-chat-draft';
   private readonly legacyDraftStorageKey = 'apt-chat-draft';
@@ -69,7 +69,7 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
         this.restorePastedBlocks();
         queueMicrotask(() => this.resizeToContent());
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
   }
 
@@ -210,7 +210,7 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
       } else {
         const serialized = blocks.map((block) => ({
           id: block.id,
-          content: block.content
+          content: block.content,
         }));
         localStorage.setItem(blockKey, JSON.stringify(serialized));
         localStorage.removeItem(legacyBlockKey);
@@ -257,9 +257,7 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
   }
 
   private describeError(error: unknown): string {
-    return error instanceof Error
-      ? error.message
-      : 'Unable to deliver your command to the Bo CLI.';
+    return error instanceof Error ? error.message : 'Unable to deliver your command to the Bo CLI.';
   }
 
   private isLargePaste(text: string): boolean {
@@ -281,7 +279,9 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
     const lines = normalized.split('\n');
     const previewSource = lines.slice(0, 3).join(' ').trim();
     const preview =
-      previewSource.length > 90 ? `${previewSource.slice(0, 90)}…` : previewSource || 'pasted block';
+      previewSource.length > 90
+        ? `${previewSource.slice(0, 90)}…`
+        : previewSource || 'pasted block';
     const randomId =
       typeof crypto !== 'undefined' && crypto.randomUUID
         ? crypto.randomUUID()
@@ -292,7 +292,7 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
       content: normalized,
       lines: lines.length,
       characters: normalized.length,
-      preview
+      preview,
     };
   }
 
@@ -323,7 +323,7 @@ export class ChatInputComponent implements AfterViewInit, OnDestroy {
     const blockBundle = blocks
       .map(
         (block, index) =>
-          `[[ attachment ${index + 1} | ${block.lines} lines | ${block.characters} chars ]]\n${block.content}`
+          `[[ attachment ${index + 1} | ${block.lines} lines | ${block.characters} chars ]]\n${block.content}`,
       )
       .join('\n\n');
 

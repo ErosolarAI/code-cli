@@ -284,18 +284,18 @@ Frames update at **10 FPS** for smooth animation without excessive CPU usage.
 
 ## Emoji Indicators
 
-| Tool | Emoji | Description |
-|------|-------|-------------|
-| Read | 📖 | Reading files |
-| Write | ✍️ | Writing files |
-| Edit | ✏️ | Editing files |
-| Bash | ⚙️ | Running commands |
-| Grep | 🔍 | Searching code |
-| Glob | 📁 | Listing directories |
-| WebFetch | 🌐 | Fetching web content |
-| WebSearch | 🔎 | Web search |
-| Thought | 💭 | AI reasoning |
-| Generic | 🔧 | Other tools |
+| Tool      | Emoji | Description          |
+| --------- | ----- | -------------------- |
+| Read      | 📖    | Reading files        |
+| Write     | ✍️    | Writing files        |
+| Edit      | ✏️    | Editing files        |
+| Bash      | ⚙️    | Running commands     |
+| Grep      | 🔍    | Searching code       |
+| Glob      | 📁    | Listing directories  |
+| WebFetch  | 🌐    | Fetching web content |
+| WebSearch | 🔎    | Web search           |
+| Thought   | 💭    | AI reasoning         |
+| Generic   | 🔧    | Other tools          |
 
 ## Performance Considerations
 
@@ -327,6 +327,7 @@ node examples/test-live-updates.js
 ```
 
 This demonstrates:
+
 - ✓ Persistent animated spinner while AI is active
 - ✓ Live thought streaming with spinner updates
 - ✓ Real-time tool execution feedback
@@ -340,11 +341,11 @@ The system can be configured via `UIControllerConfig`:
 
 ```typescript
 const controller = new UnifiedUIController(stream, {
-  enableOverlay: true,        // Show status overlay
-  enableAnimations: true,     // Enable spinner animations
-  enableTelemetry: true,      // Track performance metrics
-  adaptivePerformance: true,  // Adjust quality based on performance
-  debugMode: false,           // Debug logging
+  enableOverlay: true, // Show status overlay
+  enableAnimations: true, // Enable spinner animations
+  enableTelemetry: true, // Track performance metrics
+  adaptivePerformance: true, // Adjust quality based on performance
+  debugMode: false, // Debug logging
 });
 ```
 

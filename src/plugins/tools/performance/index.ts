@@ -3,7 +3,8 @@ import { PerformanceCapabilityModule } from '../../../capabilities/performanceCa
 
 export const performancePlugin: ToolPlugin = {
   id: 'tool.performance.optimization',
-  description: 'Performance optimization tools for parallel execution and efficiency improvements',
+  description:
+    'Performance optimization tools for parallel execution and efficiency improvements',
   targets: ['node'],
   create: () => new PerformanceCapabilityModule(),
 };

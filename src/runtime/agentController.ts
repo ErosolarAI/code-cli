@@ -3,7 +3,10 @@ import type { AgentSession, ModelSelection } from './agentSession.js';
 import type { UniversalRuntime } from './universal.js';
 import { createNodeRuntime, type NodeRuntimeOptions } from './node.js';
 import type { CapabilityModule } from './agentHost.js';
-import type { AgentCallbacks, AssistantMessageMetadata } from '../core/agent.js';
+import type {
+  AgentCallbacks,
+  AssistantMessageMetadata,
+} from '../core/agent.js';
 import type { ToolRuntimeObserver, ToolSuite } from '../core/toolRuntime.js';
 import type { ConversationMessage, ProviderUsage } from '../core/types.js';
 import type {
@@ -15,7 +18,11 @@ import type {
 } from '../contracts/v1/agent.js';
 import { AGENT_CONTRACT_VERSION } from '../contracts/v1/agent.js';
 import { MissionManager } from '../core/missionManager.js';
-import { getSharedMissionManager, getSharedPolicyEngine, getSharedTimeline } from '../core/orchestrationContext.js';
+import {
+  getSharedMissionManager,
+  getSharedPolicyEngine,
+  getSharedTimeline,
+} from '../core/orchestrationContext.js';
 
 interface EventSinkRef {
   current: EventStream<AgentEventUnion> | null;
@@ -23,7 +30,10 @@ interface EventSinkRef {
 
 class EventStream<T> implements AsyncIterableIterator<T> {
   private readonly queue: T[] = [];
-  private pending: { resolve: (value: IteratorResult<T>) => void; reject: (error: unknown) => void } | null = null;
+  private pending: {
+    resolve: (value: IteratorResult<T>) => void;
+    reject: (error: unknown) => void;
+  } | null = null;
   private closed = false;
   private failure: Error | null = null;
 
@@ -97,7 +107,7 @@ class EventStream<T> implements AsyncIterableIterator<T> {
 
 function mergeToolObservers(
   primary: ToolRuntimeObserver,
-  secondary?: ToolRuntimeObserver
+  secondary?: ToolRuntimeObserver,
 ): ToolRuntimeObserver {
   if (!secondary) {
     return primary;
@@ -163,7 +173,8 @@ interface AgentControllerDependencies {
   sinkRef: EventSinkRef;
 }
 
-export interface AgentControllerCreateOptions extends Omit<NodeRuntimeOptions, 'toolObserver'> {
+export interface AgentControllerCreateOptions
+  extends Omit<NodeRuntimeOptions, 'toolObserver'> {
   profile: ProfileName;
   workspaceContext: string | null;
   workingDir: string;
@@ -172,7 +183,7 @@ export interface AgentControllerCreateOptions extends Omit<NodeRuntimeOptions, '
 
 export async function createAgentController(
   options: AgentControllerCreateOptions,
-  additionalObserver?: ToolRuntimeObserver
+  additionalObserver?: ToolRuntimeObserver,
 ): Promise<AgentController> {
   const sinkRef: EventSinkRef = { current: null };
   const observer = createControllerToolObserver(sinkRef);
@@ -223,7 +234,10 @@ export class AgentController implements IAgentController {
     if (this.agent) {
       return this.agent;
     }
-    const agent = this.session.createAgent(this.selection, this.createAgentCallbacks());
+    const agent = this.session.createAgent(
+      this.selection,
+      this.createAgentCallbacks(),
+    );
     if (this.cachedHistory.length) {
       agent.loadHistory(this.cachedHistory);
     }
@@ -233,7 +247,8 @@ export class AgentController implements IAgentController {
 
   private createAgentCallbacks(): AgentCallbacks {
     return {
-      onAssistantMessage: (content, metadata) => this.handleAssistantMessage(content, metadata),
+      onAssistantMessage: (content, metadata) =>
+        this.handleAssistantMessage(content, metadata),
       onStreamChunk: (chunk) => this.emitDelta(chunk, false),
     } satisfies AgentCallbacks;
   }
@@ -271,7 +286,10 @@ export class AgentController implements IAgentController {
     });
   }
 
-  private handleAssistantMessage(content: string, metadata: AssistantMessageMetadata): void {
+  private handleAssistantMessage(
+    content: string,
+    metadata: AssistantMessageMetadata,
+  ): void {
     if (!this.activeSink) {
       return;
     }
@@ -295,7 +313,9 @@ export class AgentController implements IAgentController {
     }
   }
 
-  private async *runAgentTurn(message: string): AsyncGenerator<AgentEventUnion> {
+  private async *runAgentTurn(
+    message: string,
+  ): AsyncGenerator<AgentEventUnion> {
     const agent = this.ensureAgent();
     const run = agent
       .send(message, true)
@@ -304,9 +324,12 @@ export class AgentController implements IAgentController {
         this.activeSink?.close();
       })
       .catch((error) => {
-        const messageText = error instanceof Error ? error.message : String(error);
+        const messageText =
+          error instanceof Error ? error.message : String(error);
         this.emitError(messageText);
-        this.activeSink?.fail(error instanceof Error ? error : new Error(messageText));
+        this.activeSink?.fail(
+          error instanceof Error ? error : new Error(messageText),
+        );
       })
       .finally(() => {
         if (this.activeSink === this.sinkRef.current) {
@@ -328,7 +351,9 @@ export class AgentController implements IAgentController {
 
   async *send(message: string): AsyncIterableIterator<AgentEventUnion> {
     if (this.activeSink) {
-      throw new Error('Agent runtime is already processing a message. Please wait for the current run to finish.');
+      throw new Error(
+        'Agent runtime is already processing a message. Please wait for the current run to finish.',
+      );
     }
 
     const sink = new EventStream<AgentEventUnion>();
@@ -341,7 +366,10 @@ export class AgentController implements IAgentController {
     yield* this.runAgentTurn(message);
 
     // Autonomous loop
-    while (this.missionManager.getState() !== 'IDLE' && this.missionManager.getState() !== 'DONE') {
+    while (
+      this.missionManager.getState() !== 'IDLE' &&
+      this.missionManager.getState() !== 'DONE'
+    ) {
       const state = this.missionManager.getState();
       const mission = this.missionManager.getMission();
       let nextPrompt = '';
@@ -352,7 +380,9 @@ export class AgentController implements IAgentController {
         const task = this.missionManager.getCurrentTask();
         if (task) {
           const taskSummary = task.title ?? task.id;
-          const detail = task.description ? ` Details: ${task.description}` : '';
+          const detail = task.description
+            ? ` Details: ${task.description}`
+            : '';
           nextPrompt = `My mission is: "${mission}". My current task is: "${taskSummary}".${detail ? ` ${detail}` : ''} I will now take the next action to complete this task. When the task is complete, I will use the CompleteTask tool.`;
         } else {
           // Plan is complete, go back to planning.
@@ -367,7 +397,7 @@ export class AgentController implements IAgentController {
         this.activeSink = loopSink;
         this.sinkRef.current = loopSink;
         loopSink.push({ type: 'message.start', timestamp: Date.now() });
-        
+
         yield* this.runAgentTurn(nextPrompt);
       } else {
         // Should not happen, but as a safeguard.

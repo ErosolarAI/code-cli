@@ -66,7 +66,7 @@ export class RedisStreamAdapter implements PersistenceAdapter {
     }
 
     const records = await this.client.xRange(this.config.streamKey, start, end, {
-      COUNT: this.config.readCount ?? 200
+      COUNT: this.config.readCount ?? 200,
     });
 
     return records.map((record) => {
@@ -77,7 +77,7 @@ export class RedisStreamAdapter implements PersistenceAdapter {
 
       return {
         id: record.id,
-        data: JSON.parse(payload as string) as SessionEvent
+        data: JSON.parse(payload as string) as SessionEvent,
       };
     });
   }

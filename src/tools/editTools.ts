@@ -23,7 +23,8 @@ export function createEditTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'Edit',
-      description: 'Performs exact string replacements in files. Use for surgical edits when you know the exact text to replace. The edit will FAIL if old_string is not unique unless replace_all is true.',
+      description:
+        'Performs exact string replacements in files. Use for surgical edits when you know the exact text to replace. The edit will FAIL if old_string is not unique unless replace_all is true.',
       parameters: {
         type: 'object',
         properties: {
@@ -33,15 +34,18 @@ export function createEditTools(workingDir: string): ToolDefinition[] {
           },
           old_string: {
             type: 'string',
-            description: 'The exact text to replace (must match precisely including indentation and whitespace)',
+            description:
+              'The exact text to replace (must match precisely including indentation and whitespace)',
           },
           new_string: {
             type: 'string',
-            description: 'The text to replace it with (must be different from old_string)',
+            description:
+              'The text to replace it with (must be different from old_string)',
           },
           replace_all: {
             type: 'boolean',
-            description: 'Replace all occurrences of old_string (default false). When false, the edit fails if old_string appears multiple times.',
+            description:
+              'Replace all occurrences of old_string (default false). When false, the edit fails if old_string appears multiple times.',
           },
         },
         required: ['file_path', 'old_string', 'new_string'],
@@ -103,15 +107,25 @@ export function createEditTools(workingDir: string): ToolDefinition[] {
 
           // Build summary
           const relativePath = relative(workingDir, filePath);
-          const displayPath = relativePath && !relativePath.startsWith('..') ? relativePath : filePath;
-          const addedLines = diffSegments.filter(s => s.type === 'added').length;
-          const removedLines = diffSegments.filter(s => s.type === 'removed').length;
-          const occurrencesText = replaceAll ? ` (${occurrences} occurrence${occurrences > 1 ? 's' : ''})` : '';
+          const displayPath =
+            relativePath && !relativePath.startsWith('..')
+              ? relativePath
+              : filePath;
+          const addedLines = diffSegments.filter(
+            (s) => s.type === 'added',
+          ).length;
+          const removedLines = diffSegments.filter(
+            (s) => s.type === 'removed',
+          ).length;
+          const occurrencesText = replaceAll
+            ? ` (${occurrences} occurrence${occurrences > 1 ? 's' : ''})`
+            : '';
 
           const diffLines = formatDiffLines(diffSegments);
-          const diffBlock = diffLines.length > 0
-            ? ['```diff', ...diffLines, '```'].join('\n')
-            : '(No visual diff - whitespace or formatting changes only)';
+          const diffBlock =
+            diffLines.length > 0
+              ? ['```diff', ...diffLines, '```'].join('\n')
+              : '(No visual diff - whitespace or formatting changes only)';
 
           return [
             `✓ Edited ${displayPath}${occurrencesText}`,
@@ -120,12 +134,13 @@ export function createEditTools(workingDir: string): ToolDefinition[] {
             'Diff preview:',
             diffBlock,
           ].join('\n');
-
         } catch (error: any) {
           return buildError('editing file', error, {
             file_path: pathArg,
-            old_string_length: typeof oldString === 'string' ? oldString.length : 0,
-            new_string_length: typeof newString === 'string' ? newString.length : 0,
+            old_string_length:
+              typeof oldString === 'string' ? oldString.length : 0,
+            new_string_length:
+              typeof newString === 'string' ? newString.length : 0,
           });
         }
       },

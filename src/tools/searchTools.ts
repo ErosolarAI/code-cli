@@ -39,9 +39,10 @@ export function createSearchTools(workingDir: string): ToolDefinition[] {
         try {
           const pattern = requireStringArg(args['pattern'], 'pattern');
           const searchPath = resolveSearchRoot(workingDir, args['path']);
-          const filePattern = args['filePattern'] === undefined || args['filePattern'] === null
-            ? undefined
-            : requireStringArg(args['filePattern'], 'filePattern');
+          const filePattern =
+            args['filePattern'] === undefined || args['filePattern'] === null
+              ? undefined
+              : requireStringArg(args['filePattern'], 'filePattern');
           const caseSensitive = args['caseSensitive'] === true;
 
           const regex = new RegExp(pattern, caseSensitive ? 'g' : 'gi');
@@ -65,7 +66,8 @@ export function createSearchTools(workingDir: string): ToolDefinition[] {
         properties: {
           name: {
             type: 'string',
-            description: 'The name of the function, class, or interface to find',
+            description:
+              'The name of the function, class, or interface to find',
           },
           type: {
             type: 'string',
@@ -116,10 +118,17 @@ interface SearchResult {
 function searchInFiles(
   path: string,
   regex: RegExp,
-  filePattern?: string
+  filePattern?: string,
 ): SearchResult[] {
   const results: SearchResult[] = [];
-  const ignoredDirs = new Set(['.git', 'node_modules', 'dist', '.next', 'build', 'coverage']);
+  const ignoredDirs = new Set([
+    '.git',
+    'node_modules',
+    'dist',
+    '.next',
+    'build',
+    'coverage',
+  ]);
 
   function search(currentPath: string) {
     try {
@@ -156,24 +165,38 @@ function searchInFiles(
             }
           });
         } catch (error) {
-        }
+            // ignore errors
+          }
       }
     } catch (error) {
-    }
+            // ignore errors
+          }
   }
 
   search(path);
   return results;
 }
 
-type DefinitionSearchType = 'function' | 'class' | 'interface' | 'type' | 'const' | 'any';
+type DefinitionSearchType =
+  | 'function'
+  | 'class'
+  | 'interface'
+  | 'type'
+  | 'const'
+  | 'any';
 
 function normalizeDefinitionType(value: unknown): DefinitionSearchType {
   if (typeof value !== 'string') {
     return 'any';
   }
   const trimmed = value.trim().toLowerCase();
-  if (trimmed === 'function' || trimmed === 'class' || trimmed === 'interface' || trimmed === 'type' || trimmed === 'const') {
+  if (
+    trimmed === 'function' ||
+    trimmed === 'class' ||
+    trimmed === 'interface' ||
+    trimmed === 'type' ||
+    trimmed === 'const'
+  ) {
     return trimmed;
   }
   return 'any';
@@ -189,7 +212,9 @@ function formatSearchResults(results: SearchResult[]): string {
     grouped.get(result.file)!.push(result);
   }
 
-  const output: string[] = [`Found ${results.length} matches in ${grouped.size} files:\n`];
+  const output: string[] = [
+    `Found ${results.length} matches in ${grouped.size} files:\n`,
+  ];
 
   for (const [file, matches] of grouped) {
     output.push(`\n${file}:`);
@@ -203,21 +228,39 @@ function formatSearchResults(results: SearchResult[]): string {
 
 function matchFilePattern(filePath: string, pattern: string): boolean {
   const regex = new RegExp(
-    pattern
-      .replace(/\./g, '\\.')
-      .replace(/\*/g, '.*')
-      .replace(/\?/g, '.'),
-    'i'
+    pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.'),
+    'i',
   );
   return regex.test(filePath);
 }
 
 function isBinaryFile(filePath: string): boolean {
   const textExtensions = new Set([
-    '.ts', '.js', '.tsx', '.jsx', '.json', '.md', '.txt',
-    '.html', '.css', '.scss', '.sass', '.less',
-    '.yml', '.yaml', '.xml', '.svg', '.sh', '.bash',
-    '.py', '.rb', '.go', '.rs', '.c', '.cpp', '.h',
+    '.ts',
+    '.js',
+    '.tsx',
+    '.jsx',
+    '.json',
+    '.md',
+    '.txt',
+    '.html',
+    '.css',
+    '.scss',
+    '.sass',
+    '.less',
+    '.yml',
+    '.yaml',
+    '.xml',
+    '.svg',
+    '.sh',
+    '.bash',
+    '.py',
+    '.rb',
+    '.go',
+    '.rs',
+    '.c',
+    '.cpp',
+    '.h',
   ]);
 
   return !textExtensions.has(filePath.slice(filePath.lastIndexOf('.')));

@@ -24,7 +24,9 @@ const DEFAULT_DIRECTORIES = [
   ...LEGACY_DOT_DIRS.map((dir) => join(dir, 'mcp.d')),
 ];
 
-export async function loadMcpServers(options: LoadOptions): Promise<McpServerConfig[]> {
+export async function loadMcpServers(
+  options: LoadOptions,
+): Promise<McpServerConfig[]> {
   const candidates = await discoverConfigFiles(options);
   if (!candidates.length) {
     return [];
@@ -103,7 +105,9 @@ async function readDirectoryJsonFiles(directory: string): Promise<string[]> {
   }
 }
 
-async function parseConfigFile(path: string): Promise<RawMcpServerDefinition[]> {
+async function parseConfigFile(
+  path: string,
+): Promise<RawMcpServerDefinition[]> {
   const content = await readFile(path, 'utf8');
   const trimmed = content.trim();
   if (!trimmed) {
@@ -111,11 +115,15 @@ async function parseConfigFile(path: string): Promise<RawMcpServerDefinition[]> 
   }
   const parsed = JSON.parse(trimmed);
   if (Array.isArray(parsed)) {
-    return parsed.filter((entry): entry is RawMcpServerDefinition => Boolean(entry && typeof entry === 'object'));
+    return parsed.filter((entry): entry is RawMcpServerDefinition =>
+      Boolean(entry && typeof entry === 'object'),
+    );
   }
   if (parsed && typeof parsed === 'object') {
     const result: RawMcpServerDefinition[] = [];
-    for (const [id, value] of Object.entries(parsed as Record<string, RawMcpServerDefinition>)) {
+    for (const [id, value] of Object.entries(
+      parsed as Record<string, RawMcpServerDefinition>,
+    )) {
       if (value && typeof value === 'object') {
         result.push({ ...value, id });
       }
@@ -128,7 +136,7 @@ async function parseConfigFile(path: string): Promise<RawMcpServerDefinition[]> 
 function normalizeServerDefinition(
   raw: RawMcpServerDefinition,
   source: string,
-  options: LoadOptions
+  options: LoadOptions,
 ): McpServerConfig | null {
   const type = normalizeTransport(raw.type);
   if (!type) {
@@ -148,7 +156,11 @@ function normalizeServerDefinition(
     const args = Array.isArray(raw.args)
       ? raw.args
           .map((value) => {
-            const expanded = expandTemplate(String(value ?? ''), options, source);
+            const expanded = expandTemplate(
+              String(value ?? ''),
+              options,
+              source,
+            );
             return expanded || String(value ?? '').trim();
           })
           .filter(Boolean)
@@ -172,7 +184,9 @@ function normalizeServerDefinition(
   return null;
 }
 
-function normalizeTransport(value: string | undefined): McpServerConfig['type'] | null {
+function normalizeTransport(
+  value: string | undefined,
+): McpServerConfig['type'] | null {
   if (!value) {
     return 'stdio';
   }
@@ -186,7 +200,7 @@ function normalizeTransport(value: string | undefined): McpServerConfig['type'] 
 function normalizeEnv(
   env: Record<string, string> | undefined,
   options: LoadOptions,
-  source: string
+  source: string,
 ): Record<string, string> {
   if (!env) {
     return {};
@@ -202,7 +216,11 @@ function normalizeEnv(
   return record;
 }
 
-function expandTemplate(value: string, options: LoadOptions, file: string): string {
+function expandTemplate(
+  value: string,
+  options: LoadOptions,
+  file: string,
+): string {
   if (!value) {
     return '';
   }
@@ -221,21 +239,24 @@ function expandTemplate(value: string, options: LoadOptions, file: string): stri
 
   type ReplacementKey = keyof typeof replacements;
 
-  const replaced = value.replace(/\$\{([^}]+)\}/g, (_match, token: string): string => {
-    const key = token.trim();
-    if (Object.prototype.hasOwnProperty.call(replacements, key)) {
-      const replacementKey = key as ReplacementKey;
-      return replacements[replacementKey];
-    }
-    const envValue = options.env[key];
-    if (typeof envValue === 'string' && envValue.trim()) {
-      return envValue.trim();
-    }
-    if (typeof process.env[key] === 'string' && process.env[key]!.trim()) {
-      return process.env[key]!.trim();
-    }
-    return '';
-  });
+  const replaced = value.replace(
+    /\${([^}]+)}/g,
+    (_match, token: string): string => {
+      const key = token.trim();
+      if (Object.prototype.hasOwnProperty.call(replacements, key)) {
+        const replacementKey = key as ReplacementKey;
+        return replacements[replacementKey];
+      }
+      const envValue = options.env[key];
+      if (typeof envValue === 'string' && envValue.trim()) {
+        return envValue.trim();
+      }
+      if (typeof process.env[key] === 'string' && process.env[key]!.trim()) {
+        return process.env[key]!.trim();
+      }
+      return '';
+    },
+  );
 
   if (replaced.trim()) {
     return replaced;

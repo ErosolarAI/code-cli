@@ -61,7 +61,10 @@ export function saveActiveProfilePreference(profile: ProfileName): void {
   if (!normalized) {
     return;
   }
-  const payload = readSettingsFile() ?? { version: CURRENT_VERSION, profiles: {} };
+  const payload = readSettingsFile() ?? {
+    version: CURRENT_VERSION,
+    profiles: {},
+  };
   payload.version = CURRENT_VERSION;
   payload.profiles = payload.profiles ?? {};
   payload.activeProfile = normalized;
@@ -79,7 +82,9 @@ export function clearActiveProfilePreference(): void {
   writeSettingsFile(payload);
 }
 
-export function loadModelPreference(profile: ProfileName): PersistedModelPreference | null {
+export function loadModelPreference(
+  profile: ProfileName,
+): PersistedModelPreference | null {
   const payload = readSettingsFile();
   if (!payload) {
     return null;
@@ -96,9 +101,12 @@ export function loadModelPreference(profile: ProfileName): PersistedModelPrefere
 
 export function saveModelPreference(
   profile: ProfileName,
-  preference: PersistedModelPreference
+  preference: PersistedModelPreference,
 ): void {
-  const payload = readSettingsFile() ?? { version: CURRENT_VERSION, profiles: {} };
+  const payload = readSettingsFile() ?? {
+    version: CURRENT_VERSION,
+    profiles: {},
+  };
   payload.version = CURRENT_VERSION;
   payload.profiles = payload.profiles ?? {};
   payload.profiles[profile] = { ...preference };
@@ -115,7 +123,10 @@ export function loadToolSettings(): ToolSettings | null {
 }
 
 export function saveToolSettings(settings: ToolSettings): void {
-  const payload = readSettingsFile() ?? { version: CURRENT_VERSION, profiles: {} };
+  const payload = readSettingsFile() ?? {
+    version: CURRENT_VERSION,
+    profiles: {},
+  };
   payload.version = CURRENT_VERSION;
   payload.profiles = payload.profiles ?? {};
   payload.tools = {
@@ -142,7 +153,8 @@ export function loadSessionPreferences(): SessionPreferences {
   const section = payload?.session;
   return {
     autosave: typeof section?.autosave === 'boolean' ? section.autosave : true,
-    autoResume: typeof section?.autoResume === 'boolean' ? section.autoResume : true,
+    autoResume:
+      typeof section?.autoResume === 'boolean' ? section.autoResume : true,
     lastSessionId:
       typeof section?.lastSessionId === 'string' && section.lastSessionId.trim()
         ? section.lastSessionId.trim()
@@ -151,8 +163,13 @@ export function loadSessionPreferences(): SessionPreferences {
   };
 }
 
-export function saveSessionPreferences(preferences: Partial<SessionPreferences>): void {
-  const payload = readSettingsFile() ?? { version: CURRENT_VERSION, profiles: {} };
+export function saveSessionPreferences(
+  preferences: Partial<SessionPreferences>,
+): void {
+  const payload = readSettingsFile() ?? {
+    version: CURRENT_VERSION,
+    profiles: {},
+  };
   payload.version = CURRENT_VERSION;
   payload.profiles = payload.profiles ?? {};
   const section = payload.session ?? {};
@@ -185,9 +202,12 @@ function readSettingsFile(): SettingsFile | null {
       return null;
     }
     const profiles =
-      typeof parsed.profiles === 'object' && parsed.profiles !== null ? parsed.profiles : {};
+      typeof parsed.profiles === 'object' && parsed.profiles !== null
+        ? parsed.profiles
+        : {};
     const payload: SettingsFile = {
-      version: typeof parsed.version === 'number' ? parsed.version : CURRENT_VERSION,
+      version:
+        typeof parsed.version === 'number' ? parsed.version : CURRENT_VERSION,
       profiles,
     };
     const tools = parseToolSettings(parsed.tools);
@@ -216,6 +236,7 @@ function writeSettingsFile(payload: SettingsFile): void {
     mkdirSync(CONFIG_DIR, { recursive: true });
     writeFileSync(SETTINGS_PATH, JSON.stringify(payload, null, 2));
   } catch {
+    // ignore errors
   }
 }
 
@@ -230,7 +251,9 @@ function parseToolSettings(value: unknown): ToolSettingsSection | undefined {
   return { enabledTools: normalizeToolIds(record.enabledTools) };
 }
 
-function parseSessionPreferences(value: unknown): SessionPreferenceSection | undefined {
+function parseSessionPreferences(
+  value: unknown,
+): SessionPreferenceSection | undefined {
   if (!value || typeof value !== 'object') {
     return undefined;
   }

@@ -4,7 +4,9 @@ import { TimelineRecorder } from './timeline.js';
 
 const sharedTimeline = new TimelineRecorder();
 const sharedMissionManager = new MissionManager({ timeline: sharedTimeline });
-const sharedPolicyEngine = new PolicyEngine(() => sharedMissionManager.getTaskSpec());
+const sharedPolicyEngine = new PolicyEngine(() =>
+  sharedMissionManager.getTaskSpec(),
+);
 
 sharedMissionManager.setPolicyEngine(sharedPolicyEngine);
 

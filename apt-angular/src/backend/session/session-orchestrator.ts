@@ -1,8 +1,4 @@
-import {
-  SessionCommandPayload,
-  SessionEvent,
-  SessionSnapshot,
-} from '../../shared/session-models';
+import { SessionCommandPayload, SessionEvent, SessionSnapshot } from '../../shared/session-models';
 import { AgentGateway } from '../gateways/gateway';
 import { reduceSnapshot } from './snapshot-reducer';
 

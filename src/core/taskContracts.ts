@@ -4,7 +4,10 @@ export type TaskCapability =
   | 'write_and_run_tests'
   | 'full_shell';
 
-export type InteractionMode = 'full_autonomy' | 'ask_before_risky' | 'ask_every_step';
+export type InteractionMode =
+  | 'full_autonomy'
+  | 'ask_before_risky'
+  | 'ask_every_step';
 
 export interface TaskGoal {
   natural: string;
@@ -37,7 +40,13 @@ export interface TaskSpec {
   evaluation?: TaskEvaluation;
 }
 
-export type PlanNodeStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'skipped' | 'blocked';
+export type PlanNodeStatus =
+  | 'pending'
+  | 'running'
+  | 'succeeded'
+  | 'failed'
+  | 'skipped'
+  | 'blocked';
 
 export interface PlanNode {
   id: string;
@@ -74,7 +83,10 @@ export function normalizeTaskSpec(input: TaskSpec): TaskSpec {
   };
 
   const constraints = Array.isArray(input.constraints)
-    ? input.constraints.map(String).map((item) => item.trim()).filter(Boolean)
+    ? input.constraints
+        .map(String)
+        .map((item) => item.trim())
+        .filter(Boolean)
     : [];
 
   const budget: TaskBudget | undefined = input.budget
@@ -87,9 +99,15 @@ export function normalizeTaskSpec(input: TaskSpec): TaskSpec {
 
   const risk_profile: TaskRiskProfile | undefined = input.risk_profile
     ? {
-        capability: isTaskCapability(input.risk_profile.capability) ? input.risk_profile.capability : undefined,
+        capability: isTaskCapability(input.risk_profile.capability)
+          ? input.risk_profile.capability
+          : undefined,
         interaction: input.risk_profile.interaction
-          ? { mode: isInteractionMode(input.risk_profile.interaction.mode) ? input.risk_profile.interaction.mode : undefined }
+          ? {
+              mode: isInteractionMode(input.risk_profile.interaction.mode)
+                ? input.risk_profile.interaction.mode
+                : undefined,
+            }
           : undefined,
       }
     : undefined;
@@ -97,9 +115,13 @@ export function normalizeTaskSpec(input: TaskSpec): TaskSpec {
   const evaluation: TaskEvaluation | undefined = input.evaluation
     ? {
         success: Array.isArray(input.evaluation.success)
-          ? input.evaluation.success.map(String).map((item) => item.trim()).filter(Boolean)
+          ? input.evaluation.success
+              .map(String)
+              .map((item) => item.trim())
+              .filter(Boolean)
           : undefined,
-        acceptance_hint: input.evaluation.acceptance_hint?.toString().trim() || undefined,
+        acceptance_hint:
+          input.evaluation.acceptance_hint?.toString().trim() || undefined,
       }
     : undefined;
 
@@ -118,9 +140,14 @@ export function normalizePlanDAG(plan: PlanDAG): PlanDAG {
     const id = node.id?.trim() || `step_${index + 1}`;
     const title = node.title?.toString().trim() || id;
     const depends_on = Array.isArray(node.depends_on)
-      ? node.depends_on.map(String).map((value) => value.trim()).filter(Boolean)
+      ? node.depends_on
+          .map(String)
+          .map((value) => value.trim())
+          .filter(Boolean)
       : [];
-    const status: PlanNodeStatus = isPlanStatus(node.status) ? node.status : 'pending';
+    const status: PlanNodeStatus = isPlanStatus(node.status)
+      ? node.status
+      : 'pending';
     if (seen.has(id)) {
       throw new Error(`Duplicate plan node id detected: "${id}"`);
     }
@@ -137,7 +164,9 @@ export function normalizePlanDAG(plan: PlanDAG): PlanDAG {
   for (const node of nodes) {
     for (const dep of node.depends_on ?? []) {
       if (!seen.has(dep)) {
-        throw new Error(`Plan node "${node.id}" depends on unknown node "${dep}"`);
+        throw new Error(
+          `Plan node "${node.id}" depends on unknown node "${dep}"`,
+        );
       }
     }
   }
@@ -162,13 +191,29 @@ function toNumber(value: unknown): number | undefined {
 }
 
 function isTaskCapability(value: unknown): value is TaskCapability {
-  return value === 'read_only' || value === 'write_with_diff' || value === 'write_and_run_tests' || value === 'full_shell';
+  return (
+    value === 'read_only' ||
+    value === 'write_with_diff' ||
+    value === 'write_and_run_tests' ||
+    value === 'full_shell'
+  );
 }
 
 function isInteractionMode(value: unknown): value is InteractionMode {
-  return value === 'full_autonomy' || value === 'ask_before_risky' || value === 'ask_every_step';
+  return (
+    value === 'full_autonomy' ||
+    value === 'ask_before_risky' ||
+    value === 'ask_every_step'
+  );
 }
 
 function isPlanStatus(value: unknown): value is PlanNodeStatus {
-  return value === 'pending' || value === 'running' || value === 'succeeded' || value === 'failed' || value === 'skipped' || value === 'blocked';
+  return (
+    value === 'pending' ||
+    value === 'running' ||
+    value === 'succeeded' ||
+    value === 'failed' ||
+    value === 'skipped' ||
+    value === 'blocked'
+  );
 }

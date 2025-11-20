@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { loadCustomSlashCommands, buildCustomCommandPrompt } from '../src/core/customCommands.js';
+import {
+  loadCustomSlashCommands,
+  buildCustomCommandPrompt,
+} from '../src/core/customCommands.js';
 
 test('custom command loader reads JSON definitions', () => {
   const dir = mkdtempSync(join(tmpdir(), 'bo-custom-commands-'));
@@ -15,7 +18,7 @@ test('custom command loader reads JSON definitions', () => {
       description: 'Daily standup helper',
       template: 'Project {{profile}} :: {{input}} @ {{workspace}}',
       requireInput: true,
-    })
+    }),
   );
 
   const commands = loadCustomSlashCommands(dir);

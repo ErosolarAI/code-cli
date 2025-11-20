@@ -1,4 +1,8 @@
-import type { JSONSchemaArray, JSONSchemaObject, JSONSchemaProperty } from './types.js';
+import type {
+  JSONSchemaArray,
+  JSONSchemaObject,
+  JSONSchemaProperty,
+} from './types.js';
 
 export class ToolArgumentValidationError extends Error {
   constructor(toolName: string, issues: string[]) {
@@ -10,7 +14,7 @@ export class ToolArgumentValidationError extends Error {
 export function validateToolArguments(
   toolName: string,
   schema: JSONSchemaObject | undefined,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
 ): void {
   if (!schema || schema.type !== 'object') {
     return;
@@ -46,7 +50,7 @@ function validateSchemaProperty(
   definition: JSONSchemaProperty,
   value: unknown,
   path: string,
-  errors: string[]
+  errors: string[],
 ): void {
   switch (definition.type) {
     case 'string': {
@@ -56,14 +60,17 @@ function validateSchemaProperty(
       }
       if (definition.enum && !definition.enum.includes(value)) {
         errors.push(
-          `Argument "${path}" must be one of: ${definition.enum.map((entry) => `"${entry}"`).join(', ')}.`
+          `Argument "${path}" must be one of: ${definition.enum.map((entry) => `"${entry}"`).join(', ')}.`,
         );
       }
-      if (typeof definition.minLength === 'number' && value.length < definition.minLength) {
+      if (
+        typeof definition.minLength === 'number' &&
+        value.length < definition.minLength
+      ) {
         errors.push(
           `Argument "${path}" must be at least ${definition.minLength} character${
             definition.minLength === 1 ? '' : 's'
-          } long.`
+          } long.`,
         );
       }
       return;
@@ -97,7 +104,7 @@ function validateArrayItems(
   definition: JSONSchemaArray,
   value: unknown[],
   path: string,
-  errors: string[]
+  errors: string[],
 ): void {
   const itemSchema = definition.items;
   if (!itemSchema) {

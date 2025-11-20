@@ -28,7 +28,7 @@ const firebaseConfig: FirebaseOptions = {
   authDomain: 'apt-agents.firebaseapp.com',
   projectId: 'apt-agents',
   storageBucket: 'apt-agents.firebasestorage.app',
-  messagingSenderId: '392993175297'
+  messagingSenderId: '392993175297',
 };
 
 export const environment: EnvironmentConfig = {
@@ -38,11 +38,11 @@ export const environment: EnvironmentConfig = {
     projectId: 'demo-project',
     profileId: 'bo-code',
     connectorId: 'mock-gateway',
-    region: 'us-central1'
+    region: 'us-central1',
   },
   emulator: {
     auth: { host: '127.0.0.1', port: 9099 },
     firestore: { host: '127.0.0.1', port: 8080 },
-    functions: { host: '127.0.0.1', port: 5001 }
-  }
+    functions: { host: '127.0.0.1', port: 5001 },
+  },
 };

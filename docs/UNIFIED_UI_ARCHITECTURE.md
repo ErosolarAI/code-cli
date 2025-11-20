@@ -11,6 +11,7 @@ The Unified UI Layer is a comprehensive orchestration system that coordinates al
 Manages terminal overlay rendering using ANSI escape sequences for precise cursor control.
 
 **Key Features:**
+
 - Multi-region overlay composition (status, progress, hints, alerts)
 - Adaptive terminal sizing
 - Output guard system to prevent conflicts
@@ -18,14 +19,15 @@ Manages terminal overlay rendering using ANSI escape sequences for precise curso
 - Smooth transitions
 
 **Usage:**
+
 ```typescript
 const overlayManager = new OverlayManager(process.stdout);
 overlayManager.setLayout({
   regions: {
     status: { content: 'Processing...', height: 1, priority: 100 },
-    progress: { content: '[████░░░░] 50%', height: 1, priority: 90 }
+    progress: { content: '[████░░░░] 50%', height: 1, priority: 90 },
   },
-  maxHeight: 4
+  maxHeight: 4,
 });
 overlayManager.show();
 ```
@@ -35,21 +37,28 @@ overlayManager.show();
 Unifies status management from multiple sources with priority-based resolution.
 
 **Key Features:**
+
 - Hierarchical status management (base + overrides)
 - Tool lifecycle tracking
 - Event-driven architecture
 - Smart status aggregation
 
 **Status Priority:**
+
 1. Active interrupts (highest)
 2. Running tools
 3. Status overrides
 4. Base status (lowest)
 
 **Usage:**
+
 ```typescript
 const orchestrator = new StatusOrchestrator();
-orchestrator.setBaseStatus({ text: 'Ready', tone: 'success', startedAt: Date.now() });
+orchestrator.setBaseStatus({
+  text: 'Ready',
+  tone: 'success',
+  startedAt: Date.now(),
+});
 orchestrator.onToolStart(toolCallRequest);
 orchestrator.onToolProgress(toolId, { current: 5, total: 10 });
 orchestrator.onToolComplete(toolId, result);
@@ -60,25 +69,33 @@ orchestrator.onToolComplete(toolId, result);
 Coordinates all animations with frame-based updates and easing functions.
 
 **Animation Types:**
+
 - **Spinner**: Rotating characters for loading states
 - **Progress**: Smooth progress bar transitions
 - **Elapsed**: Time tracking displays
 - **Transition**: Property animations with easing
 
 **Built-in Spinners:**
+
 - `dots`, `dots2`, `dots3`: Various dot patterns
 - `line`, `pipe`: Line-based spinners
 - `growVertical`, `growHorizontal`: Growing bars
 - `bounce`, `circle`, `arrow`: Motion patterns
 
 **Easing Functions:**
+
 - Linear, Quad (In/Out/InOut), Cubic (In/Out/InOut)
 - Elastic Out for bouncy effects
 
 **Usage:**
+
 ```typescript
 const scheduler = new AnimationScheduler(30); // 30 FPS
-const spinner = scheduler.createSpinner('loading', 'Processing...', AnimationScheduler.SpinnerFrames.dots);
+const spinner = scheduler.createSpinner(
+  'loading',
+  'Processing...',
+  AnimationScheduler.SpinnerFrames.dots,
+);
 const progress = scheduler.createProgress('upload', 0, 100, 500); // 500ms duration
 scheduler.updateProgress('upload', 50); // Animate to 50%
 ```
@@ -88,6 +105,7 @@ scheduler.updateProgress('upload', 50); // Animate to 50%
 Manages user interruptions with sophisticated priority queuing and transitions.
 
 **Priority Levels:**
+
 - `CRITICAL` (100): System errors, critical failures
 - `HIGH` (75): User cancellations, important alerts
 - `NORMAL` (50): Standard user input, questions
@@ -95,6 +113,7 @@ Manages user interruptions with sophisticated priority queuing and transitions.
 - `BACKGROUND` (0): Non-urgent notifications
 
 **Features:**
+
 - Priority-based queuing
 - Interrupt deferrals (up to 3 times by default)
 - Time-to-live (TTL) for auto-expiration
@@ -102,6 +121,7 @@ Manages user interruptions with sophisticated priority queuing and transitions.
 - Smooth transition animations
 
 **Usage:**
+
 ```typescript
 const manager = new InterruptManager();
 const id = manager.queue({
@@ -111,7 +131,7 @@ const id = manager.queue({
   ttl: 30000, // 30 second timeout
   handler: async (interrupt) => {
     // Handle user response
-  }
+  },
 });
 ```
 
@@ -120,6 +140,7 @@ const id = manager.queue({
 Comprehensive telemetry collection for performance monitoring and optimization.
 
 **Metrics Collected:**
+
 - Event tracking with metadata
 - Performance timing (render, response)
 - User interaction tracking
@@ -128,12 +149,14 @@ Comprehensive telemetry collection for performance monitoring and optimization.
 - Error logging with context
 
 **Performance Thresholds:**
+
 - Render time: 16ms (60 FPS target)
 - Response time: 100ms maximum
 - Frame rate: 30 FPS minimum
 - Memory: 500MB threshold
 
 **Usage:**
+
 ```typescript
 const telemetry = new UITelemetry({ enabled: true });
 telemetry.markStart('operation.heavy');
@@ -150,6 +173,7 @@ interaction.complete();
 Central orchestration layer that coordinates all UI components.
 
 **Key Features:**
+
 - Unified event handling
 - Adaptive performance modes (high/balanced/low)
 - Automatic memory management
@@ -157,17 +181,19 @@ Central orchestration layer that coordinates all UI components.
 - Telemetry integration
 
 **Performance Modes:**
+
 - **High**: 60 FPS, all animations enabled
 - **Balanced**: 30 FPS, standard animations
 - **Low**: 10 FPS, minimal animations
 
 **Usage:**
+
 ```typescript
 const controller = new UnifiedUIController(process.stdout, {
   enableOverlay: true,
   enableAnimations: true,
   enableTelemetry: true,
-  adaptivePerformance: true
+  adaptivePerformance: true,
 });
 
 // Tool execution
@@ -180,7 +206,11 @@ controller.setBaseStatus('Ready', 'success');
 controller.pushStatusOverride('processing', 'Working...', 'Step 1', 'info');
 
 // Interrupts
-const id = controller.queueInterrupt('alert', 'Important!', InterruptPriority.HIGH);
+const id = controller.queueInterrupt(
+  'alert',
+  'Important!',
+  InterruptPriority.HIGH,
+);
 controller.completeInterrupt(id);
 ```
 
@@ -189,17 +219,19 @@ controller.completeInterrupt(id);
 Bridge between the unified UI system and existing shell infrastructure.
 
 **Features:**
+
 - Backward compatibility with legacy components
 - Feature flag for gradual migration
 - Tool observer factory
 - Telemetry access
 
 **Usage:**
+
 ```typescript
 const adapter = new ShellUIAdapter(process.stdout, display, {
   useUnifiedUI: true,
   preserveCompatibility: true,
-  enableTelemetry: true
+  enableTelemetry: true,
 });
 
 // Create tool observer for agent
@@ -229,7 +261,7 @@ import { Display } from './ui/display';
 const display = new Display(process.stdout);
 const uiAdapter = new ShellUIAdapter(process.stdout, display, {
   useUnifiedUI: true,
-  enableTelemetry: true
+  enableTelemetry: true,
 });
 ```
 
@@ -263,7 +295,7 @@ const id = uiAdapter.showInterrupt(
   'confirmation',
   async () => {
     // Handle user response
-  }
+  },
 );
 
 // Complete when done
@@ -291,8 +323,8 @@ The system supports gradual migration through feature flags:
 ```typescript
 // Start with compatibility mode
 const adapter = new ShellUIAdapter(stream, display, {
-  useUnifiedUI: false,  // Use legacy system
-  preserveCompatibility: true
+  useUnifiedUI: false, // Use legacy system
+  preserveCompatibility: true,
 });
 
 // Test unified UI
@@ -320,15 +352,15 @@ The system automatically adjusts quality based on performance:
 ```typescript
 // Reduce animation quality
 controller.updateConfig({
-  enableAnimations: false  // Disable non-essential animations
+  enableAnimations: false, // Disable non-essential animations
 });
 
 // Adjust frame rate
-animationScheduler.setTargetFPS(15);  // Lower FPS for better performance
+animationScheduler.setTargetFPS(15); // Lower FPS for better performance
 
 // Clear old data
-telemetry.flush();  // Clear telemetry buffers
-interruptManager.clearAll();  // Clear pending interrupts
+telemetry.flush(); // Clear telemetry buffers
+interruptManager.clearAll(); // Clear pending interrupts
 ```
 
 ## Event System
@@ -344,7 +376,7 @@ controller.on('ui.performance.adjusted', ({ from, to }) => {});
 
 // Status events
 orchestrator.subscribe((event) => {
-  switch(event.type) {
+  switch (event.type) {
     case 'tool.start':
     case 'tool.progress':
     case 'tool.complete':
@@ -374,6 +406,7 @@ npm test -- unifiedUI
 ```
 
 Test coverage includes:
+
 - Overlay rendering and truncation
 - Status priority resolution
 - Animation frame updates
@@ -395,17 +428,20 @@ Test coverage includes:
 ## Troubleshooting
 
 ### Overlay not showing
+
 - Check `isEnabled` state
 - Verify output guards are balanced
 - Ensure terminal supports ANSI escape codes
 
 ### Poor performance
+
 - Check telemetry for slow operations
 - Verify adaptive performance is enabled
 - Consider reducing animation FPS
 - Check for memory leaks
 
 ### Interrupts not appearing
+
 - Verify priority levels
 - Check TTL hasn't expired
 - Ensure queue isn't full

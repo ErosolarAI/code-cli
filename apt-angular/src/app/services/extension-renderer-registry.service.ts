@@ -31,25 +31,27 @@ export class ExtensionRendererRegistryService {
         component,
         priority: -100,
         fallback: true,
-        predicate: () => true
+        predicate: () => true,
       });
     }
   }
 
   resolve(extension: MessageExtension): ExtensionRendererEntry | undefined {
-    return this.entries
-      .slice()
-      .sort((a, b) => b.priority - a.priority)
-      .find((entry) => {
-        if (entry.predicate) {
-          return entry.predicate(extension);
-        }
+    return (
+      this.entries
+        .slice()
+        .sort((a, b) => b.priority - a.priority)
+        .find((entry) => {
+          if (entry.predicate) {
+            return entry.predicate(extension);
+          }
 
-        if (entry.kinds?.length) {
-          return entry.kinds.includes(extension.kind);
-        }
+          if (entry.kinds?.length) {
+            return entry.kinds.includes(extension.kind);
+          }
 
-        return false;
-      }) ?? this.entries.find((entry) => entry.fallback);
+          return false;
+        }) ?? this.entries.find((entry) => entry.fallback)
+    );
   }
 }

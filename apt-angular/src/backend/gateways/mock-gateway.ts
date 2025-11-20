@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { ChatMessage, SessionEvent, SessionSnapshot, StreamMeter } from '../../shared/session-models';
+import {
+  ChatMessage,
+  SessionEvent,
+  SessionSnapshot,
+  StreamMeter,
+} from '../../shared/session-models';
 import { AgentGateway } from './gateway';
 import { mockSnapshot, mockStreamMeters } from '../seed/mock-session';
 
@@ -20,7 +25,7 @@ export class MockGateway implements AgentGateway {
       const message = this.composeStreamingMessage();
       eventHandler({
         type: 'chat-message',
-        payload: message
+        payload: message,
       });
 
       if (Math.random() > 0.6) {
@@ -34,16 +39,16 @@ export class MockGateway implements AgentGateway {
             data: {
               tool: 'mock.apply_patch',
               latencyMs: 420 + Math.round(Math.random() * 200),
-              status: Math.random() > 0.5 ? 'success' : 'warn'
+              status: Math.random() > 0.5 ? 'success' : 'warn',
             },
-            messageId: message.id
-          }
+            messageId: message.id,
+          },
         });
       }
 
       eventHandler({
         type: 'stream-meters',
-        payload: this.bumpMeters()
+        payload: this.bumpMeters(),
       });
     }, 8000);
 
@@ -67,8 +72,8 @@ export class MockGateway implements AgentGateway {
       tokens: `${(800 + Math.random() * 400).toFixed(0)} tok/s`,
       body: [
         'mock gateway: emitting synthetic update to prove wiring works.',
-        'swap AGENT_SOURCE=local-cli to mirror the actual Bo CLI process.'
-      ]
+        'swap AGENT_SOURCE=local-cli to mirror the actual Bo CLI process.',
+      ],
     };
   }
 
@@ -76,7 +81,7 @@ export class MockGateway implements AgentGateway {
     const meters = deepClone(mockStreamMeters);
     meters[0] = {
       ...meters[0],
-      detail: `1.${Math.round(Math.random() * 4)}k tok/s · latency ${60 + Math.round(Math.random() * 30)}ms`
+      detail: `1.${Math.round(Math.random() * 4)}k tok/s · latency ${60 + Math.round(Math.random() * 30)}ms`,
     };
     return meters;
   }

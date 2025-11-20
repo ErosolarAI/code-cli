@@ -43,7 +43,10 @@ export class GoogleGenAIProvider implements LLMProvider {
     this.maxOutputTokens = options.maxOutputTokens;
   }
 
-  async generate(messages: ConversationMessage[], tools: ProviderToolDefinition[]): Promise<ProviderResponse> {
+  async generate(
+    messages: ConversationMessage[],
+    tools: ProviderToolDefinition[],
+  ): Promise<ProviderResponse> {
     const { contents, systemInstruction } = mapConversation(messages);
     const config: GenerateContentConfig = {};
 
@@ -89,7 +92,10 @@ export class GoogleGenAIProvider implements LLMProvider {
   }
 }
 
-function mapConversation(messages: ConversationMessage[]): { contents: Content[]; systemInstruction?: string } {
+function mapConversation(messages: ConversationMessage[]): {
+  contents: Content[];
+  systemInstruction?: string;
+} {
   const contents: Content[] = [];
   const systemPrompts: string[] = [];
 
@@ -126,7 +132,9 @@ function mapConversation(messages: ConversationMessage[]): { contents: Content[]
 
   return {
     contents,
-    systemInstruction: systemPrompts.length ? systemPrompts.join('\n\n') : undefined,
+    systemInstruction: systemPrompts.length
+      ? systemPrompts.join('\n\n')
+      : undefined,
   };
 }
 
@@ -183,8 +191,7 @@ function parseToolResponse(content: string): Record<string, unknown> {
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
-  } catch {
-  }
+  } catch {}
 
   return { output: content };
 }
@@ -218,13 +225,18 @@ function mapTools(tools: ProviderToolDefinition[]): Tool[] {
       functionDeclarations: tools.map((tool) => ({
         name: tool.name,
         description: tool.description,
-        parametersJsonSchema: tool.parameters ?? { type: 'object', properties: {} },
+        parametersJsonSchema: tool.parameters ?? {
+          type: 'object',
+          properties: {},
+        },
       })),
     },
   ];
 }
 
-function mapUsage(metadata?: GenerateContentResponseUsageMetadata | null): ProviderUsage | null {
+function mapUsage(
+  metadata?: GenerateContentResponseUsageMetadata | null,
+): ProviderUsage | null {
   if (!metadata) {
     return null;
   }
@@ -248,6 +260,7 @@ function toRecord(value: unknown): Record<string, unknown> {
       const parsed = JSON.parse(trimmed);
       return isPlainRecord(parsed) ? parsed : {};
     } catch {
+      // ignore parse errors
       return {};
     }
   }

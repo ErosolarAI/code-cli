@@ -33,17 +33,17 @@ function runCommand(name, command) {
 
 function showHelp() {
   const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
-  
+
   console.log(`
 📦 ${packageJson.name} v${packageJson.version} - Development Utilities
 
 Available commands:
 `);
-  
+
   Object.entries(commands).forEach(([name, command]) => {
     console.log(`  ${name.padEnd(15)} ${command}`);
   });
-  
+
   console.log(`
 Usage:
   node scripts/dev-utils.mjs <command>
@@ -53,16 +53,16 @@ Usage:
 
 function runAll() {
   console.log('\n🔧 Running full development workflow...\n');
-  
+
   runCommand('clean', commands.clean);
   runCommand('build', commands.build);
   runCommand('test', commands.test);
   runCommand('type-check', commands['type-check']);
-  
+
   console.log('\n🎉 All checks passed! Ready for development.\n');
 }
 
-const [,, command] = process.argv;
+const [, , command] = process.argv;
 
 if (!command || command === 'help') {
   showHelp();

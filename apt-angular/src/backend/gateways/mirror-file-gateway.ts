@@ -195,7 +195,8 @@ export class MirrorFileGateway implements AgentGateway {
       return;
     }
 
-    const messageId = typeof entry.data['messageId'] === 'string' ? entry.data['messageId'] : undefined;
+    const messageId =
+      typeof entry.data['messageId'] === 'string' ? entry.data['messageId'] : undefined;
     if (!messageId) {
       return;
     }
@@ -207,8 +208,9 @@ export class MirrorFileGateway implements AgentGateway {
         ? entry.data['data']
         : { raw: entry.data }) as Record<string, unknown>,
       label: typeof entry.data['label'] === 'string' ? entry.data['label'] : undefined,
-      description: typeof entry.data['description'] === 'string' ? entry.data['description'] : undefined,
-      messageId
+      description:
+        typeof entry.data['description'] === 'string' ? entry.data['description'] : undefined,
+      messageId,
     };
 
     if (emit && handler) {
@@ -219,7 +221,10 @@ export class MirrorFileGateway implements AgentGateway {
           return message;
         }
 
-        const nextExtensions = [...(message.extensions ?? []).filter((extension) => extension.id !== payload.id), payload];
+        const nextExtensions = [
+          ...(message.extensions ?? []).filter((extension) => extension.id !== payload.id),
+          payload,
+        ];
         return { ...message, extensions: nextExtensions };
       });
     }
@@ -266,7 +271,12 @@ export class MirrorFileGateway implements AgentGateway {
     this.emitStatus(this.status, handler, emit);
   }
 
-  private handleStreamEntry(stream: MirrorStream, entry: MirrorEntry, emit: boolean, handler?: Handler): void {
+  private handleStreamEntry(
+    stream: MirrorStream,
+    entry: MirrorEntry,
+    emit: boolean,
+    handler?: Handler,
+  ): void {
     const chunk = typeof entry.data?.['chunk'] === 'string' ? entry.data['chunk'] : '';
     if (!chunk) {
       return;
@@ -316,7 +326,8 @@ export class MirrorFileGateway implements AgentGateway {
   }
 
   private handleErrorEntry(entry: MirrorEntry, emit: boolean, handler?: Handler): void {
-    const detail = typeof entry.data?.['message'] === 'string' ? entry.data['message'] : 'unknown error';
+    const detail =
+      typeof entry.data?.['message'] === 'string' ? entry.data['message'] : 'unknown error';
     this.pushOpsEvent(
       {
         label: 'mirror error',

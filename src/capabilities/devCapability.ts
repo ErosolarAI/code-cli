@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createDevTools } from '../tools/devTools.js';
 
 export interface DevCapabilityOptions {
@@ -19,7 +23,9 @@ export class DevCapabilityModule implements CapabilityModule {
     const workingDir = this.options.workingDir ?? context.workingDir;
     return {
       id: this.options.id ?? 'development.tools.workflow',
-      description: this.options.description ?? 'Development workflow tools for testing, building, and dependency management.',
+      description:
+        this.options.description ??
+        'Development workflow tools for testing, building, and dependency management.',
       toolSuite: {
         id: 'development',
         description: 'Development workflow',

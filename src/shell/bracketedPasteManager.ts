@@ -33,6 +33,7 @@ export class BracketedPasteManager {
     let cursor = line;
     let touched = this.active;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.active) {
         if (this.pendingNewline) {

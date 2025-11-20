@@ -1,4 +1,8 @@
-import type { CapabilityModule, CapabilityContribution, CapabilityContext } from '../runtime/agentHost.js';
+import type {
+  CapabilityModule,
+  CapabilityContribution,
+  CapabilityContext,
+} from '../runtime/agentHost.js';
 
 export interface TodoItem {
   content: string;
@@ -91,7 +95,8 @@ ONLY mark completed when FULLY accomplished:
                       activeForm: {
                         type: 'string',
                         minLength: 1,
-                        description: 'The task description in present continuous form',
+                        description:
+                          'The task description in present continuous form',
                       },
                     },
                     required: ['content', 'status', 'activeForm'],
@@ -112,13 +117,17 @@ ONLY mark completed when FULLY accomplished:
                 if (!todo.content || !todo.status || !todo.activeForm) {
                   return 'Error: Each todo must have content, status, and activeForm';
                 }
-                if (!['pending', 'in_progress', 'completed'].includes(todo.status)) {
+                if (
+                  !['pending', 'in_progress', 'completed'].includes(todo.status)
+                ) {
                   return 'Error: Invalid status. Must be pending, in_progress, or completed';
                 }
               }
 
               // Check for exactly one in_progress task
-              const inProgressCount = todos.filter((t) => t.status === 'in_progress').length;
+              const inProgressCount = todos.filter(
+                (t) => t.status === 'in_progress',
+              ).length;
               if (inProgressCount > 1) {
                 return 'Warning: Multiple tasks marked as in_progress. Only one task should be actively worked on at a time.';
               }

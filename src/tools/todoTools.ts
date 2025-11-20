@@ -79,7 +79,8 @@ Skip using this tool when:
                 content: {
                   type: 'string',
                   minLength: 1,
-                  description: 'The imperative form of the task (e.g., "Run tests")',
+                  description:
+                    'The imperative form of the task (e.g., "Run tests")',
                 },
                 status: {
                   type: 'string',
@@ -89,7 +90,8 @@ Skip using this tool when:
                 activeForm: {
                   type: 'string',
                   minLength: 1,
-                  description: 'The present continuous form (e.g., "Running tests")',
+                  description:
+                    'The present continuous form (e.g., "Running tests")',
                 },
               },
               required: ['content', 'status', 'activeForm'],
@@ -106,8 +108,8 @@ Skip using this tool when:
         }
 
         // Validate that exactly one task is in_progress (if there are any non-completed tasks)
-        const inProgressTasks = todos.filter(t => t.status === 'in_progress');
-        const nonCompletedTasks = todos.filter(t => t.status !== 'completed');
+        const inProgressTasks = todos.filter((t) => t.status === 'in_progress');
+        const nonCompletedTasks = todos.filter((t) => t.status !== 'completed');
 
         if (nonCompletedTasks.length > 0 && inProgressTasks.length !== 1) {
           return `Error: Exactly ONE task must be in_progress at any time. Currently ${inProgressTasks.length} tasks are in_progress.`;
@@ -157,8 +159,10 @@ Skip using this tool when:
           output += '\n';
         }
 
-        const pendingCount = todos.filter(t => t.status === 'pending').length;
-        const completedCount = todos.filter(t => t.status === 'completed').length;
+        const pendingCount = todos.filter((t) => t.status === 'pending').length;
+        const completedCount = todos.filter(
+          (t) => t.status === 'completed',
+        ).length;
         const totalCount = todos.length;
 
         output += `\nProgress: ${completedCount}/${totalCount} tasks completed, ${pendingCount} pending\n`;

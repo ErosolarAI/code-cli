@@ -33,7 +33,8 @@ export function createDependencyTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'summarize_dependencies',
-      description: 'Summarize dependency counts, categories, and notable packages from package.json.',
+      description:
+        'Summarize dependency counts, categories, and notable packages from package.json.',
       parameters: {
         type: 'object',
         properties: {
@@ -61,7 +62,8 @@ export function createDependencyTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'scan_dependency_health',
-      description: 'Run npm audit to surface known vulnerabilities (requires npm registry access).',
+      description:
+        'Run npm audit to surface known vulnerabilities (requires npm registry access).',
       parameters: {
         type: 'object',
         properties: {
@@ -75,7 +77,9 @@ export function createDependencyTools(workingDir: string): ToolDefinition[] {
       handler: async (args) => {
         const timeoutArg = args['timeout'];
         const timeout =
-          typeof timeoutArg === 'number' && Number.isFinite(timeoutArg) && timeoutArg > 0
+          typeof timeoutArg === 'number' &&
+          Number.isFinite(timeoutArg) &&
+          timeoutArg > 0
             ? timeoutArg
             : 180000;
 
@@ -104,7 +108,8 @@ export function createDependencyTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'inspect_dependency_tree',
-      description: 'Analyze package-lock.json for resolved versions and duplicate dependency instances.',
+      description:
+        'Analyze package-lock.json for resolved versions and duplicate dependency instances.',
       parameters: {
         type: 'object',
         properties: {},
@@ -122,7 +127,9 @@ export function createDependencyTools(workingDir: string): ToolDefinition[] {
             return 'package-lock.json not found. Run npm install to generate it.';
           }
 
-          const lock = JSON.parse(readFileSync(lockPath, 'utf-8')) as PackageLock;
+          const lock = JSON.parse(
+            readFileSync(lockPath, 'utf-8'),
+          ) as PackageLock;
           return formatLockSummary(pkg, lock);
         } catch (error) {
           return `Error inspecting dependency tree: ${error instanceof Error ? error.message : String(error)}`;
@@ -140,13 +147,18 @@ function readPackageJson(workingDir: string): PackageJson | null {
   return JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
 }
 
-function formatDependencySummary(pkg: PackageJson, detail: 'basic' | 'full'): string {
+function formatDependencySummary(
+  pkg: PackageJson,
+  detail: 'basic' | 'full',
+): string {
   const deps = Object.entries(pkg.dependencies ?? {});
   const devDeps = Object.entries(pkg.devDependencies ?? {});
   const optionalDeps = Object.entries(pkg.optionalDependencies ?? {});
 
   const output: string[] = [];
-  output.push(`# Dependency summary for ${pkg.name ?? 'package'} v${pkg.version ?? '0.0.0'}`);
+  output.push(
+    `# Dependency summary for ${pkg.name ?? 'package'} v${pkg.version ?? '0.0.0'}`,
+  );
   output.push('');
   output.push(`- Production dependencies: ${deps.length}`);
   output.push(`- Dev dependencies: ${devDeps.length}`);
@@ -202,7 +214,8 @@ function formatDependencySummary(pkg: PackageJson, detail: 'basic' | 'full'): st
 function formatAuditReport(jsonText: string): string {
   const report = JSON.parse(jsonText);
   const metadata = report.metadata ?? {};
-  const vulnerabilityCounts = metadata.vulnerabilities ?? report.vulnerabilities ?? {};
+  const vulnerabilityCounts =
+    metadata.vulnerabilities ?? report.vulnerabilities ?? {};
   const output: string[] = [];
   output.push('# npm audit report');
   output.push('');
@@ -225,20 +238,28 @@ function formatAuditReport(jsonText: string): string {
       const data = info as any;
       const severity = data.severity ?? data.metadata?.severity ?? 'unknown';
       const via = Array.isArray(data.via)
-        ? data.via.map((item: any) => (typeof item === 'string' ? item : item.title)).join(', ')
+        ? data.via
+            .map((item: any) => (typeof item === 'string' ? item : item.title))
+            .join(', ')
         : '';
-      output.push(`- ${name}: severity ${severity}${via ? ` (via ${via})` : ''}`);
+      output.push(
+        `- ${name}: severity ${severity}${via ? ` (via ${via})` : ''}`,
+      );
       if (data.range) {
         output.push(`  Affected versions: ${data.range}`);
       } else if (data.vulnerable_versions) {
         output.push(`  Affected versions: ${data.vulnerable_versions}`);
       }
       if (data.patch_available || data.fixAvailable) {
-        output.push(`  Fix available: ${JSON.stringify(data.patch_available ?? data.fixAvailable)}`);
+        output.push(
+          `  Fix available: ${JSON.stringify(data.patch_available ?? data.fixAvailable)}`,
+        );
       }
     });
   } else {
-    output.push('No detailed vulnerability entries were returned by npm audit.');
+    output.push(
+      'No detailed vulnerability entries were returned by npm audit.',
+    );
   }
 
   return output.join('\n');
@@ -291,7 +312,9 @@ function resolveLockVersion(lock: PackageLock, name: string): string | null {
     return lock.dependencies[name]!.version ?? null;
   }
   if (lock.packages) {
-    const key = name.startsWith('node_modules/') ? name : `node_modules/${name}`;
+    const key = name.startsWith('node_modules/')
+      ? name
+      : `node_modules/${name}`;
     const entry = lock.packages[key];
     if (entry?.version) {
       return entry.version;
@@ -300,7 +323,9 @@ function resolveLockVersion(lock: PackageLock, name: string): string | null {
   return null;
 }
 
-function detectDuplicateVersions(lock: PackageLock): Array<{ name: string; versions: Set<string> }> {
+function detectDuplicateVersions(
+  lock: PackageLock,
+): Array<{ name: string; versions: Set<string> }> {
   const versionMap = new Map<string, Set<string>>();
   if (!lock.packages) {
     return [];

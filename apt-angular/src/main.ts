@@ -23,6 +23,7 @@ const ensureFirebaseConfig = async (): Promise<void> => {
         return;
       }
     } catch {
+      // ignore fetch errors
     }
   }
 

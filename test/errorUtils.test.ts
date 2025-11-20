@@ -11,7 +11,7 @@ test('createErrorDetails creates proper error details from Error', () => {
   const error = new Error('Test error');
   const context = { userId: '123', action: 'test' };
   const details = createErrorDetails(error, context, 'TEST_ERROR');
-  
+
   assert.equal(details.message, 'Test error');
   assert.equal(details.code, 'TEST_ERROR');
   assert.deepEqual(details.context, context);
@@ -21,7 +21,7 @@ test('createErrorDetails creates proper error details from Error', () => {
 
 test('createErrorDetails handles non-Error objects', () => {
   const details = createErrorDetails('String error');
-  
+
   assert.equal(details.message, 'String error');
   assert.equal(details.code, undefined);
   assert.equal(details.context, undefined);
@@ -33,7 +33,7 @@ test('formatErrorForLogging formats error with context', () => {
   const error = new Error('Test error');
   const context = { userId: '123', action: 'test' };
   const formatted = formatErrorForLogging(error, context);
-  
+
   assert.ok(formatted.includes('Test error'));
   assert.ok(formatted.includes('Context: {"userId":"123","action":"test"}'));
   assert.ok(formatted.includes('Stack:'));
@@ -51,7 +51,7 @@ test('isRetryableError identifies retryable errors', () => {
 
 test('withRetry retries on retryable errors', async () => {
   let attempts = 0;
-  
+
   const operation = async () => {
     attempts++;
     if (attempts < 3) {
@@ -59,21 +59,21 @@ test('withRetry retries on retryable errors', async () => {
     }
     return 'success';
   };
-  
+
   const result = await withRetry(operation, 3, 10);
-  
+
   assert.equal(result, 'success');
   assert.equal(attempts, 3);
 });
 
 test('withRetry fails after max retries', async () => {
   let attempts = 0;
-  
+
   const operation = async () => {
     attempts++;
     throw new Error('Rate limit exceeded');
   };
-  
+
   try {
     await withRetry(operation, 2, 10);
     assert.fail('Should have thrown');
@@ -85,12 +85,12 @@ test('withRetry fails after max retries', async () => {
 
 test('withRetry does not retry non-retryable errors', async () => {
   let attempts = 0;
-  
+
   const operation = async () => {
     attempts++;
     throw new Error('Validation error');
   };
-  
+
   try {
     await withRetry(operation, 3, 10);
     assert.fail('Should have thrown');

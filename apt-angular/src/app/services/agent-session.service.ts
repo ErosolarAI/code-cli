@@ -1,6 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { DestroyRef, Injectable, PLATFORM_ID, Signal, computed, inject, signal } from '@angular/core';
+import {
+  DestroyRef,
+  Injectable,
+  PLATFORM_ID,
+  Signal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   ChatMessage,
@@ -41,9 +49,13 @@ export class AgentSessionService {
   readonly isLoading = this.loadingState.asReadonly();
   readonly errorMessage = this.errorState.asReadonly();
 
-  readonly chatMessages: Signal<ChatMessage[]> = computed(() => this.snapshotState()?.chatMessages ?? []);
+  readonly chatMessages: Signal<ChatMessage[]> = computed(
+    () => this.snapshotState()?.chatMessages ?? [],
+  );
 
-  readonly streamMeters: Signal<StreamMeter[]> = computed(() => this.snapshotState()?.streamMeters ?? []);
+  readonly streamMeters: Signal<StreamMeter[]> = computed(
+    () => this.snapshotState()?.streamMeters ?? [],
+  );
 
   readonly opsEvents = computed(() => this.snapshotState()?.opsEvents ?? []);
   readonly shortcuts = computed(() => this.snapshotState()?.shortcuts ?? []);
@@ -118,7 +130,7 @@ export class AgentSessionService {
     try {
       await this.ensureSessionAccess(false);
       const snapshot = await firstValueFrom(
-        this.http.get<SessionSnapshot>('/api/session', this.buildRequestOptions())
+        this.http.get<SessionSnapshot>('/api/session', this.buildRequestOptions()),
       );
       this.snapshotState.set(snapshot);
       this.errorState.set(null);
@@ -162,7 +174,7 @@ export class AgentSessionService {
       'stream-meters',
       'ops-events',
       'shortcuts',
-      'status'
+      'status',
     ];
 
     supportedEvents.forEach((eventName) => {
@@ -202,7 +214,7 @@ export class AgentSessionService {
 
   private computeNextSnapshot(
     current: SessionSnapshot | null,
-    event: SessionEvent
+    event: SessionEvent,
   ): SessionSnapshot | null {
     if (!current) {
       return event.type === 'session' ? event.payload : current;
@@ -217,8 +229,8 @@ export class AgentSessionService {
         return {
           ...current,
           chatMessages: current.chatMessages.map((message) =>
-            message.id === event.payload.id ? event.payload : message
-          )
+            message.id === event.payload.id ? event.payload : message,
+          ),
         };
       case 'chat-history':
         return { ...current, chatMessages: [...event.payload] };
@@ -241,7 +253,7 @@ export class AgentSessionService {
             const existing = message.extensions ?? [];
             const filtered = existing.filter((extension) => extension.id !== event.payload.id);
             return { ...message, extensions: [...filtered, event.payload] };
-          })
+          }),
         };
       default:
         event satisfies never;
@@ -286,7 +298,7 @@ export class AgentSessionService {
     }
 
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
   }
 
@@ -307,10 +319,12 @@ export class AgentSessionService {
       return null;
     }
 
-    const globalSessionId = (globalThis as unknown as { BO_SESSION_ID?: string; APT_SESSION_ID?: string })
-      .BO_SESSION_ID;
-    const legacySessionId = (globalThis as unknown as { BO_SESSION_ID?: string; APT_SESSION_ID?: string })
-      .APT_SESSION_ID;
+    const globalSessionId = (
+      globalThis as unknown as { BO_SESSION_ID?: string; APT_SESSION_ID?: string }
+    ).BO_SESSION_ID;
+    const legacySessionId = (
+      globalThis as unknown as { BO_SESSION_ID?: string; APT_SESSION_ID?: string }
+    ).APT_SESSION_ID;
     return globalSessionId ?? legacySessionId ?? null;
   }
 
@@ -415,10 +429,16 @@ export class AgentSessionService {
 
   private composeAccessEndpoint(): string {
     const sessionId = this.sessionIdState();
-    return sessionId ? `/api/session/${encodeURIComponent(sessionId)}/access` : '/api/session/access';
+    return sessionId
+      ? `/api/session/${encodeURIComponent(sessionId)}/access`
+      : '/api/session/access';
   }
 
-  private computeAccessKey(sessionId: string, passphrase: string, firebaseToken: string | null): string {
+  private computeAccessKey(
+    sessionId: string,
+    passphrase: string,
+    firebaseToken: string | null,
+  ): string {
     return `${sessionId}:${passphrase}:${firebaseToken ?? ''}`;
   }
 }

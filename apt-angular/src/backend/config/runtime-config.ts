@@ -115,7 +115,7 @@ const discoverWorkspaceCandidates = (): string[] => {
     process.env['BO_UI_WORKSPACE'],
     process.env['APT_UI_WORKSPACE'],
     process.env['WORKSPACE'],
-    process.cwd()
+    process.cwd(),
   ].filter((value): value is string => Boolean(value));
 
   return hints.map((hint) => {
@@ -145,6 +145,7 @@ const pickLatestMirrorFile = (workspace: string): string | undefined => {
       try {
         mtime = statSync(fullPath).mtimeMs;
       } catch {
+        // ignore errors
       }
       return { path: fullPath, mtime };
     })
@@ -190,8 +191,7 @@ const parseAccessConfig = (): SessionAccessConfig => {
 export const loadRuntimeConfig = (): RuntimeConfig => {
   const explicitSource = process.env['AGENT_SOURCE'] as AgentSource | undefined;
   const autoMirrorFile = discoverMirrorFile();
-  const source: AgentSource =
-    explicitSource ?? (autoMirrorFile ? 'mirror-file' : 'mock');
+  const source: AgentSource = explicitSource ?? (autoMirrorFile ? 'mirror-file' : 'mock');
   const access = parseAccessConfig();
 
   if (source === 'mirror-file') {
@@ -204,20 +204,23 @@ export const loadRuntimeConfig = (): RuntimeConfig => {
 
     const sessionId = deriveMirrorSessionId(
       file,
-      process.env['BO_UI_SESSION_ID'] ?? process.env['APT_UI_SESSION_ID'] ?? process.env['SESSION_ID']
+      process.env['BO_UI_SESSION_ID'] ??
+        process.env['APT_UI_SESSION_ID'] ??
+        process.env['SESSION_ID'],
     );
     return {
       source,
       sessionId,
       mirrorFile: {
         file,
-        sessionId
+        sessionId,
       },
-      access
+      access,
     };
   }
 
-  const sessionId = process.env['SESSION_ID'] ?? (source === 'mock' ? 'mock-local' : 'workspace-stream');
+  const sessionId =
+    process.env['SESSION_ID'] ?? (source === 'mock' ? 'mock-local' : 'workspace-stream');
 
   if (source === 'local-cli') {
     const expectJson = parseBoolean(process.env['LOCAL_CLI_JSON'], true);
@@ -226,14 +229,14 @@ export const loadRuntimeConfig = (): RuntimeConfig => {
       sessionId,
       localCli: {
         command: process.env['LOCAL_CLI_COMMAND'] ?? 'bo --profile bo-code --json',
-          cwd: process.env['LOCAL_CLI_CWD'] ?? process.cwd(),
-          expectJson,
-          env: parseEnvObject(process.env['LOCAL_CLI_ENV']),
-          sessionId
-        },
-        access
-      };
-    }
+        cwd: process.env['LOCAL_CLI_CWD'] ?? process.cwd(),
+        expectJson,
+        env: parseEnvObject(process.env['LOCAL_CLI_ENV']),
+        sessionId,
+      },
+      access,
+    };
+  }
 
   if (source === 'remote-cloud') {
     return {
@@ -242,9 +245,9 @@ export const loadRuntimeConfig = (): RuntimeConfig => {
       remote: {
         baseUrl: process.env['REMOTE_AGENT_URL'] ?? '',
         token: process.env['REMOTE_AGENT_TOKEN'],
-        project: process.env['REMOTE_AGENT_PROJECT']
+        project: process.env['REMOTE_AGENT_PROJECT'],
       },
-      access
+      access,
     };
   }
 
@@ -260,9 +263,9 @@ export const loadRuntimeConfig = (): RuntimeConfig => {
       jsonlStore: {
         url,
         pollIntervalMs: parseNumber(process.env['JSONL_STORE_POLL_MS']),
-        label: process.env['JSONL_STORE_LABEL']
+        label: process.env['JSONL_STORE_LABEL'],
       },
-      access
+      access,
     };
   }
 
@@ -280,9 +283,9 @@ export const loadRuntimeConfig = (): RuntimeConfig => {
         url,
         streamKey,
         pollIntervalMs: parseNumber(process.env['REDIS_STREAM_POLL_MS']),
-        label: process.env['REDIS_STREAM_LABEL']
+        label: process.env['REDIS_STREAM_LABEL'],
       },
-      access
+      access,
     };
   }
 
@@ -299,9 +302,9 @@ export const loadRuntimeConfig = (): RuntimeConfig => {
         historyUrl,
         commandUrl: process.env['TEMPORAL_COMMAND_URL'],
         pollIntervalMs: parseNumber(process.env['TEMPORAL_POLL_MS']),
-        label: process.env['TEMPORAL_LABEL']
+        label: process.env['TEMPORAL_LABEL'],
       },
-      access
+      access,
     };
   }
 

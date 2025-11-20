@@ -5,17 +5,20 @@ import {
   OnChanges,
   SimpleChanges,
   ViewContainerRef,
-  inject
+  inject,
 } from '@angular/core';
 import { ChatMessage } from '../../../shared/session-models';
-import { MessageRendererRegistryService, MessageRendererComponent } from '../../services/message-renderer-registry.service';
+import {
+  MessageRendererRegistryService,
+  MessageRendererComponent,
+} from '../../services/message-renderer-registry.service';
 import { DefaultChatMessageRendererComponent } from './default-chat-message-renderer';
 
 @Component({
   selector: 'app-chat-message',
   standalone: true,
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatMessageHostComponent implements OnChanges {
   @Input({ required: true }) message!: ChatMessage;

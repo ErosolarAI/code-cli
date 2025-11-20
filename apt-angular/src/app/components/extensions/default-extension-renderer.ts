@@ -3,7 +3,7 @@ import { JsonPipe, NgIf } from '@angular/common';
 import { MessageExtension } from '../../../shared/session-models';
 import {
   ExtensionRendererRegistryService,
-  ExtensionRendererComponent
+  ExtensionRendererComponent,
 } from '../../services/extension-renderer-registry.service';
 
 @Component({
@@ -14,12 +14,14 @@ import {
     <section class="extension-card">
       <header>
         <p class="extension-label">{{ extension.label ?? extension.kind }}</p>
-        <p class="extension-description" *ngIf="extension.description">{{ extension.description }}</p>
+        <p class="extension-description" *ngIf="extension.description">
+          {{ extension.description }}
+        </p>
       </header>
       <pre class="extension-body">{{ extension.data | json }}</pre>
     </section>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DefaultExtensionRendererComponent implements ExtensionRendererComponent {
   @Input({ required: true }) extension!: MessageExtension;

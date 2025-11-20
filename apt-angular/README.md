@@ -130,12 +130,12 @@ The CLI dev server now proxies `/api/**` requests and the SSE stream to the back
 
 ## Switching data sources
 
-| Mode          | Env                                 | Notes                                                                                   |
-|---------------|-------------------------------------|-----------------------------------------------------------------------------------------|
-| Mock (default)| _none_                              | Uses the scripted chatfeed that shipped with the static page.                           |
-| Local CLI     | `AGENT_SOURCE=local-cli`            | Spawns whatever command you pass through `LOCAL_CLI_COMMAND`. Works best with JSON logs.|
-| Mirror file   | `AGENT_SOURCE=mirror-file`          | Tails the `.jsonl` mirror written by `apt-ui` / Bo CLI for a read-only replay. |
-| Remote cloud  | `AGENT_SOURCE=remote-cloud`         | Polls another SSR host that already exposes `/api/session`. Useful for Cloud Run.       |
+| Mode           | Env                         | Notes                                                                                    |
+| -------------- | --------------------------- | ---------------------------------------------------------------------------------------- |
+| Mock (default) | _none_                      | Uses the scripted chatfeed that shipped with the static page.                            |
+| Local CLI      | `AGENT_SOURCE=local-cli`    | Spawns whatever command you pass through `LOCAL_CLI_COMMAND`. Works best with JSON logs. |
+| Mirror file    | `AGENT_SOURCE=mirror-file`  | Tails the `.jsonl` mirror written by `apt-ui` / Bo CLI for a read-only replay.           |
+| Remote cloud   | `AGENT_SOURCE=remote-cloud` | Polls another SSR host that already exposes `/api/session`. Useful for Cloud Run.        |
 
 ### Local CLI bridge
 

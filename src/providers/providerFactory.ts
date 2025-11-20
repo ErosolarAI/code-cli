@@ -22,7 +22,11 @@ export interface RegisterProviderOptions {
 
 const registry = new Map<ProviderId, ProviderFactory>();
 
-export function registerProvider(id: ProviderId, factory: ProviderFactory, options: RegisterProviderOptions = {}): void {
+export function registerProvider(
+  id: ProviderId,
+  factory: ProviderFactory,
+  options: RegisterProviderOptions = {},
+): void {
   if (!id?.trim()) {
     throw new Error('Provider id cannot be blank.');
   }
@@ -36,7 +40,9 @@ export function createProvider(config: ProviderConfig): LLMProvider {
   const factory = registry.get(config.provider);
   if (!factory) {
     const known = Array.from(registry.keys()).sort().join(', ');
-    throw new Error(`Provider "${config.provider}" is not registered. Registered providers: ${known || 'none'}.`);
+    throw new Error(
+      `Provider "${config.provider}" is not registered. Registered providers: ${known || 'none'}.`,
+    );
   }
   return factory(config);
 }

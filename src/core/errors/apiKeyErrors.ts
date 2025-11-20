@@ -14,7 +14,10 @@ export interface ApiKeyErrorInfo {
   message?: string;
 }
 
-export function detectApiKeyError(error: unknown, provider?: ProviderId | null): ApiKeyErrorInfo | null {
+export function detectApiKeyError(
+  error: unknown,
+  provider?: ProviderId | null,
+): ApiKeyErrorInfo | null {
   if (error instanceof MissingSecretError) {
     const primaryProvider = error.secret.providers[0] ?? null;
     return {
@@ -27,7 +30,9 @@ export function detectApiKeyError(error: unknown, provider?: ProviderId | null):
 
   if (isUnauthorizedError(error)) {
     const labelProvider = provider ?? extractProviderFromError(error);
-    const secret = labelProvider ? getSecretDefinitionForProvider(labelProvider) : null;
+    const secret = labelProvider
+      ? getSecretDefinitionForProvider(labelProvider)
+      : null;
     return {
       type: 'invalid',
       provider: labelProvider,
@@ -81,7 +86,9 @@ function extractStatus(error: unknown): number | null {
   return null;
 }
 
-function extractStructuredError(error: unknown): { type?: string; code?: string; message?: string } | null {
+function extractStructuredError(
+  error: unknown,
+): { type?: string; code?: string; message?: string } | null {
   if (!error || typeof error !== 'object') {
     return null;
   }
@@ -123,7 +130,10 @@ function extractErrorMessage(error: unknown): string {
     if (payload?.message) {
       return payload.message;
     }
-    if ('message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    if (
+      'message' in error &&
+      typeof (error as { message?: unknown }).message === 'string'
+    ) {
       return (error as { message: string }).message;
     }
   }

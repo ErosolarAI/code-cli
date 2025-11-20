@@ -63,11 +63,17 @@ class StdoutLineTracker {
       this: NodeJS.WriteStream,
       chunk: WriteChunk,
       encoding?: WriteEncoding | ((error: Error | null | undefined) => void),
-      callback?: (error: Error | null | undefined) => void
+      callback?: (error: Error | null | undefined) => void,
     ): boolean {
-      const actualEncoding = typeof encoding === 'function' ? undefined : encoding;
+      const actualEncoding =
+        typeof encoding === 'function' ? undefined : encoding;
       tracker.recordChunk(chunk, actualEncoding);
-      return tracker.originalWrite.call(this, chunk, encoding as WriteEncoding, callback);
+      return tracker.originalWrite.call(
+        this,
+        chunk,
+        encoding as WriteEncoding,
+        callback,
+      );
     } as WriteFn;
   }
 
@@ -90,7 +96,10 @@ class StdoutLineTracker {
     }
   }
 
-  private chunkToString(chunk: WriteChunk, encoding?: WriteEncoding): string | null {
+  private chunkToString(
+    chunk: WriteChunk,
+    encoding?: WriteEncoding,
+  ): string | null {
     if (typeof chunk === 'string') {
       return chunk;
     }
@@ -250,7 +259,7 @@ export class Display {
     model: string,
     provider: string,
     workingDir: string,
-    version?: string
+    version?: string,
   ) {
     // Validate required inputs
     if (!model?.trim() || !provider?.trim() || !workingDir?.trim()) {
@@ -263,7 +272,7 @@ export class Display {
       model,
       provider,
       workingDir,
-      width
+      width,
     );
 
     if (!banner) {
@@ -314,18 +323,13 @@ export class Display {
       model,
       provider,
       state.workingDir,
-      state.width
+      state.width,
     );
     const providerAccent = pickProviderAccent(provider);
-    const banner = this.buildBanner(
-      'Bo CLI',
-      state.width,
-      lines,
-      {
-        badge: this.buildBannerOptions(state.version)?.badge,
-        accent: providerAccent.edge,
-      }
-    );
+    const banner = this.buildBanner('Bo CLI', state.width, lines, {
+      badge: this.buildBannerOptions(state.version)?.badge,
+      accent: providerAccent.edge,
+    });
     const height = this.measureBannerHeight(banner);
 
     // If height changed or rewrite failed, do full re-render
@@ -382,7 +386,9 @@ export class Display {
       return;
     }
     const isThought = metadata?.isFinal === false;
-    const body = isThought ? this.buildClaudeStyleThought(content) : this.buildChatBox(content, metadata);
+    const body = isThought
+      ? this.buildClaudeStyleThought(content)
+      : this.buildChatBox(content, metadata);
     if (!body.trim()) {
       return;
     }
@@ -408,7 +414,9 @@ export class Display {
       return;
     }
     const prefersRich = text.includes('```');
-    let rendered = prefersRich ? this.buildRichSubActionLines(text, status) : this.buildWrappedSubActionLines(text, status);
+    let rendered = prefersRich
+      ? this.buildRichSubActionLines(text, status)
+      : this.buildWrappedSubActionLines(text, status);
     if (!rendered.length && prefersRich) {
       rendered = this.buildWrappedSubActionLines(text, status);
     }
@@ -421,7 +429,10 @@ export class Display {
     });
   }
 
-  private buildWrappedSubActionLines(text: string, status: ActionStatus): string[] {
+  private buildWrappedSubActionLines(
+    text: string,
+    status: ActionStatus,
+  ): string[] {
     const lines = text.split('\n').map((line) => line.trimEnd());
     while (lines.length && !lines[lines.length - 1]?.trim()) {
       lines.pop();
@@ -433,25 +444,35 @@ export class Display {
     for (let index = 0; index < lines.length; index += 1) {
       const segment = lines[index] ?? '';
       const isLast = index === lines.length - 1;
-      const { prefix, continuation } = this.buildSubActionPrefixes(status, isLast);
-      rendered.push(this.wrapWithPrefix(segment, prefix, { continuationPrefix: continuation }));
+      const { prefix, continuation } = this.buildSubActionPrefixes(
+        status,
+        isLast,
+      );
+      rendered.push(
+        this.wrapWithPrefix(segment, prefix, {
+          continuationPrefix: continuation,
+        }),
+      );
     }
     return rendered;
   }
 
-  private buildRichSubActionLines(text: string, status: ActionStatus): string[] {
+  private buildRichSubActionLines(
+    text: string,
+    status: ActionStatus,
+  ): string[] {
     const normalized = text.trim();
     if (!normalized) {
       return [];
     }
     const width = Math.max(
       DISPLAY_CONSTANTS.MIN_ACTION_WIDTH,
-      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_ACTION_WIDTH)
+      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_ACTION_WIDTH),
     );
     const samplePrefix = this.buildSubActionPrefixes(status, true).prefix;
     const contentWidth = Math.max(
       DISPLAY_CONSTANTS.MIN_CONTENT_WIDTH,
-      width - this.visibleLength(samplePrefix)
+      width - this.visibleLength(samplePrefix),
     );
     const blocks = formatRichContent(normalized, contentWidth);
     if (!blocks.length) {
@@ -535,7 +556,7 @@ export class Display {
 
     const width = Math.max(
       DISPLAY_CONSTANTS.MIN_THOUGHT_WIDTH,
-      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH)
+      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH),
     );
 
     const heading = renderSectionHeading(`Plan ${index}/${total}`, {
@@ -555,7 +576,11 @@ export class Display {
     });
     this.stdoutTracker.reset();
     if (this.bannerState) {
-      this.renderAndStoreBanner(this.bannerState, this.bannerState.model, this.bannerState.provider);
+      this.renderAndStoreBanner(
+        this.bannerState,
+        this.bannerState.model,
+        this.bannerState.provider,
+      );
     }
   }
 
@@ -569,11 +594,11 @@ export class Display {
     const availableColumns = getTerminalColumns();
     const effectiveWidth = Math.max(
       DISPLAY_CONSTANTS.MIN_BANNER_WIDTH,
-      availableColumns - DISPLAY_CONSTANTS.BANNER_PADDING
+      availableColumns - DISPLAY_CONSTANTS.BANNER_PADDING,
     );
     return Math.min(
       Math.max(effectiveWidth, DISPLAY_CONSTANTS.MIN_BANNER_WIDTH),
-      DISPLAY_CONSTANTS.MAX_BANNER_WIDTH
+      DISPLAY_CONSTANTS.MAX_BANNER_WIDTH,
     );
   }
 
@@ -583,23 +608,45 @@ export class Display {
     model: string,
     provider: string,
     workingDir: string,
-    width: number
+    width: number,
   ): string[] {
     const normalizedLabel = profileLabel ? profileLabel.trim() : '';
     const normalizedProfile = profileName ? profileName.trim() : '';
     const agentLabel = normalizedLabel || normalizedProfile || 'Active agent';
     const modelSummary = [this.formatModelLabel(model), provider].join(' • ');
     const lines = [
-      ...this.formatInfoBlock('Agent', agentLabel, width, this.getInfoFieldStyle('agent')),
+      ...this.formatInfoBlock(
+        'Agent',
+        agentLabel,
+        width,
+        this.getInfoFieldStyle('agent'),
+      ),
     ];
 
     if (normalizedProfile) {
-      lines.push(...this.formatInfoBlock('Profile', normalizedProfile, width, this.getInfoFieldStyle('profile')));
+      lines.push(
+        ...this.formatInfoBlock(
+          'Profile',
+          normalizedProfile,
+          width,
+          this.getInfoFieldStyle('profile'),
+        ),
+      );
     }
 
     lines.push(
-      ...this.formatInfoBlock('Model', modelSummary, width, this.getInfoFieldStyle('model')),
-      ...this.formatInfoBlock('Workspace', workingDir, width, this.getInfoFieldStyle('workspace'))
+      ...this.formatInfoBlock(
+        'Model',
+        modelSummary,
+        width,
+        this.getInfoFieldStyle('model'),
+      ),
+      ...this.formatInfoBlock(
+        'Workspace',
+        workingDir,
+        width,
+        this.getInfoFieldStyle('workspace'),
+      ),
     );
 
     return lines;
@@ -671,7 +718,11 @@ export class Display {
     }
   }
 
-  private renderAndStoreBanner(state: BannerState, model: string, provider: string): void {
+  private renderAndStoreBanner(
+    state: BannerState,
+    model: string,
+    provider: string,
+  ): void {
     const width = this.getBannerWidth();
     const lines = this.buildSessionLines(
       state.profileLabel,
@@ -679,7 +730,7 @@ export class Display {
       model,
       provider,
       state.workingDir,
-      width
+      width,
     );
     const providerAccent = pickProviderAccent(provider);
     const banner = this.buildBanner('Bo CLI', width, lines, {
@@ -726,12 +777,17 @@ export class Display {
     return model;
   }
 
-  private buildChatBox(content: string, metadata?: DisplayMessageMetadata): string {
+  private buildChatBox(
+    content: string,
+    metadata?: DisplayMessageMetadata,
+  ): string {
     const normalized = content.trim();
     if (!normalized) {
       return '';
     }
-    const providerAccent = this.bannerState ? pickProviderAccent(this.bannerState.provider) : null;
+    const providerAccent = this.bannerState
+      ? pickProviderAccent(this.bannerState.provider)
+      : null;
     const accent =
       providerAccent?.panel ??
       (theme.gradient?.aurora as ((value: string) => string) | undefined) ??
@@ -748,7 +804,8 @@ export class Display {
       icon: icons.assistant,
       tagline,
       accentColor: accent,
-      borderColor: providerAccent?.edge ?? theme.ui.panelEdge ?? theme.ui.border,
+      borderColor:
+        providerAccent?.edge ?? theme.ui.panelEdge ?? theme.ui.border,
       halo: true,
     });
     const telemetry = this.formatTelemetryLine(metadata);
@@ -762,7 +819,10 @@ export class Display {
     const columns = getTerminalColumns();
     return Math.max(
       DISPLAY_CONSTANTS.MIN_MESSAGE_WIDTH,
-      Math.min(columns - DISPLAY_CONSTANTS.MESSAGE_PADDING, DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH)
+      Math.min(
+        columns - DISPLAY_CONSTANTS.MESSAGE_PADDING,
+        DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH,
+      ),
     );
   }
 
@@ -772,7 +832,11 @@ export class Display {
    * @deprecated Use buildClaudeStyleThought instead
    */
   // @ts-expect-error - Legacy method kept for backwards compatibility
-  private _appendThoughtBlock(block: string, format: ThoughtFormatConfig, output: string[]): void {
+  private _appendThoughtBlock(
+    block: string,
+    format: ThoughtFormatConfig,
+    output: string[],
+  ): void {
     const rawLines = block.split('\n');
     const indices = rawLines
       .map((line, index) => (line.trim().length ? index : -1))
@@ -815,7 +879,9 @@ export class Display {
     format: ThoughtFormatConfig;
   }): string {
     if (!options.usedFirst) {
-      return options.segmentIndex === 0 ? options.format.bullet : options.format.spacer;
+      return options.segmentIndex === 0
+        ? options.format.bullet
+        : options.format.spacer;
     }
 
     if (options.segmentIndex === 0) {
@@ -834,10 +900,13 @@ export class Display {
   private _getThoughtFormat(): ThoughtFormatConfig {
     const totalWidth = Math.max(
       DISPLAY_CONSTANTS.MIN_THOUGHT_WIDTH,
-      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_THOUGHT_WIDTH)
+      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_THOUGHT_WIDTH),
     );
     const prefixWidth = Math.max(3, this.visibleLength(`${icons.bullet} `));
-    const available = Math.max(DISPLAY_CONSTANTS.MIN_WRAP_WIDTH, totalWidth - prefixWidth);
+    const available = Math.max(
+      DISPLAY_CONSTANTS.MIN_WRAP_WIDTH,
+      totalWidth - prefixWidth,
+    );
 
     return {
       totalWidth,
@@ -852,7 +921,9 @@ export class Display {
 
   private wrapThoughtLine(line: string, width: number): string[] {
     const preserveIndentation = /^\s/.test(line);
-    const normalized = preserveIndentation ? line.replace(/\s+$/, '') : line.trim();
+    const normalized = preserveIndentation
+      ? line.replace(/\s+$/, '')
+      : line.trim();
     if (!normalized) {
       return [];
     }
@@ -878,7 +949,10 @@ export class Display {
       parts.push(usageChunk);
     }
 
-    const contextChunk = this.formatContextUsage(metadata.usage, metadata.contextWindowTokens);
+    const contextChunk = this.formatContextUsage(
+      metadata.usage,
+      metadata.contextWindowTokens,
+    );
     if (contextChunk) {
       parts.push(contextChunk);
     }
@@ -892,7 +966,11 @@ export class Display {
   }
 
   private formatElapsed(elapsedMs?: number): string | null {
-    if (typeof elapsedMs !== 'number' || !Number.isFinite(elapsedMs) || elapsedMs < 0) {
+    if (
+      typeof elapsedMs !== 'number' ||
+      !Number.isFinite(elapsedMs) ||
+      elapsedMs < 0
+    ) {
       return null;
     }
     const totalSeconds = Math.max(0, Math.round(elapsedMs / 1000));
@@ -912,18 +990,31 @@ export class Display {
     const totalTokens = this.resolveTotalTokens(usage);
     const segments: string[] = [];
 
-    if (typeof usage.inputTokens === 'number' && Number.isFinite(usage.inputTokens)) {
-      segments.push(`in ${this.formatNumber(usage.inputTokens) ?? usage.inputTokens.toString()}`);
+    if (
+      typeof usage.inputTokens === 'number' &&
+      Number.isFinite(usage.inputTokens)
+    ) {
+      segments.push(
+        `in ${this.formatNumber(usage.inputTokens) ?? usage.inputTokens.toString()}`,
+      );
     }
 
-    if (typeof usage.outputTokens === 'number' && Number.isFinite(usage.outputTokens)) {
-      segments.push(`out ${this.formatNumber(usage.outputTokens) ?? usage.outputTokens.toString()}`);
+    if (
+      typeof usage.outputTokens === 'number' &&
+      Number.isFinite(usage.outputTokens)
+    ) {
+      segments.push(
+        `out ${this.formatNumber(usage.outputTokens) ?? usage.outputTokens.toString()}`,
+      );
     }
 
-    const totalLabel = totalTokens !== null ? this.formatNumber(totalTokens) : null;
+    const totalLabel =
+      totalTokens !== null ? this.formatNumber(totalTokens) : null;
     const label = theme.ui.muted('usage');
     const accent = theme.metrics?.elapsedValue ?? theme.secondary;
-    const detail = segments.length ? theme.ui.muted(` (${segments.join(' / ')})`) : '';
+    const detail = segments.length
+      ? theme.ui.muted(` (${segments.join(' / ')})`)
+      : '';
 
     if (totalLabel) {
       return `${label} ${accent(totalLabel)}${detail}`;
@@ -938,11 +1029,12 @@ export class Display {
 
   private formatContextUsage(
     usage: ProviderUsage | null | undefined,
-    contextWindowTokens?: number | null
+    contextWindowTokens?: number | null,
   ): string | null {
     const total = this.resolveTotalTokens(usage);
     const limit =
-      typeof contextWindowTokens === 'number' && Number.isFinite(contextWindowTokens)
+      typeof contextWindowTokens === 'number' &&
+      Number.isFinite(contextWindowTokens)
         ? contextWindowTokens
         : null;
 
@@ -961,15 +1053,24 @@ export class Display {
     const clamped = Math.max(0, Math.min(1, value));
     const filled = Math.max(1, Math.round(length * clamped));
     const ramp = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
-    const cool = (theme.gradient?.cool as ((v: string) => string) | undefined) ?? theme.info;
-    const warm = (theme.gradient?.warm as ((v: string) => string) | undefined) ?? theme.warning;
-    const hot = (theme.gradient?.ember as ((v: string) => string) | undefined) ?? theme.error;
+    const cool =
+      (theme.gradient?.cool as ((v: string) => string) | undefined) ??
+      theme.info;
+    const warm =
+      (theme.gradient?.warm as ((v: string) => string) | undefined) ??
+      theme.warning;
+    const hot =
+      (theme.gradient?.ember as ((v: string) => string) | undefined) ??
+      theme.error;
     const activeColor = clamped > 0.82 ? hot : clamped > 0.6 ? warm : cool;
     const muted = theme.ui.muted;
     let bar = '';
 
     for (let index = 0; index < length; index += 1) {
-      const glyphIndex = Math.min(ramp.length - 1, Math.floor((index / length) * ramp.length));
+      const glyphIndex = Math.min(
+        ramp.length - 1,
+        Math.floor((index / length) * ramp.length),
+      );
       const glyph = ramp[glyphIndex] ?? ramp[ramp.length - 1] ?? '▁';
       bar += index < filled ? activeColor(glyph) : muted(glyph);
     }
@@ -982,17 +1083,22 @@ export class Display {
       return null;
     }
 
-    if (typeof usage.totalTokens === 'number' && Number.isFinite(usage.totalTokens)) {
+    if (
+      typeof usage.totalTokens === 'number' &&
+      Number.isFinite(usage.totalTokens)
+    ) {
       const normalized = Math.max(0, Math.round(usage.totalTokens));
       return normalized === 0 ? null : normalized;
     }
 
     const input =
-      typeof usage.inputTokens === 'number' && Number.isFinite(usage.inputTokens)
+      typeof usage.inputTokens === 'number' &&
+      Number.isFinite(usage.inputTokens)
         ? usage.inputTokens
         : 0;
     const output =
-      typeof usage.outputTokens === 'number' && Number.isFinite(usage.outputTokens)
+      typeof usage.outputTokens === 'number' &&
+      Number.isFinite(usage.outputTokens)
         ? usage.outputTokens
         : 0;
     const total = Math.round(input + output);
@@ -1011,7 +1117,7 @@ export class Display {
     model: string,
     provider: string,
     workingDir: string,
-    width: number
+    width: number,
   ): string {
     const providerAccent = pickProviderAccent(provider);
     const border =
@@ -1028,16 +1134,29 @@ export class Display {
       (theme.ui.glass as ((value: string) => string) | undefined) ??
       (theme.ui.surface as ((value: string) => string) | undefined);
     const crestColor =
-      (theme.gradient?.aurora as ((value: string) => string) | undefined) ?? border;
+      (theme.gradient?.aurora as ((value: string) => string) | undefined) ??
+      border;
     const crestBase = 'BO';
     const crest = `${theme.bold(crestColor(crestBase))} ${theme.secondary('CODE')}`;
     const ritual = `${dim('craft')} ${dim('•')} ${dim('debug')} ${dim('•')} ${dim('ship')}`;
-    const modelChip = this.decorateChip(this.formatModelLabel(model), theme.info, glass);
-    const providerChip = this.decorateChip(provider, providerAccent.text ?? theme.secondary, glass);
+    const modelChip = this.decorateChip(
+      this.formatModelLabel(model),
+      theme.info,
+      glass,
+    );
+    const providerChip = this.decorateChip(
+      provider,
+      providerAccent.text ?? theme.secondary,
+      glass,
+    );
     const profileChip = profileLabel?.trim()
       ? this.decorateChip(profileLabel.trim(), theme.secondary, glass)
       : dim('No profile loaded');
-    const shortPath = this.decorateChip(this.abbreviatePath(workingDir, width - 10), dim, glass);
+    const shortPath = this.decorateChip(
+      this.abbreviatePath(workingDir, width - 10),
+      dim,
+      glass,
+    );
     const motifColor =
       providerAccent.motif ??
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
@@ -1055,9 +1174,17 @@ export class Display {
     lines.push(this.centerLine(crest, width, border));
     lines.push(this.centerLine(ritual, width, border, dim));
     lines.push(border(`╟${'═'.repeat(width)}╢`));
-    lines.push(this.centerLine(`${modelChip}${dim('  ⟡  ')}${providerChip}`, width, border));
+    lines.push(
+      this.centerLine(
+        `${modelChip}${dim('  ⟡  ')}${providerChip}`,
+        width,
+        border,
+      ),
+    );
     lines.push(this.centerLine(profileChip, width, border));
-    lines.push(this.centerLine(`${theme.ui.muted('↳')} ${shortPath}`, width, border));
+    lines.push(
+      this.centerLine(`${theme.ui.muted('↳')} ${shortPath}`, width, border),
+    );
     lines.push(border(`╟${'┄'.repeat(width)}╢`));
     lines.push(this.centerLine(signal, width, border));
     lines.push(this.centerLine(motif, width, border));
@@ -1070,7 +1197,7 @@ export class Display {
   private decorateChip(
     value: string,
     tint: (val: string) => string,
-    surface?: (val: string) => string
+    surface?: (val: string) => string,
   ): string {
     const clean = value.trim();
     if (!clean) {
@@ -1081,9 +1208,30 @@ export class Display {
     return surface ? surface(highlighted) : highlighted;
   }
 
-  private buildSignalBar(width: number, colorize: (value: string) => string): string {
-    const ramp = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▇', '▆', '▅', '▄', '▃', '▂'];
-    const target = Math.max(16, Math.min(width, DISPLAY_CONSTANTS.MAX_BANNER_WIDTH));
+  private buildSignalBar(
+    width: number,
+    colorize: (value: string) => string,
+  ): string {
+    const ramp = [
+      '▁',
+      '▂',
+      '▃',
+      '▄',
+      '▅',
+      '▆',
+      '▇',
+      '█',
+      '▇',
+      '▆',
+      '▅',
+      '▄',
+      '▃',
+      '▂',
+    ];
+    const target = Math.max(
+      16,
+      Math.min(width, DISPLAY_CONSTANTS.MAX_BANNER_WIDTH),
+    );
     let bar = '';
     for (let index = 0; index < target; index += 1) {
       bar += ramp[index % ramp.length];
@@ -1095,14 +1243,20 @@ export class Display {
     text: string,
     width: number,
     borderColor: (s: string) => string,
-    textColor?: (s: string) => string
+    textColor?: (s: string) => string,
   ): string {
     const visibleLen = this.visibleLength(text);
     const available = Math.max(0, width - visibleLen);
     const padding = Math.floor(available / 2);
     const rightPad = Math.max(0, available - padding);
     const colored = textColor ? textColor(text) : text;
-    return borderColor('║') + ' '.repeat(padding) + colored + ' '.repeat(rightPad) + borderColor('║');
+    return (
+      borderColor('║') +
+      ' '.repeat(padding) +
+      colored +
+      ' '.repeat(rightPad) +
+      borderColor('║')
+    );
   }
 
   private abbreviatePath(path: string, maxLen: number): string {
@@ -1116,7 +1270,7 @@ export class Display {
     title: string,
     width: number,
     lines: string[],
-    options?: { badge?: string; accent?: (value: string) => string }
+    options?: { badge?: string; accent?: (value: string) => string },
   ): string {
     const badge = options?.badge ? ` ${options.badge}` : '';
     const titleSegment = `═ ${title}${badge} `;
@@ -1127,7 +1281,9 @@ export class Display {
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.primary;
     const top = accent(`╔${titleSegment}${filler}╗`);
-    const body = lines.map((line) => this.buildBannerLine(line, width, accent)).join('\n');
+    const body = lines
+      .map((line) => this.buildBannerLine(line, width, accent))
+      .join('\n');
     const bottom = accent(`╚${'═'.repeat(width)}╝`);
     return `${top}\n${body}\n${bottom}`;
   }
@@ -1142,7 +1298,7 @@ export class Display {
   private buildBannerLine(
     text: string,
     width: number,
-    edgeColor?: (value: string) => string
+    edgeColor?: (value: string) => string,
   ): string {
     const padded = this.padLine(text, width);
     const fill =
@@ -1176,7 +1332,7 @@ export class Display {
     label: string,
     value: string,
     width: number,
-    options?: InfoBlockStyleOptions
+    options?: InfoBlockStyleOptions,
   ): string[] {
     // Validate inputs
     if (!label?.trim() || !value?.trim()) {
@@ -1188,7 +1344,10 @@ export class Display {
 
     const prefix = `${label.toUpperCase()}: `;
     const prefixLength = prefix.length;
-    const available = Math.max(DISPLAY_CONSTANTS.MIN_CONTENT_WIDTH, width - prefixLength);
+    const available = Math.max(
+      DISPLAY_CONSTANTS.MIN_CONTENT_WIDTH,
+      width - prefixLength,
+    );
     const wrapped = this.wrapLine(value, available);
 
     return wrapped.map((line, index) => {
@@ -1206,7 +1365,7 @@ export class Display {
         prefixLength,
         line.length,
         labelColor,
-        options.valueColor
+        options.valueColor,
       );
     });
   }
@@ -1216,12 +1375,15 @@ export class Display {
     prefixLength: number,
     valueLength: number,
     labelColor?: (value: string) => string,
-    valueColor?: (value: string) => string
+    valueColor?: (value: string) => string,
   ): string {
     const prefix = line.slice(0, prefixLength);
     const remainder = line.slice(prefixLength);
     const tintedPrefix = labelColor ? labelColor(prefix) : prefix;
-    const safeValueLength = Math.max(0, Math.min(valueLength, remainder.length));
+    const safeValueLength = Math.max(
+      0,
+      Math.min(valueLength, remainder.length),
+    );
     if (!valueColor || safeValueLength <= 0) {
       return `${tintedPrefix}${remainder}`;
     }
@@ -1233,7 +1395,9 @@ export class Display {
 
   private getInfoFieldStyle(field: InfoField): InfoBlockStyleOptions {
     const labelColor = theme.fields?.label ?? ((text: string) => text);
-    const valueColor = (theme.fields?.[field] as ((text: string) => string) | undefined) ?? ((text: string) => text);
+    const valueColor =
+      (theme.fields?.[field] as ((text: string) => string) | undefined) ??
+      ((text: string) => text);
     return {
       labelColor,
       valueColor,
@@ -1244,17 +1408,24 @@ export class Display {
    * Wraps text with a prefix on the first line and optional continuation prefix.
    * Handles multi-line text and word wrapping intelligently.
    */
-  private wrapWithPrefix(text: string, prefix: string, options?: PrefixWrapOptions): string {
+  private wrapWithPrefix(
+    text: string,
+    prefix: string,
+    options?: PrefixWrapOptions,
+  ): string {
     if (!text) {
       return prefix.trimEnd();
     }
 
     const width = Math.max(
       DISPLAY_CONSTANTS.MIN_ACTION_WIDTH,
-      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_ACTION_WIDTH)
+      Math.min(getTerminalColumns(), DISPLAY_CONSTANTS.MAX_ACTION_WIDTH),
     );
     const prefixWidth = this.visibleLength(prefix);
-    const available = Math.max(DISPLAY_CONSTANTS.MIN_CONTENT_WIDTH, width - prefixWidth);
+    const available = Math.max(
+      DISPLAY_CONSTANTS.MIN_CONTENT_WIDTH,
+      width - prefixWidth,
+    );
     const indent =
       typeof options?.continuationPrefix === 'string'
         ? options.continuationPrefix
@@ -1305,10 +1476,11 @@ export class Display {
     return colorize(`${icons.action}`);
   }
 
-
   private buildClaudeStyleThought(content: string): string {
     // Claude Code style: compact ⏺ prefix for thoughts/reasoning
-    const accent = (theme.gradient?.primary as ((value: string) => string) | undefined) ?? theme.ui.muted;
+    const accent =
+      (theme.gradient?.primary as ((value: string) => string) | undefined) ??
+      theme.ui.muted;
     const prefix = `${accent('⏺')} `;
     return this.wrapWithPrefix(content, prefix);
   }
@@ -1385,7 +1557,11 @@ export class Display {
    * Attempts to append a word to the current line.
    * Returns instructions on how to handle the word.
    */
-  private tryAppendWord(current: string, word: string, width: number): WordAppendResult {
+  private tryAppendWord(
+    current: string,
+    word: string,
+    width: number,
+  ): WordAppendResult {
     if (!word) {
       return { shouldFlush: false, newCurrent: current, chunks: [] };
     }
@@ -1396,12 +1572,20 @@ export class Display {
         return { shouldFlush: false, newCurrent: word, chunks: [] };
       }
       // Word too long, need to chunk it
-      return { shouldFlush: false, newCurrent: '', chunks: this.chunkWord(word, width) };
+      return {
+        shouldFlush: false,
+        newCurrent: '',
+        chunks: this.chunkWord(word, width),
+      };
     }
 
     // Word fits on current line with space
     if (current.length + 1 + word.length <= width) {
-      return { shouldFlush: false, newCurrent: `${current} ${word}`, chunks: [] };
+      return {
+        shouldFlush: false,
+        newCurrent: `${current} ${word}`,
+        chunks: [],
+      };
     }
 
     // Word doesn't fit - flush current and start new line
@@ -1410,7 +1594,11 @@ export class Display {
     }
 
     // Word doesn't fit and is too long - flush current and chunk word
-    return { shouldFlush: true, newCurrent: '', chunks: this.chunkWord(word, width) };
+    return {
+      shouldFlush: true,
+      newCurrent: '',
+      chunks: this.chunkWord(word, width),
+    };
   }
 
   /**

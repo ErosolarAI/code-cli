@@ -1,4 +1,8 @@
-import type { CapabilityContribution, CapabilityContext, CapabilityModule } from '../runtime/agentHost.js';
+import type {
+  CapabilityContribution,
+  CapabilityContext,
+  CapabilityModule,
+} from '../runtime/agentHost.js';
 import { createFileTools } from '../tools/fileTools.js';
 
 export interface FilesystemCapabilityOptions {
@@ -19,7 +23,9 @@ export class FilesystemCapabilityModule implements CapabilityModule {
     const workingDir = this.options.workingDir ?? context.workingDir;
     return {
       id: this.options.id ?? 'filesystem.tools.local',
-      description: this.options.description ?? 'Local file system access with deterministic diff summaries.',
+      description:
+        this.options.description ??
+        'Local file system access with deterministic diff summaries.',
       toolSuite: {
         id: 'fs',
         description: 'File operations',

@@ -6,7 +6,12 @@
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
 
-export type AnimationType = 'spinner' | 'progress' | 'elapsed' | 'pulse' | 'transition';
+export type AnimationType =
+  | 'spinner'
+  | 'progress'
+  | 'elapsed'
+  | 'pulse'
+  | 'transition';
 
 export interface Animation {
   id: string;
@@ -79,7 +84,9 @@ export class AnimationScheduler extends EventEmitter {
       t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
     easeOutElastic: (t: number) => {
       const p = 0.3;
-      return Math.pow(2, -10 * t) * Math.sin((t - p / 4) * (2 * Math.PI) / p) + 1;
+      return (
+        Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1
+      );
     },
   };
 
@@ -95,7 +102,20 @@ export class AnimationScheduler extends EventEmitter {
     star: ['✶', '✸', '✹', '✺', '✹', '✷'],
     hamburger: ['☱', '☲', '☴'],
     growVertical: ['▁', '▃', '▄', '▅', '▆', '▇', '▆', '▅', '▄', '▃'],
-    growHorizontal: ['▏', '▎', '▍', '▌', '▋', '▊', '▉', '▊', '▋', '▌', '▍', '▎'],
+    growHorizontal: [
+      '▏',
+      '▎',
+      '▍',
+      '▌',
+      '▋',
+      '▊',
+      '▉',
+      '▊',
+      '▋',
+      '▌',
+      '▍',
+      '▎',
+    ],
     balloon: [' ', '.', 'o', 'O', '@', '*', ' '],
     noise: ['▓', '▒', '░'],
     bounce: ['⠁', '⠂', '⠄', '⠂'],
@@ -134,7 +154,7 @@ export class AnimationScheduler extends EventEmitter {
   createSpinner(
     id: string,
     message?: string,
-    frames: string[] = AnimationScheduler.SpinnerFrames.dots
+    frames: string[] = AnimationScheduler.SpinnerFrames.dots,
   ): SpinnerAnimation {
     const animation: SpinnerAnimation = {
       id,
@@ -160,7 +180,7 @@ export class AnimationScheduler extends EventEmitter {
     id: string,
     current: number,
     total: number,
-    duration: number = 500
+    duration: number = 500,
   ): ProgressAnimation {
     const animation: ProgressAnimation = {
       id,
@@ -225,7 +245,7 @@ export class AnimationScheduler extends EventEmitter {
     to: unknown,
     property: string,
     duration: number = 300,
-    easing?: EasingFunction
+    easing?: EasingFunction,
   ): TransitionAnimation {
     const animation: TransitionAnimation = {
       id,
@@ -344,7 +364,10 @@ export class AnimationScheduler extends EventEmitter {
     }
 
     this.lastFrameTime = now;
-    this.emit('scheduler:tick', { deltaTime, animationCount: this.animations.size });
+    this.emit('scheduler:tick', {
+      deltaTime,
+      animationCount: this.animations.size,
+    });
   }
 
   /**
@@ -356,7 +379,10 @@ export class AnimationScheduler extends EventEmitter {
         this.updateSpinner(animation as SpinnerAnimation);
         break;
       case 'progress':
-        this.updateProgressAnimation(animation as ProgressAnimation, elapsedTime);
+        this.updateProgressAnimation(
+          animation as ProgressAnimation,
+          elapsedTime,
+        );
         break;
       case 'elapsed':
         this.updateElapsed(animation as ElapsedAnimation);
@@ -384,12 +410,14 @@ export class AnimationScheduler extends EventEmitter {
    */
   private updateProgressAnimation(
     animation: ProgressAnimation,
-    elapsedTime: number
+    elapsedTime: number,
   ): void {
     if (!animation.duration) return;
 
     const progress = Math.min(elapsedTime / animation.duration, 1);
-    const easedProgress = animation.easing ? animation.easing(progress) : progress;
+    const easedProgress = animation.easing
+      ? animation.easing(progress)
+      : progress;
     const { current, target, total } = animation.data;
 
     const newValue = current + (target - current) * easedProgress;
@@ -427,12 +455,14 @@ export class AnimationScheduler extends EventEmitter {
    */
   private updateTransition(
     animation: TransitionAnimation,
-    elapsedTime: number
+    elapsedTime: number,
   ): void {
     if (!animation.duration) return;
 
     const progress = Math.min(elapsedTime / animation.duration, 1);
-    const easedProgress = animation.easing ? animation.easing(progress) : progress;
+    const easedProgress = animation.easing
+      ? animation.easing(progress)
+      : progress;
     const { from, to } = animation.data;
 
     let value;
@@ -471,7 +501,9 @@ export class AnimationScheduler extends EventEmitter {
     if (!animation.duration) return animation.data.target;
 
     const progress = Math.min(elapsedTime / animation.duration, 1);
-    const easedProgress = animation.easing ? animation.easing(progress) : progress;
+    const easedProgress = animation.easing
+      ? animation.easing(progress)
+      : progress;
     const { current, target } = animation.data;
 
     return current + (target - current) * easedProgress;

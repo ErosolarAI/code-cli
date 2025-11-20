@@ -57,6 +57,7 @@ Bo Agent Decision + Action Loop
 ```
 
 Data Path Notes:
+
 - Control data stays JSON-structured (task spec, plan graph, tool calls, status).
 - Artifacts (diffs, logs, tests) are stored separately and referenced in feedback envelopes.
 - Guardrails enforce profile rulebooks, policy checks, and sandbox scopes before execution.

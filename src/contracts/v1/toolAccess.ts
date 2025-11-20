@@ -22,7 +22,12 @@ export type ToolPermissionScope =
   | 'planning:refactor'
   | 'external:web-search';
 
-export type ToolSelectionTarget = 'cli' | 'browser' | 'http' | 'worker' | 'service';
+export type ToolSelectionTarget =
+  | 'cli'
+  | 'browser'
+  | 'http'
+  | 'worker'
+  | 'service';
 
 export interface ToolAvailabilityOption {
   id: string;

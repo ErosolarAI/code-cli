@@ -7,11 +7,23 @@ import { EventEmitter } from 'events';
 import { OverlayManager } from './overlay/OverlayManager.js';
 import type { OverlayRegion } from './overlay/OverlayManager.js';
 import { StatusOrchestrator } from './orchestration/StatusOrchestrator.js';
-import type { StatusEvent, ToolStatus } from './orchestration/StatusOrchestrator.js';
+import type {
+  StatusEvent,
+  ToolStatus,
+} from './orchestration/StatusOrchestrator.js';
 import { AnimationScheduler } from './animation/AnimationScheduler.js';
-import type { SpinnerAnimation, ElapsedAnimation } from './animation/AnimationScheduler.js';
-import { InterruptManager, InterruptPriority } from './interrupts/InterruptManager.js';
-import type { InterruptType, Interrupt } from './interrupts/InterruptManager.js';
+import type {
+  SpinnerAnimation,
+  ElapsedAnimation,
+} from './animation/AnimationScheduler.js';
+import {
+  InterruptManager,
+  InterruptPriority,
+} from './interrupts/InterruptManager.js';
+import type {
+  InterruptType,
+  Interrupt,
+} from './interrupts/InterruptManager.js';
 import { UITelemetry } from './telemetry/UITelemetry.js';
 import type { TelemetrySnapshot } from './telemetry/UITelemetry.js';
 import type { ToolCallRequest } from '../core/types.js';
@@ -69,7 +81,7 @@ export class UnifiedUIController extends EventEmitter {
 
   constructor(
     writeStream: NodeJS.WriteStream,
-    config: Partial<UIControllerConfig> = {}
+    config: Partial<UIControllerConfig> = {},
   ) {
     super();
     this.config = {
@@ -161,16 +173,36 @@ export class UnifiedUIController extends EventEmitter {
 
     switch (event.type) {
       case 'tool.start':
-        this.handleToolStart(event.data as { toolCall: ToolCallRequest; toolStatus: ToolStatus });
+        this.handleToolStart(
+          event.data as { toolCall: ToolCallRequest; toolStatus: ToolStatus },
+        );
         break;
       case 'tool.progress':
-        this.handleToolProgress(event.data as { toolId: string; toolStatus: ToolStatus; progress?: unknown });
+        this.handleToolProgress(
+          event.data as {
+            toolId: string;
+            toolStatus: ToolStatus;
+            progress?: unknown;
+          },
+        );
         break;
       case 'tool.complete':
-        this.handleToolComplete(event.data as { toolId: string; toolStatus: ToolStatus; result?: unknown });
+        this.handleToolComplete(
+          event.data as {
+            toolId: string;
+            toolStatus: ToolStatus;
+            result?: unknown;
+          },
+        );
         break;
       case 'tool.error':
-        this.handleToolError(event.data as { toolId: string; toolStatus: ToolStatus; error: unknown });
+        this.handleToolError(
+          event.data as {
+            toolId: string;
+            toolStatus: ToolStatus;
+            error: unknown;
+          },
+        );
         break;
       case 'status.base.changed':
       case 'status.override.pushed':
@@ -183,7 +215,10 @@ export class UnifiedUIController extends EventEmitter {
   /**
    * Handle tool start event
    */
-  private handleToolStart(data: { toolCall: ToolCallRequest; toolStatus: ToolStatus }): void {
+  private handleToolStart(data: {
+    toolCall: ToolCallRequest;
+    toolStatus: ToolStatus;
+  }): void {
     const { toolCall, toolStatus } = data;
 
     // Start telemetry
@@ -193,7 +228,7 @@ export class UnifiedUIController extends EventEmitter {
     if (this.config.enableAnimations) {
       const spinner = this.animationScheduler.createSpinner(
         `tool-${toolCall.id}`,
-        toolStatus.description
+        toolStatus.description,
       );
       this.activeSpinners.set(toolCall.id, spinner);
     }
@@ -201,7 +236,7 @@ export class UnifiedUIController extends EventEmitter {
     // Create elapsed time animation
     const elapsed = this.animationScheduler.createElapsed(
       `elapsed-${toolCall.id}`,
-      toolStatus.startedAt
+      toolStatus.startedAt,
     );
     this.activeElapsed.set(toolCall.id, elapsed);
 
@@ -219,7 +254,7 @@ export class UnifiedUIController extends EventEmitter {
       const progress = data.progress as { current: number; total: number };
       this.animationScheduler.updateProgress(
         `progress-${data.toolId}`,
-        progress.current
+        progress.current,
       );
     }
 
@@ -296,8 +331,10 @@ export class UnifiedUIController extends EventEmitter {
     }
 
     // Progress region
-    const activeTools = Array.from(this.statusOrchestrator.getContext().tools.values());
-    const progressTools = activeTools.filter(t => t.progress);
+    const activeTools = Array.from(
+      this.statusOrchestrator.getContext().tools.values(),
+    );
+    const progressTools = activeTools.filter((t) => t.progress);
     if (progressTools.length > 0 && progressTools[0]) {
       const progressRegion = this.buildProgressRegion(progressTools[0]);
       if (progressRegion) {
@@ -311,7 +348,8 @@ export class UnifiedUIController extends EventEmitter {
     }
 
     // Alerts region (for active interrupts)
-    const activeInterrupts = this.interruptManager.getInterruptsByStatus('active');
+    const activeInterrupts =
+      this.interruptManager.getInterruptsByStatus('active');
     if (activeInterrupts.length > 0 && activeInterrupts[0]) {
       regions['alerts'] = this.buildAlertsRegion(activeInterrupts[0]);
     }
@@ -328,7 +366,10 @@ export class UnifiedUIController extends EventEmitter {
     });
 
     const hasOverlayContent = Object.keys(regions).length > 0;
-    const allowShow = this.state.isProcessing || this.feedbackRegion !== null || activeInterrupts.length > 0;
+    const allowShow =
+      this.state.isProcessing ||
+      this.feedbackRegion !== null ||
+      activeInterrupts.length > 0;
 
     if (allowShow && hasOverlayContent) {
       this.overlayManager.show();
@@ -352,7 +393,9 @@ export class UnifiedUIController extends EventEmitter {
     // Get current spinner frame if thinking spinner is active
     let spinnerFrame = '';
     if (this.thinkingSpinner && this.state.isProcessing) {
-      const frameIndex = this.thinkingSpinner.currentFrame % this.thinkingSpinner.data.frames.length;
+      const frameIndex =
+        this.thinkingSpinner.currentFrame %
+        this.thinkingSpinner.data.frames.length;
       spinnerFrame = this.thinkingSpinner.data.frames[frameIndex] || '';
     }
 
@@ -443,7 +486,7 @@ export class UnifiedUIController extends EventEmitter {
     // Record interaction
     const interaction = this.telemetry.recordInteraction(
       'menu-selection',
-      interrupt.type
+      interrupt.type,
     );
 
     // Store for completion
@@ -462,7 +505,8 @@ export class UnifiedUIController extends EventEmitter {
       interruptWithTelemetry._telemetryInteraction.complete();
     }
 
-    const activeCount = this.interruptManager.getInterruptsByStatus('active').length;
+    const activeCount =
+      this.interruptManager.getInterruptsByStatus('active').length;
     this.state.hasActiveInterrupts = activeCount > 0;
 
     this.updateOverlay();
@@ -481,7 +525,7 @@ export class UnifiedUIController extends EventEmitter {
       direction === 'in' ? 0 : 1,
       direction === 'in' ? 1 : 0,
       'opacity',
-      duration
+      duration,
     );
   }
 
@@ -585,7 +629,7 @@ export class UnifiedUIController extends EventEmitter {
     this.telemetry.flush();
 
     // Clear completed animations
-    this.animationScheduler.getActiveAnimations().forEach(anim => {
+    this.animationScheduler.getActiveAnimations().forEach((anim) => {
       if (anim.currentFrame > anim.frameCount) {
         this.animationScheduler.unregister(anim.id);
       }
@@ -595,10 +639,11 @@ export class UnifiedUIController extends EventEmitter {
     const stats = this.interruptManager.getStatistics();
     if (stats.queueLength > 50) {
       // Keep only high priority interrupts
-      const lowPriority = this.interruptManager.getInterruptsByStatus('pending')
-        .filter(i => i.priority < InterruptPriority.NORMAL);
+      const lowPriority = this.interruptManager
+        .getInterruptsByStatus('pending')
+        .filter((i) => i.priority < InterruptPriority.NORMAL);
 
-      lowPriority.forEach(i => this.interruptManager.cancelInterrupt(i.id));
+      lowPriority.forEach((i) => this.interruptManager.cancelInterrupt(i.id));
     }
 
     // Force garbage collection if available
@@ -623,7 +668,7 @@ export class UnifiedUIController extends EventEmitter {
       this.thinkingSpinner = this.animationScheduler.createSpinner(
         'ai-thinking',
         'Thinking...',
-        AnimationScheduler.SpinnerFrames.dots
+        AnimationScheduler.SpinnerFrames.dots,
       );
       this.activeSpinners.set('ai-thinking', this.thinkingSpinner);
     }
@@ -663,7 +708,12 @@ export class UnifiedUIController extends EventEmitter {
   /**
    * Push status override
    */
-  pushStatusOverride(id: string, text: string, detail?: string, tone?: LiveStatusTone): void {
+  pushStatusOverride(
+    id: string,
+    text: string,
+    detail?: string,
+    tone?: LiveStatusTone,
+  ): void {
     this.statusOrchestrator.pushOverride(id, {
       text,
       detail,
@@ -723,7 +773,10 @@ export class UnifiedUIController extends EventEmitter {
     this.statusOrchestrator.onToolStart(toolCall);
   }
 
-  onToolProgress(toolId: string, progress: { current: number; total: number; message?: string }): void {
+  onToolProgress(
+    toolId: string,
+    progress: { current: number; total: number; message?: string },
+  ): void {
     this.statusOrchestrator.onToolProgress(toolId, progress);
   }
 
@@ -742,7 +795,7 @@ export class UnifiedUIController extends EventEmitter {
     type: InterruptType,
     message: string,
     priority: InterruptPriority = InterruptPriority.NORMAL,
-    handler?: (interrupt: Interrupt) => void | Promise<void>
+    handler?: (interrupt: Interrupt) => void | Promise<void>,
   ): string {
     return this.interruptManager.queue({
       type,

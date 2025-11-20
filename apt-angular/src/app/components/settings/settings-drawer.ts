@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { NgIf } from '@angular/common';
 import { AgentSessionService } from '../../services/agent-session.service';
 import { FirebaseLoginService } from '../../services/firebase-login.service';
@@ -8,24 +18,11 @@ import { FirebaseLoginService } from '../../services/firebase-login.service';
   standalone: true,
   imports: [NgIf],
   template: `
-    <div
-      class="settings-overlay"
-      *ngIf="open"
-      (click)="close.emit()"
-    >
-      <section
-        class="settings-panel"
-        (click)="$event.stopPropagation()"
-      >
+    <div class="settings-overlay" *ngIf="open" (click)="close.emit()">
+      <section class="settings-panel" (click)="$event.stopPropagation()">
         <header class="settings-head">
           <h2>Session settings</h2>
-          <button
-            class="icon-button"
-            type="button"
-            (click)="close.emit()"
-          >
-            ×
-          </button>
+          <button class="icon-button" type="button" (click)="close.emit()">×</button>
         </header>
 
         <div class="settings-body">
@@ -81,7 +78,7 @@ import { FirebaseLoginService } from '../../services/firebase-login.service';
     </div>
   `,
   styleUrl: './settings-drawer.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsDrawerComponent {
   @Input({ required: true }) open = false;

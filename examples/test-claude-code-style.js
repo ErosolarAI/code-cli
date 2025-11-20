@@ -6,7 +6,7 @@
 import { Display } from '../dist/ui/display.js';
 
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function demonstrateClaudeCodeStyle() {
@@ -24,7 +24,7 @@ async function demonstrateClaudeCodeStyle() {
     'deepseek-reasoner',
     'deepseek',
     '/Users/bo/GitHub/tools_second_refactor',
-    '1.0.4'
+    '1.0.4',
   );
 
   await sleep(1500);
@@ -34,7 +34,7 @@ async function demonstrateClaudeCodeStyle() {
   console.log('2. CLEAN STARTUP (No Verbose Tool List)');
   console.log('═'.repeat(60));
   console.log('✓ Tools are available but not listed on startup');
-  console.log('✓ Matches Claude Code\'s minimal approach\n');
+  console.log("✓ Matches Claude Code's minimal approach\n");
 
   await sleep(1000);
 
@@ -52,7 +52,7 @@ async function demonstrateClaudeCodeStyle() {
   console.log('═'.repeat(60));
   display.showAssistantMessage(
     "I'll look at the file you have open and identify an opportunity to simplify it while improving correctness.",
-    { isFinal: false }
+    { isFinal: false },
   );
 
   await sleep(1000);
@@ -66,17 +66,17 @@ async function demonstrateClaudeCodeStyle() {
     {
       name: 'Read',
       args: { file_path: 'src/shell/interactiveShell.ts' },
-      output: Array(1859).fill('line').join('\n')
+      output: Array(1859).fill('line').join('\n'),
     },
     {
       name: 'Grep',
       args: { pattern: 'handleRequest' },
-      output: 'Found 5 matches'
+      output: 'Found 5 matches',
     },
     {
       name: 'Edit',
       args: { file_path: 'src/utils/errorUtils.ts' },
-      output: 'Changes applied'
+      output: 'Changes applied',
     },
   ];
 
@@ -86,7 +86,7 @@ async function demonstrateClaudeCodeStyle() {
     display.stopThinking();
 
     // Simulate tool result display
-    const lines = tool.output.split('\n').filter(l => l.trim());
+    const lines = tool.output.split('\n').filter((l) => l.trim());
     const lineCount = lines.length;
 
     let resultText = '';
@@ -107,8 +107,8 @@ async function demonstrateClaudeCodeStyle() {
   console.log('6. ADDITIONAL THOUGHTS');
   console.log('═'.repeat(60));
   display.showAssistantMessage(
-    "Now let me analyze the results and formulate a response.",
-    { isFinal: false }
+    'Now let me analyze the results and formulate a response.',
+    { isFinal: false },
   );
 
   await sleep(1000);
@@ -119,12 +119,12 @@ async function demonstrateClaudeCodeStyle() {
   console.log('═'.repeat(60));
   display.showAssistantMessage(
     "I've identified an opportunity to simplify the error handling in `src/utils/errorUtils.ts`. " +
-    "The current implementation has some unnecessary complexity that can be reduced while improving type safety.\n\n" +
-    "The changes I made:\n" +
-    "- Consolidated duplicate error checking logic\n" +
-    "- Added proper TypeScript type guards\n" +
-    "- Improved error message formatting",
-    { isFinal: true, elapsedMs: 4567 }
+      'The current implementation has some unnecessary complexity that can be reduced while improving type safety.\n\n' +
+      'The changes I made:\n' +
+      '- Consolidated duplicate error checking logic\n' +
+      '- Added proper TypeScript type guards\n' +
+      '- Improved error message formatting',
+    { isFinal: true, elapsedMs: 4567 },
   );
 
   // Summary

@@ -67,8 +67,7 @@ export class AgentConnectorStore {
       }
 
       if (!this.hasFetched) {
-        this.refresh().catch(() => {
-        });
+        this.refresh().catch(() => {});
       }
     });
   }
@@ -90,7 +89,7 @@ export class AgentConnectorStore {
       this.hasFetched = true;
     } catch (error) {
       this.errorState.set(
-        error instanceof Error ? error.message : 'Unable to load connector metadata from Firebase.'
+        error instanceof Error ? error.message : 'Unable to load connector metadata from Firebase.',
       );
     } finally {
       this.loadingState.set(false);

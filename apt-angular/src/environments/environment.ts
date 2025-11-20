@@ -28,7 +28,7 @@ const firebaseConfig: FirebaseOptions = {
   authDomain: 'apt-agents.firebaseapp.com',
   projectId: 'apt-agents',
   storageBucket: 'apt-agents.firebasestorage.app',
-  messagingSenderId: '392993175297'
+  messagingSenderId: '392993175297',
 };
 
 export const environment: EnvironmentConfig = {
@@ -38,7 +38,7 @@ export const environment: EnvironmentConfig = {
     projectId: 'default-project',
     profileId: 'bo-code',
     connectorId: 'mock-gateway',
-    region: 'us-central1'
+    region: 'us-central1',
   },
-  emulator: null
+  emulator: null,
 };

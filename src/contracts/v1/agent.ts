@@ -1,6 +1,6 @@
 /**
  * Agent Contract v1.0
- * 
+ *
  * Stable interface for agent interaction across all frontends.
  * Breaking changes require a new version (v2/).
  */
@@ -129,7 +129,7 @@ export interface ToolCapability {
 
 /**
  * Core agent controller interface
- * 
+ *
  * This is the stable contract that all frontends depend on.
  */
 export interface IAgentController {

@@ -24,7 +24,8 @@
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -183,7 +184,10 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
 }
 
 .chip-button:hover {
@@ -211,8 +215,15 @@
   color: rgba(255, 255, 255, 0.92);
   max-height: 200px;
   overflow: auto;
-  font: 600 0.85rem/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  font:
+    600 0.85rem/1.6 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    'Liberation Mono',
+    'Courier New',
+    monospace;
   white-space: pre-wrap;
 }
 
@@ -225,7 +236,13 @@
   outline: none;
   background: transparent;
   color: #fff;
-  font: 500 0.95rem/1.5 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font:
+    500 0.95rem/1.5 'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   padding: 0;
   caret-color: #5ef2ff;
 }
@@ -262,7 +279,11 @@
   background: transparent;
   color: #fff;
   cursor: pointer;
-  transition: opacity 120ms ease, transform 120ms ease, background 180ms ease, border-color 180ms ease;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
 }
 
 .chat-button:disabled {

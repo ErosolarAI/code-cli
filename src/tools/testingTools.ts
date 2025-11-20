@@ -15,7 +15,8 @@ export function createTestingTools(workingDir: string): ToolDefinition[] {
   return [
     {
       name: 'generate_test_templates',
-      description: 'Create sample Jest/Vitest/Mocha test blocks for functions and classes.',
+      description:
+        'Create sample Jest/Vitest/Mocha test blocks for functions and classes.',
       parameters: {
         type: 'object',
         properties: {
@@ -54,7 +55,8 @@ export function createTestingTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'run_coverage_analysis',
-      description: 'Execute a coverage-focused test run (npm test -- --coverage / jest / vitest).',
+      description:
+        'Execute a coverage-focused test run (npm test -- --coverage / jest / vitest).',
       parameters: {
         type: 'object',
         properties: {
@@ -75,10 +77,13 @@ export function createTestingTools(workingDir: string): ToolDefinition[] {
         additionalProperties: false,
       },
       handler: async (args) => {
-        const framework = typeof args['framework'] === 'string' ? args['framework'] : 'npm';
+        const framework =
+          typeof args['framework'] === 'string' ? args['framework'] : 'npm';
         const timeoutArg = args['timeout'];
         const timeout =
-          typeof timeoutArg === 'number' && Number.isFinite(timeoutArg) && timeoutArg > 0
+          typeof timeoutArg === 'number' &&
+          Number.isFinite(timeoutArg) &&
+          timeoutArg > 0
             ? timeoutArg
             : 240000;
         const extraArgsArg = args['additionalArgs'];
@@ -88,7 +93,11 @@ export function createTestingTools(workingDir: string): ToolDefinition[] {
             : '';
 
         try {
-          const command = await determineCoverageCommand(workingDir, framework, extraArgs);
+          const command = await determineCoverageCommand(
+            workingDir,
+            framework,
+            extraArgs,
+          );
           const { stdout, stderr } = await execAsync(command, {
             cwd: workingDir,
             timeout,
@@ -108,13 +117,15 @@ export function createTestingTools(workingDir: string): ToolDefinition[] {
     },
     {
       name: 'summarize_coverage_report',
-      description: 'Summarize coverage/coverage-summary.json (NYC/Jest/Vitest) in markdown.',
+      description:
+        'Summarize coverage/coverage-summary.json (NYC/Jest/Vitest) in markdown.',
       parameters: {
         type: 'object',
         properties: {
           path: {
             type: 'string',
-            description: 'Custom path to the coverage summary JSON (defaults to coverage/coverage-summary.json).',
+            description:
+              'Custom path to the coverage summary JSON (defaults to coverage/coverage-summary.json).',
           },
         },
         additionalProperties: false,
@@ -129,7 +140,9 @@ export function createTestingTools(workingDir: string): ToolDefinition[] {
             return `Coverage summary not found at ${summaryPath}. Run coverage and ensure the report is generated.`;
           }
 
-          const summary = JSON.parse(readFileSync(summaryPath, 'utf-8')) as CoverageSummary;
+          const summary = JSON.parse(
+            readFileSync(summaryPath, 'utf-8'),
+          ) as CoverageSummary;
           return formatCoverageSummary(summary, summaryPath, workingDir);
         } catch (error) {
           return `Error summarizing coverage: ${error instanceof Error ? error.message : String(error)}`;
@@ -149,7 +162,10 @@ interface CoverageMetric {
 }
 
 interface CoverageSummary {
-  total: Record<'lines' | 'statements' | 'functions' | 'branches', CoverageMetric>;
+  total: Record<
+    'lines' | 'statements' | 'functions' | 'branches',
+    CoverageMetric
+  >;
   [file: string]: any;
 }
 
@@ -168,7 +184,11 @@ function normalizeFramework(input: unknown): Framework {
   return 'jest';
 }
 
-function buildTestTemplate(ast: ReturnType<typeof performAdvancedAstAnalysis>, filePath: string, framework: Framework): string {
+function buildTestTemplate(
+  ast: ReturnType<typeof performAdvancedAstAnalysis>,
+  filePath: string,
+  framework: Framework,
+): string {
   const describeName = basename(filePath);
   const testFn = framework === 'mocha' ? 'it' : 'test';
   const output: string[] = [];
@@ -178,7 +198,9 @@ function buildTestTemplate(ast: ReturnType<typeof performAdvancedAstAnalysis>, f
   ast.symbols.forEach((symbol) => {
     if (symbol.kind === 'class') {
       output.push(`  describe('${symbol.name}', () => {`);
-      output.push(`    ${testFn}('should construct and expose expected behavior', () => {`);
+      output.push(
+        `    ${testFn}('should construct and expose expected behavior', () => {`,
+      );
       output.push('      // Arrange');
       output.push('      // const instance = new ClassUnderTest();');
       output.push('');
@@ -207,7 +229,11 @@ function buildTestTemplate(ast: ReturnType<typeof performAdvancedAstAnalysis>, f
   return output.join('\n');
 }
 
-async function determineCoverageCommand(workingDir: string, framework: string, extraArgs: string): Promise<string> {
+async function determineCoverageCommand(
+  workingDir: string,
+  framework: string,
+  extraArgs: string,
+): Promise<string> {
   const pkg = readPackageJson(workingDir);
   const suffix = extraArgs ? ` ${extraArgs}` : '';
 
@@ -238,18 +264,28 @@ function readPackageJson(workingDir: string): PackageJson | null {
   return JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
 }
 
-function formatCoverageSummary(summary: CoverageSummary, path: string, workingDir: string): string {
-  const relPath = path.startsWith(workingDir) ? path.slice(workingDir.length + 1) : path;
+function formatCoverageSummary(
+  summary: CoverageSummary,
+  path: string,
+  workingDir: string,
+): string {
+  const relPath = path.startsWith(workingDir)
+    ? path.slice(workingDir.length + 1)
+    : path;
   const total = summary.total;
   const output: string[] = [];
   output.push(`# Coverage summary (${relPath})`);
   output.push('');
   output.push('| Metric | Covered | Total | % |');
   output.push('| --- | --- | --- | --- |');
-  (['lines', 'statements', 'functions', 'branches'] as const).forEach((metric) => {
-    const entry = total[metric];
-    output.push(`| ${metric} | ${entry.covered} | ${entry.total} | ${entry.pct}% |`);
-  });
+  (['lines', 'statements', 'functions', 'branches'] as const).forEach(
+    (metric) => {
+      const entry = total[metric];
+      output.push(
+        `| ${metric} | ${entry.covered} | ${entry.total} | ${entry.pct}% |`,
+      );
+    },
+  );
 
   const detailedFiles = Object.entries(summary)
     .filter(([key]) => key !== 'total')

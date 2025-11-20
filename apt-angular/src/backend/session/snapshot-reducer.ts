@@ -2,7 +2,7 @@ import { SessionEvent, SessionSnapshot } from '../../shared/session-models';
 
 export const reduceSnapshot = (
   current: SessionSnapshot | null,
-  event: SessionEvent
+  event: SessionEvent,
 ): SessionSnapshot => {
   if (!current) {
     if (event.type === 'session') {
@@ -19,39 +19,39 @@ export const reduceSnapshot = (
     case 'chat-message':
       return {
         ...current,
-        chatMessages: [...current.chatMessages, event.payload]
+        chatMessages: [...current.chatMessages, event.payload],
       };
     case 'chat-replace':
       return {
         ...current,
         chatMessages: current.chatMessages.map((message) =>
-          message.id === event.payload.id ? event.payload : message
-        )
+          message.id === event.payload.id ? event.payload : message,
+        ),
       };
     case 'chat-history':
       return {
         ...current,
-        chatMessages: [...event.payload]
+        chatMessages: [...event.payload],
       };
     case 'stream-meters':
       return {
         ...current,
-        streamMeters: [...event.payload]
+        streamMeters: [...event.payload],
       };
     case 'ops-events':
       return {
         ...current,
-        opsEvents: [...event.payload]
+        opsEvents: [...event.payload],
       };
     case 'shortcuts':
       return {
         ...current,
-        shortcuts: [...event.payload]
+        shortcuts: [...event.payload],
       };
     case 'status':
       return {
         ...current,
-        status: event.payload
+        status: event.payload,
       };
     case 'extension':
       return {
@@ -61,9 +61,11 @@ export const reduceSnapshot = (
             return message;
           }
 
-          const filtered = (message.extensions ?? []).filter((extension) => extension.id !== event.payload.id);
+          const filtered = (message.extensions ?? []).filter(
+            (extension) => extension.id !== event.payload.id,
+          );
           return { ...message, extensions: [...filtered, event.payload] };
-        })
+        }),
       };
     default:
       return current;

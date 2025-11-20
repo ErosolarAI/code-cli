@@ -1,7 +1,7 @@
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection
+  provideZoneChangeDetection,
 } from '@angular/core';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -21,14 +21,17 @@ export const appConfig: ApplicationConfig = {
     provideAuth(() => {
       const auth = getAuth();
       if (environment.emulator?.auth) {
-        connectAuthEmulator(auth, `http://${environment.emulator.auth.host}:${environment.emulator.auth.port}`, {
-          disableWarnings: true
-        });
+        connectAuthEmulator(
+          auth,
+          `http://${environment.emulator.auth.host}:${environment.emulator.auth.port}`,
+          {
+            disableWarnings: true,
+          },
+        );
       }
 
       if (!auth.currentUser) {
-        signInAnonymously(auth).catch(() => {
-        });
+        signInAnonymously(auth).catch(() => {});
       }
       return auth;
     }),
@@ -38,7 +41,7 @@ export const appConfig: ApplicationConfig = {
         connectFirestoreEmulator(
           firestore,
           environment.emulator.firestore.host,
-          environment.emulator.firestore.port
+          environment.emulator.firestore.port,
         );
       }
       return firestore;
@@ -49,10 +52,10 @@ export const appConfig: ApplicationConfig = {
         connectFunctionsEmulator(
           functions,
           environment.emulator.functions.host,
-          environment.emulator.functions.port
+          environment.emulator.functions.port,
         );
       }
       return functions;
-    })
-  ]
+    }),
+  ],
 };
