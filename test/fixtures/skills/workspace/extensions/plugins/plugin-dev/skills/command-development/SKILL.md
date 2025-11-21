@@ -1,6 +1,5 @@
----
 name: Command Development
-description: Skill for building Claude Code plugin commands.
+description: Skill for building plugin commands.
 version: 0.2.0
 ---
 

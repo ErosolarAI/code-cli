@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully implemented comprehensive software engineering capabilities and efficiency improvements in the Bo CLI repository. The enhancements bring the CLI to parity with advanced coding assistants like Claude Code while maintaining the existing security and reliability standards.
+Successfully implemented comprehensive software engineering capabilities and efficiency improvements in the Bo CLI repository. The enhancements bring the CLI to parity with modern coding assistants while maintaining the existing security and reliability standards.
 
 ## Recent Updates
 - Complexity analysis now uses TypeScript AST traversal for accurate metrics and safe output when files contain no functions.

@@ -66,7 +66,7 @@ summarize_coverage_report {}
 
 ### Skill library suite
 
-Reusable knowledge bundles modeled after Claude Code Skills:
+Reusable knowledge bundles modeled after the Skill package format:
 
 - `ListSkills` – enumerates SKILL.md packages discovered in the workspace or user skill directories.
 - `Skill` – loads a SKILL.md (metadata, full body, and bundled `references/`, `scripts/`, `assets/` directories).

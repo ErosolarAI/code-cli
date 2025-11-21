@@ -391,7 +391,7 @@ export class ShellUIAdapter {
     filterText?: string,
   ): void {
     if (this.config.useUnifiedUI) {
-      // Build a Claude Code-style command menu
+      // Build a compact command menu
       const terminalWidth = (this.display as any).writeStream?.columns || 80;
       const separator = '─'.repeat(terminalWidth - 1);
 
@@ -599,7 +599,7 @@ export class ShellUIAdapter {
     const lineCount = lines.length;
     const args = call.arguments as any;
 
-    // Claude Code style: ⏺ ToolName(args)\n  ⎿  Details
+    // Compact style: ⏺ ToolName(args)\n  ⎿  Details
     switch (call.name) {
       case 'Read':
       case 'read_file':

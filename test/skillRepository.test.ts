@@ -11,7 +11,7 @@ const fixtureRoot = fileURLToPath(
 );
 
 describe('SkillRepository', () => {
-  it('loads workspace and nested Claude Code skills', () => {
+  it('loads workspace and nested skills', () => {
     const repository = new SkillRepository({
       workingDir: fixtureRoot,
       env: {},
@@ -27,7 +27,7 @@ describe('SkillRepository', () => {
       skill.id.includes('command-development'),
     );
     assert.ok(nested, 'expected nested plugin skill to be discovered');
-    assert.equal(nested?.namespace, 'claude-code:plugins:plugin-dev');
+    assert.equal(nested?.namespace, 'extensions:plugins:plugin-dev');
   });
 
   it('resolves skills by slug and namespace', () => {
@@ -40,7 +40,7 @@ describe('SkillRepository', () => {
     assert.equal(bySlug?.name, 'Sample Skill');
 
     const byNamespace = repository.getSkill(
-      'claude-code:plugins:plugin-dev:command-development',
+      'extensions:plugins:plugin-dev:command-development',
     );
     assert.ok(byNamespace);
     assert.equal(byNamespace?.name, 'Command Development');

@@ -39,7 +39,6 @@ export default [
       'node_modules/**',
       'dist/**',
       'apt-angular/**',
-      'claude-code/**',
       'coverage/**',
       'examples/**',
       '**/*.d.ts',

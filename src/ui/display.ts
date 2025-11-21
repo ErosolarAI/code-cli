@@ -192,7 +192,7 @@ const SPINNER_FRAMES = ['∴', 'ε', '∴', '✻', 'ε', '✻'] as const;
  * - Banner state management for in-place updates
  * - Configurable width constraints via DISPLAY_CONSTANTS
  *
- * Claude Code Style Formatting:
+ * Compact UI formatting:
  * - ⏺ prefix for tool calls, actions, and thinking/reasoning
  * - ⎿ prefix for results, details, and nested information
  * - ─ horizontal separators for dividing sections (edit diffs, etc.)
@@ -347,7 +347,7 @@ export class Display {
     if (this.activeSpinner) {
       this.activeSpinner.stop();
     }
-    // Use Claude Code style spinner with epsilon: ∴, ε, and ✻
+    // Use compact spinner with epsilon: ∴, ε, and ✻
     const tintedMessage = theme.info(message);
     this.activeSpinner = createSpinner(tintedMessage, {
       spinner: {
@@ -402,7 +402,7 @@ export class Display {
     if (!text.trim()) {
       return;
     }
-    // Claude Code style: always use ⏺ prefix for actions
+    // Always use ⏺ prefix for actions
     const icon = this.formatActionIcon(status);
     this.withOutput(() => {
       console.log(this.wrapWithPrefix(text, `${icon} `));
@@ -540,7 +540,7 @@ export class Display {
   }
 
   showAvailableTools(_tools: Array<{ name: string; description: string }>) {
-    // Hidden by default to match Claude Code style
+    // Hidden by default to keep output concise
     // Tools are available but not listed verbosely on startup
     // Parameter prefixed with underscore to indicate intentionally unused
   }
@@ -1477,7 +1477,7 @@ export class Display {
   }
 
   private buildClaudeStyleThought(content: string): string {
-    // Claude Code style: compact ⏺ prefix for thoughts/reasoning
+    // Compact ⏺ prefix for thoughts/reasoning
     const accent =
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.ui.muted;
@@ -1491,7 +1491,7 @@ export class Display {
   private buildSubActionPrefixes(status: ActionStatus, isLast: boolean) {
     if (isLast) {
       const colorize = this.resolveStatusColor(status);
-      // Claude Code style: use ⎿ for sub-action result/detail prefix
+      // Use ⎿ for sub-action result/detail prefix
       return {
         prefix: `  ${colorize(icons.subaction)} `,
         continuation: '    ',

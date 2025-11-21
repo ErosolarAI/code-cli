@@ -87,8 +87,7 @@ export const theme = {
 };
 
 /**
- * Claude Code style icons
- * Following the official Claude Code UI conventions:
+ * Compact terminal UI icon set:
  * - ⏺ (action): Used for tool calls, actions, and thinking/reasoning
  * - ⎿ (subaction): Used for results, details, and nested information
  * - ─ (separator): Horizontal lines for dividing sections (not in this object)
@@ -106,8 +105,8 @@ export const icons = {
   user: '❯',
   assistant: '◆',
   loading: '⣾',
-  action: '⏺', // Claude Code: tool actions and thoughts
-  subaction: '⎿', // Claude Code: results and details
+  action: '⏺', // Tool actions and thoughts
+  subaction: '⎿', // Results and details
 };
 
 export function formatBanner(profileLabel: string, model: string): string {

@@ -1,6 +1,6 @@
-# Advanced Features Implemented from Claude Code
+# Advanced Features Implemented
 
-This document outlines the advanced optimizations and features implemented in Bo CLI, inspired by Claude Code's architecture.
+This document outlines the advanced optimizations and features implemented in Bo CLI, inspired by modern assistant architectures.
 
 ## 🚀 **1. Streaming Responses**
 
@@ -313,7 +313,7 @@ await agent.send('prompt', false); // streaming = false
 
 ### What It Does
 
-Stores every conversation (system > user > assistant > tool turns) under `~/.bo/sessions/` so you can resume work or branch threads at any time—mirroring Claude Code's persistent workspace log.
+Stores every conversation (system > user > assistant > tool turns) under `~/.bo/sessions/` so you can resume work or branch threads at any time—mirroring persistent workspace logs used by other assistants.
 
 ### Implementation
 
@@ -339,7 +339,7 @@ Stores every conversation (system > user > assistant > tool turns) under `~/.bo/
 
 ### What It Does
 
-Loads user-defined slash commands from `~/.bo/commands/*.json`—the same customization point Claude Code exposes—so operators can codify macros, playbooks, or onboarding checklists without touching TypeScript.
+Loads user-defined slash commands from `~/.bo/commands/*.json`—the same customization point exposed by the prior toolkit—so operators can codify macros, playbooks, or onboarding checklists without touching TypeScript.
 
 ### Implementation
 
@@ -432,7 +432,7 @@ Potential additions:
 
 ## 📝 **Summary**
 
-Bo CLI now includes advanced optimizations from Claude Code:
+Bo CLI now includes these advanced optimizations:
 
 ✅ **Streaming responses** - Real-time token delivery
 ✅ **Parallel tool execution** - 3-10x faster multi-tool operations

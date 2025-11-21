@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['test/**/*.test.ts', 'src/**/*.test.ts'],
-    exclude: ['node_modules', 'dist', 'apt-angular/**', 'claude-code/**'],
+    exclude: ['node_modules', 'dist', 'apt-angular/**'],
     setupFiles: ['./test/setup.ts'],
     coverage: {
       provider: 'v8',
@@ -17,7 +17,6 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.d.ts',
         'apt-angular/**',
-        'claude-code/**',
       ],
     },
     testTimeout: 30000,

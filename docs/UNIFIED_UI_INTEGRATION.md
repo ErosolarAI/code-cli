@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully completed the integration of the Unified UI System into the APT CLI, providing live status updates similar to Claude Code. The system is now fully functional and integrated throughout the interactive shell.
+Successfully completed the integration of the Unified UI System into the APT CLI, providing live status updates similar to other assistant experiences. The system is now fully functional and integrated throughout the interactive shell.
 
 ## What Was Implemented
 
@@ -246,7 +246,7 @@ The APT CLI now has a production-ready unified UI system that provides:
 ✅ Full backward compatibility with legacy components
 ✅ Extensible architecture for future enhancements
 
-The system is fully integrated into the interactive shell and provides a user experience similar to Claude Code, with smooth animations, real-time feedback, and intelligent performance adaptation.
+The system is fully integrated into the interactive shell and provides a user experience on par with top assistants, with smooth animations, real-time feedback, and intelligent performance adaptation.
 
 ## Files Modified
 

@@ -1,6 +1,6 @@
 # Live Updates & Spinner System Implementation
 
-This document describes the comprehensive live update system implemented in APT CLI, similar to Claude Code's real-time feedback system.
+This document describes the comprehensive live update system implemented in APT CLI, similar to other real-time feedback systems.
 
 ## Overview
 
@@ -407,4 +407,4 @@ The live update system provides comprehensive, real-time feedback that keeps use
 - Performance optimization (adaptive frame rates)
 - Seamless integration (tool observer pattern)
 
-This creates a professional, polished user experience similar to Claude Code's implementation.
+This creates a professional, polished user experience similar to other premium implementations.

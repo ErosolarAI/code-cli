@@ -1,2 +1,1 @@
-# Exclude non-AGPL, non-distributable assets
-claude-code/
+# Exclude workspace-only assets from npm packages

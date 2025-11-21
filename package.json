@@ -47,13 +47,13 @@
   ],
   "author": "Bo Security <support@bo.dev>",
   "license": "MIT",
-  "homepage": "https://github.com/dragonghidra/bo-cli-RE-claude-code#readme",
+  "homepage": "https://github.com/ErosolarAI/code-cli#readme",
   "bugs": {
-    "url": "https://github.com/dragonghidra/bo-cli-RE-claude-code/issues"
+    "url": "https://github.com/ErosolarAI/code-cli/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dragonghidra/bo-cli-RE-claude-code.git"
+    "url": "git+https://github.com/ErosolarAI/code-cli.git"
   },
   "engines": {
     "node": ">=20.0.0"

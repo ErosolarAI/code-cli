@@ -2,7 +2,7 @@
 
 ## What Was Implemented
 
-A comprehensive live update system for the APT CLI that provides real-time feedback during AI processing, similar to Claude Code's implementation.
+A comprehensive live update system for the APT CLI that provides real-time feedback during AI processing, similar to other premium implementations.
 
 ## Key Features
 
@@ -194,7 +194,7 @@ No manual configuration needed - it just works!
 - **Transparency**: Users always know what the AI is doing
 - **Engagement**: Animated feedback keeps users engaged
 - **Trust**: Real-time updates build confidence
-- **Polish**: Professional, Claude Code-quality UX
+- **Polish**: Professional, top-tier UX
 
 ### Developer Experience
 
@@ -203,9 +203,9 @@ No manual configuration needed - it just works!
 - **Maintainable**: Clean separation of concerns
 - **Testable**: Comprehensive test coverage
 
-## Comparison with Claude Code
+## Feature Comparison
 
-| Feature               | Claude Code | APT CLI | Status                |
+| Feature               | Reference | APT CLI | Status                |
 | --------------------- | ----------- | ------- | --------------------- |
 | Persistent spinner    | ✅          | ✅      | ✅ Implemented        |
 | Live thoughts         | ✅          | ✅      | ✅ Implemented        |
@@ -234,7 +234,7 @@ Potential improvements for next iteration:
 
 The live update system is now **fully implemented and production-ready**. It provides:
 
-- ✅ **Feature parity** with Claude Code's core feedback system
+- ✅ **Feature parity** with the reference feedback system
 - ✅ **Rich, informative** real-time updates
 - ✅ **Professional UX** with smooth animations
 - ✅ **High performance** with minimal overhead
@@ -247,7 +247,7 @@ Users now have complete visibility into AI operations with:
 - What's **happening** (status transitions)
 - How it's **progressing** (dynamic updates)
 
-This creates a transparent, engaging, and trustworthy user experience that matches the quality of Claude Code.
+This creates a transparent, engaging, and trustworthy user experience that matches the quality of top-tier assistants.
 
 ---
 

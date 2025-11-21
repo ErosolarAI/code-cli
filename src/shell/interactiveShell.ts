@@ -575,7 +575,7 @@ export class InteractiveShell {
         'https://www.anthropic.com/news/disrupting-AI-espionage',
         '',
         `Email ${highlightedEmail} with any bugs or feedback`,
-        'GitHub: https://github.com/dragonghidra/bo-cli-RE-claude-code',
+        'GitHub: https://github.com/ErosolarAI/code-cli',
         'npm: https://www.npmjs.com/package/bo-cli',
       ].join('\n');
       display.showInfo(infoMessage);
