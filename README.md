@@ -118,3 +118,365 @@ This section outlines how an NSA-owned, fully isolated environment can run open-
 ## License
 
 MIT License. See `LICENSE` for details. Third-party components retain their original licenses.
+
+
+bo@Mac code-cli % npm i -g .
+
+up to date in 2s
+bo@Mac code-cli % bo
+╭┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╮
+╔═══════════════════════════════════╗
+║                                   ║
+║              BO CODE              ║
+║       craft • debug • ship        ║
+╟═══════════════════════════════════╢
+║ deepseek-reasoner   ⟡   deepseek  ║
+║              Bo Code              ║
+║   ↳  /Users/bo/GitHub/code-cli    ║
+╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+║   ▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▂▁   ║
+║         ✶   ✦   ✶   ✦   ✶         ║
+╚═══════════════════════════════════╝
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╯
+╭┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╮
+╔═════════════════════════════════════╗
+┃ ℹ Info                              ┃
+┃ signal lane • neon overlay          ┃
+╞═════════════════════════════════════╡
+┃ Restored last autosaved             ┃
+┃ session.                            ┃
+╚═════════════════════════════════════╝
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╯
+│ >  carefully explain what this repo does
+                                 │
+⠋ Working on your request...╭┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╮
+╔═════════════════════════════════════╗
+┃ ◆ Assistant                         ┃
+┃ deepseek-reasoner • deepseek        ┃
+╞═════════════════════════════════════╡
+┃ Based on my comprehensive analysis  ┃
+┃ of this repository, here's a        ┃
+┃ detailed explanation of what this   ┃
+┃ software does:                      ┃
+┃                                     ┃
+┃ 🎯 Core Purpose                     ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ Bo CLI is an advanced AI-powered    ┃
+┃ command-line interface that         ┃
+┃ provides autonomous coding          ┃
+┃ assistance, security testing, and   ┃
+┃ agent orchestration capabilities.   ┃
+┃ It's designed to help developers    ┃
+┃ and security professionals automate ┃
+┃ complex coding tasks, perform       ┃
+┃ security assessments, and manage    ┃
+┃ multi-step workflows through        ┃
+┃ natural language commands.          ┃
+┃                                     ┃
+┃ 🔧 Primary Functions                ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ 1. AI-Powered Coding Assistant      ┃
+┃                                     ┃
+┃ • Code Analysis & Generation:       ┃
+┃   Reads, analyzes, and modifies     ┃
+┃   code files                        ┃
+┃ • Refactoring Support: Helps        ┃
+┃   restructure and improve existing  ┃
+┃   code                              ┃
+┃ • Dependency Management: Analyzes   ┃
+┃   and manages project dependencies  ┃
+┃ • Testing Automation: Runs tests    ┃
+┃   and generates test templates      ┃
+┃ • Build Process Management:         ┃
+┃   Executes build commands and       ┃
+┃   validates outputs                 ┃
+┃                                     ┃
+┃ 2. Security & Penetration Testing   ┃
+┃ Suite                               ┃
+┃                                     ┃
+┃ • Defensive Security: Provides      ┃
+┃   security baselines and            ┃
+┃   vulnerability scanning            ┃
+┃ • Offensive Security: Includes      ┃
+┃   penetration testing tools (nmap,  ┃
+┃   nuclei, ffuf, gobuster)           ┃
+┃ • Dependency Security: Scans for    ┃
+┃   vulnerable dependencies and       ┃
+┃   security issues                   ┃
+┃ • Code Security: Analyzes code for  ┃
+┃   potential security                ┃
+┃   vulnerabilities                   ┃
+┃                                     ┃
+┃ 3. Agent Orchestration System       ┃
+┃                                     ┃
+┃ • Multi-Agent Architecture: Spawns  ┃
+┃   specialized sub-agents for        ┃
+┃   complex tasks                     ┃
+┃ • Task Automation: Breaks down      ┃
+┃   complex requests into manageable  ┃
+┃   steps                             ┃
+┃ • Parallel Execution: Runs multiple ┃
+┃   operations simultaneously for     ┃
+┃   efficiency                        ┃
+┃ • Progress Tracking: Monitors and   ┃
+┃   reports on multi-step operations  ┃
+┃                                     ┃
+┃ 🏗️ Architecture Components         ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ Capability-Based System             ┃
+┃                                     ┃
+┃ The CLI uses a modular capability   ┃
+┃ system where each feature area is   ┃
+┃ implemented as a separate module:   ┃
+┃                                     ┃
+┃ │ ───────────── CODE ────────────── ┃
+┃ │ 📦 Core Capabilities:             ┃
+┃ │ ├── 📁 Filesystem Operations (rea ┃
+┃ │ d/write/list/search)              ┃
+┃ │ ├── 📁 Code Analysis (structure,  ┃
+┃ │ dependencies, complexity)         ┃
+┃ │ ├── 📁 Development Workflow (test ┃
+┃ │ s, builds, package management)    ┃
+┃ │ ├── 📁 Security Tools (pentesting ┃
+┃ │ , dependency scanning)            ┃
+┃ │ ├── 📁 Task Management (progress  ┃
+┃ │ tracking, todo system)            ┃
+┃ │ ├── 📁 Performance Tools (paralle ┃
+┃ │ l execution, optimization)        ┃
+┃ │ └── 📁 Code Intelligence (complex ┃
+┃ │ ity metrics, quality assessment)  ┃
+┃                                     ┃
+┃ Agent Profiles & Rulebooks          ┃
+┃                                     ┃
+┃ • Bo Code Profile: Specialized for  ┃
+┃   fast, deterministic code editing  ┃
+┃ • General Profile: Broad            ┃
+┃   capabilities for research and     ┃
+┃   planning                          ┃
+┃ • Rulebook System: Governs behavior ┃
+┃   with structured constraints and   ┃
+┃   guardrails                        ┃
+┃                                     ┃
+┃ 🚀 Key Features                     ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ Advanced Code Intelligence          ┃
+┃                                     ┃
+┃ │ ────────────── TS ─────────────── ┃
+┃ │ // Example: Analyze code complexi ┃
+┃ │ ty                                ┃
+┃ │ AnalyzeCodeComplexity({           ┃
+┃ │   path: "src/**/*.ts",            ┃
+┃ │   threshold: 15                   ┃
+┃ │ });                               ┃
+┃                                     ┃
+┃ Performance Optimization            ┃
+┃                                     ┃
+┃ │ ────────────── TS ─────────────── ┃
+┃ │ // Example: Run commands in paral ┃
+┃ │ lel                               ┃
+┃ │ ParallelExecute({                 ┃
+┃ │   commands: ["npm run test", "npm ┃
+┃ │  run lint", "npm run build"]      ┃
+┃ │ });                               ┃
+┃                                     ┃
+┃ Task Management                     ┃
+┃                                     ┃
+┃ │ ────────────── TS ─────────────── ┃
+┃ │ // Example: Track complex workflo ┃
+┃ │ ws                                ┃
+┃ │ TodoWrite({                       ┃
+┃ │   todos: [                        ┃
+┃ │     { content: "Fix security vuln ┃
+┃ │ erability", status: "in_progress… ┃
+┃ │     { content: "Run penetration t ┃
+┃ │ ests", status: "pending" }        ┃
+┃ │   ]                               ┃
+┃ │ });                               ┃
+┃                                     ┃
+┃ 🛡️ Security & Safety Features      ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ Guardrail System                    ┃
+┃                                     ┃
+┃ • Workspace Snapshot Lock: Requires ┃
+┃   current context before editing    ┃
+┃ • Tool Transparency: Narrates all   ┃
+┃   actions before execution          ┃
+┃ • Policy Engine: Blocks dangerous   ┃
+┃   operations automatically          ┃
+┃ • Git Safety: Prevents destructive  ┃
+┃   git operations                    ┃
+┃                                     ┃
+┃ Sandboxed Execution                 ┃
+┃                                     ┃
+┃ • Isolated Environment: Commands    ┃
+┃   run in sandboxed directories      ┃
+┃ • Resource Limits: Timeouts and     ┃
+┃   memory constraints                ┃
+┃ • Permission Controls: Granular     ┃
+┃   tool access controls              ┃
+┃                                     ┃
+┃ 📊 Integration & Extensibility      ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ Provider System                     ┃
+┃                                     ┃
+┃ • OpenAI Integration: GPT models    ┃
+┃   for coding tasks                  ┃
+┃ • Anthropic Claude: Alternative AI  ┃
+┃   provider                          ┃
+┃ • Google GenAI: Additional model    ┃
+┃   options                           ┃
+┃ • Pluggable Architecture: Easy to   ┃
+┃   add new providers                 ┃
+┃                                     ┃
+┃ MCP (Model Context Protocol)        ┃
+┃ Support                             ┃
+┃                                     ┃
+┃ • External Tool Integration:        ┃
+┃   Connects to external services and ┃
+┃   APIs                              ┃
+┃ • Filesystem Access: Remote file    ┃
+┃   operations                        ┃
+┃ • Custom Tools: Extensible tool     ┃
+┃   ecosystem                         ┃
+┃                                     ┃
+┃ 🎯 Use Cases                        ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ For Developers                      ┃
+┃                                     ┃
+┃ • Rapid Prototyping: Generate and   ┃
+┃   modify code quickly               ┃
+┃ • Code Review: Automated analysis   ┃
+┃   and quality assessment            ┃
+┃ • Refactoring: Safe, guided code    ┃
+┃   restructuring                     ┃
+┃ • Testing: Automated test execution ┃
+┃   and generation                    ┃
+┃                                     ┃
+┃ For Security Professionals          ┃
+┃                                     ┃
+┃ • Vulnerability Assessment:         ┃
+┃   Automated security scanning       ┃
+┃ • Penetration Testing: Offensive    ┃
+┃   security testing                  ┃
+┃ • Security Baselines: Establish and ┃
+┃   verify security standards         ┃
+┃ • Compliance Checking: Automated    ┃
+┃   security compliance validation    ┃
+┃                                     ┃
+┃ For Teams                           ┃
+┃                                     ┃
+┃ • Workflow Automation: Multi-step   ┃
+┃   process automation                ┃
+┃ • Code Quality Gates: Automated     ┃
+┃   quality checks                    ┃
+┃ • Documentation Generation:         ┃
+┃   Automated documentation updates   ┃
+┃ • CI/CD Integration: Build and      ┃
+┃   deployment automation             ┃
+┃                                     ┃
+┃ 🔄 Operational Flow                 ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ • Context Capture: Snapshot of      ┃
+┃   current workspace and             ┃
+┃   requirements                      ┃
+┃ • Plan Generation: Break down       ┃
+┃   requests into executable steps    ┃
+┃ • Tool Execution: Run appropriate   ┃
+┃   tools with safety checks          ┃
+┃ • Validation: Verify results and    ┃
+┃   run tests                         ┃
+┃ • Reporting: Summarize changes and  ┃
+┃   next steps                        ┃
+┃                                     ┃
+┃ 📈 Advanced Capabilities            ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ Just Implemented Enhancements       ┃
+┃                                     ┃
+┃ The repository recently gained      ┃
+┃ significant new capabilities:       ┃
+┃                                     ┃
+┃ • Parallel Execution: Run multiple  ┃
+┃   independent commands              ┃
+┃   simultaneously                    ┃
+┃ • Code Complexity Analysis:         ┃
+┃   Advanced metrics for code quality ┃
+┃   assessment                        ┃
+┃ • Structured Task Management:       ┃
+┃   Professional progress tracking    ┃
+┃   for complex workflows             ┃
+┃ • Performance Optimization:         ┃
+┃   Multi-core utilization and        ┃
+┃   efficiency improvements           ┃
+┃                                     ┃
+┃ Enterprise-Ready Features           ┃
+┃                                     ┃
+┃ • Audit Logging: Complete           ┃
+┃   transparency of all operations    ┃
+┃ • Policy Enforcement: Configurable  ┃
+┃   security and safety rules         ┃
+┃ • Multi-Environment Support:        ┃
+┃   Development, staging, production  ┃
+┃   contexts                          ┃
+┃ • Team Collaboration: Shared        ┃
+┃   configurations and rulebooks      ┃
+┃                                     ┃
+┃ 🎯 Unique Value Proposition         ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ This tool represents a significant  ┃
+┃ advancement in AI-assisted          ┃
+┃ development because it:             ┃
+┃                                     ┃
+┃ • Combines coding and security in a ┃
+┃   single unified interface          ┃
+┃ • Provides autonomous operation     ┃
+┃   with appropriate safety           ┃
+┃   constraints                       ┃
+┃ • Offers enterprise-grade security  ┃
+┃   features for professional use     ┃
+┃ • Maintains full transparency with  ┃
+┃   detailed operation logging        ┃
+┃ • Supports complex workflows        ┃
+┃   through agent orchestration       ┃
+┃                                     ┃
+┃ 🔮 Strategic Importance             ┃
+┃ ─────────────────────────────────── ┃
+┃                                     ┃
+┃ The repository documentation        ┃
+┃ indicates this was developed as a   ┃
+┃ response to emerging AI security    ┃
+┃ threats, with the goal of providing ┃
+┃ powerful AI capabilities while      ┃
+┃ maintaining appropriate safety      ┃
+┃ controls and transparency. It's     ┃
+┃ positioned as both a defensive tool ┃
+┃ (security testing) and an offensive ┃
+┃ capability (autonomous coding),     ┃
+┃ making it valuable for security     ┃
+┃ research, development acceleration, ┃
+┃ and understanding AI capabilities   ┃
+┃ in controlled environments.         ┃
+┃                                     ┃
+┃ In essence, Bo CLI is a             ┃
+┃ sophisticated AI orchestration      ┃
+┃ platform that transforms natural    ┃
+┃ language requests into executable   ┃
+┃ coding and security operations      ┃
+┃ while maintaining comprehensive     ┃
+┃ safety, transparency, and control.  ┃
+╚═════════════════════════════════════╝
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╯
+  ⟡ elapsed 54s • usage 70,853 (in 69,438 / out 1,415) • context [▁▁▂▂▃▃▄▅▅▆▆▇▇█] 54%
+
+✔ Waiting for next instruction...
+                                 │
+• Context 54% used (0s)
