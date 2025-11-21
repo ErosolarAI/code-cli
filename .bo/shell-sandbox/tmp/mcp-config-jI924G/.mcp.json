@@ -1,0 +1,14 @@
+{
+  "filesystem": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "${WORKSPACE_ROOT}"
+    ],
+    "env": {
+      "TOKEN": "${CUSTOM_TOKEN}"
+    },
+    "description": "Workspace FS"
+  }
+}

@@ -15,6 +15,7 @@ import type {
   ToolCallRequest,
   ProviderUsage,
 } from '../core/types.js';
+import { withExponentialBackoff } from '../utils/errorUtils.js';
 
 interface OpenAIChatCompletionsOptions {
   apiKey: string;
@@ -57,7 +58,14 @@ export class OpenAIChatCompletionsProvider implements LLMProvider {
       stream: false,
     };
 
-    const completion = await this.client.chat.completions.create(request);
+    const completion = await withExponentialBackoff(
+      () => this.client.chat.completions.create(request),
+      {
+        initialDelayMs: 500,
+        maxDelayMs: 8000,
+        maxRetries: 3,
+      },
+    );
     assertHasChoices(completion);
     const choice = completion.choices[0];
     const usage = mapUsage(completion.usage);
@@ -171,6 +179,10 @@ function extractMessageContent(choice: ChatCompletion.Choice): string {
 }
 
 function mapToolCall(call: ChatCompletionMessageToolCall): ToolCallRequest {
+  if (call.type !== 'function') {
+    throw new Error(`Unsupported tool call type: ${call.type}`);
+  }
+
   let parsed: Record<string, unknown> = {};
   try {
     parsed = JSON.parse(call.function.arguments ?? '{}');

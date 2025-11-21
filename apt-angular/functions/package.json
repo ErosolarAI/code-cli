@@ -11,7 +11,7 @@
     "clean": "rm -rf lib",
     "deploy": "npm run build && firebase deploy --only functions",
     "bootstrap:project": "node scripts/bootstrap-project.mjs",
-    "lint": "echo \"lint step not configured\"",
+    "lint": "eslint . --ext .ts --max-warnings 0",
     "watch": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
@@ -20,6 +20,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5.5.4"
+    "@eslint/js": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "~5.9.2"
   }
 }

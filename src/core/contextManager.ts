@@ -8,7 +8,7 @@
  * - Keep conversation within budget
  */
 
-import type { ConversationMessage } from './types.js';
+import type { ConversationMessage, ProviderUsage } from './types.js';
 import { getContextWindowTokens } from './contextWindow.js';
 
 export interface ContextManagerConfig {
@@ -28,6 +28,11 @@ export interface TruncationResult {
 
 export class ContextManager {
   private config: ContextManagerConfig;
+  private readonly calibration = {
+    samples: 0,
+    totalChars: 0,
+    totalTokens: 0,
+  };
 
   constructor(config: Partial<ContextManagerConfig> = {}) {
     this.config = {
@@ -165,20 +170,7 @@ export class ContextManager {
    * Estimate tokens in a message
    */
   estimateTokens(message: ConversationMessage): number {
-    let charCount = 0;
-
-    if (message.content) {
-      charCount += message.content.length;
-    }
-
-    if (message.role === 'assistant' && message.toolCalls) {
-      // Tool calls add overhead
-      for (const call of message.toolCalls) {
-        charCount += call.name.length;
-        charCount += JSON.stringify(call.arguments).length;
-      }
-    }
-
+    const charCount = this.calculateCharacterFootprint(message);
     return Math.ceil(charCount / this.config.estimatedCharsPerToken);
   }
 
@@ -187,6 +179,38 @@ export class ContextManager {
    */
   estimateTotalTokens(messages: ConversationMessage[]): number {
     return messages.reduce((sum, msg) => sum + this.estimateTokens(msg), 0);
+  }
+
+  /**
+   * Calibrate token estimation using real provider usage.
+   */
+  reconcileWithUsage(
+    messages: ConversationMessage[],
+    usage?: ProviderUsage | null,
+    additionalContent = '',
+  ): void {
+    if (!usage?.totalTokens || usage.totalTokens <= 0) {
+      return;
+    }
+    const footprint =
+      this.calculateConversationFootprint(messages) +
+      (additionalContent ? additionalContent.length : 0);
+    if (!footprint) {
+      return;
+    }
+
+    this.calibration.samples += 1;
+    this.calibration.totalChars += footprint;
+    this.calibration.totalTokens += usage.totalTokens;
+
+    const observedCharsPerToken =
+      this.calibration.totalChars / this.calibration.totalTokens;
+    const clamped = clamp(observedCharsPerToken, 1.5, 6);
+    const smoothing = 0.25; // avoid wild swings from a single request
+    const adjusted =
+      this.config.estimatedCharsPerToken * (1 - smoothing) + clamped * smoothing;
+
+    this.config.estimatedCharsPerToken = clamp(adjusted, 1.5, 6);
   }
 
   /**
@@ -283,6 +307,34 @@ export class ContextManager {
   updateConfig(config: Partial<ContextManagerConfig>): void {
     this.config = { ...this.config, ...config };
   }
+
+  private calculateConversationFootprint(
+    messages: ConversationMessage[],
+  ): number {
+    return messages.reduce(
+      (sum, message) => sum + this.calculateCharacterFootprint(message),
+      0,
+    );
+  }
+
+  private calculateCharacterFootprint(message: ConversationMessage): number {
+    let charCount = message.content?.length ?? 0;
+
+    if (message.role === 'assistant' && message.toolCalls) {
+      for (const call of message.toolCalls) {
+        if (call?.name) {
+          charCount += call.name.length;
+        }
+        try {
+          charCount += JSON.stringify(call.arguments ?? {}).length;
+        } catch {
+          charCount += String(call.arguments ?? '').length;
+        }
+      }
+    }
+
+    return charCount;
+  }
 }
 
 const DEFAULT_CONTEXT_HEADROOM = 0.97;
@@ -325,4 +377,8 @@ export function createDefaultContextManager(
     estimatedCharsPerToken: 3, // Conservative estimate for code-heavy text
     ...overrides,
   });
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }

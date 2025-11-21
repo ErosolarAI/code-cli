@@ -20,6 +20,7 @@ import type {
   ReasoningEffortLevel,
   TextVerbosityLevel,
 } from '../core/types.js';
+import { withExponentialBackoff } from '../utils/errorUtils.js';
 
 interface OpenAIProviderOptions {
   apiKey: string;
@@ -78,7 +79,14 @@ export class OpenAIResponsesProvider implements LLMProvider {
       request.text = { verbosity: this.textVerbosity };
     }
 
-    const response = await this.client.responses.create(request);
+    const response = await withExponentialBackoff(
+      () => this.client.responses.create(request),
+      {
+        initialDelayMs: 500,
+        maxDelayMs: 8000,
+        maxRetries: 3,
+      },
+    );
     assertHasOutput(response);
 
     const toolCalls = response.output.filter(isFunctionCall).map(mapToolCall);
@@ -202,11 +210,13 @@ function collectRefusalText(output: ResponseOutputItem[]): string {
 }
 
 function mapToolCall(call: ResponseFunctionToolCall): ToolCallRequest {
-  let parsed: Record<string, unknown> = {};
+  let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(call.arguments ?? '{}');
-  } catch {
-    parsed = {};
+  } catch (error) {
+    throw new Error(`Failed to parse tool call arguments: ${call.arguments}`, {
+      cause: error,
+    });
   }
 
   return {

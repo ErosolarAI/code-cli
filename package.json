@@ -26,8 +26,8 @@
     "dev": "node --loader ts-node/esm src/bin/bo.ts",
     "dev:watch": "node --watch --loader ts-node/esm src/bin/bo.ts",
     "start": "node dist/bin/bo.js",
-    "test": "node --loader ts-node/esm --test test/*.test.ts",
-    "test:watch": "node --watch --loader ts-node/esm --test test/*.test.ts",
+    "test": "vitest",
+    "test:watch": "TS_NODE_TRANSPILE_ONLY=1 TS_NODE_PROJECT=tsconfig.test.json node --watch --loader ts-node/esm --test test/*.test.ts",
     "lint": "eslint . --ext .ts --max-warnings 0",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
@@ -46,7 +46,7 @@
     "productivity"
   ],
   "author": "Bo Security <support@bo.dev>",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "homepage": "https://github.com/dragonghidra/bo-cli-RE-claude-code#readme",
   "bugs": {
     "url": "https://github.com/dragonghidra/bo-cli-RE-claude-code/issues"
@@ -60,25 +60,27 @@
   },
   "devDependencies": {
     "@types/gradient-string": "^1.1.6",
-    "@types/node": "^20.11.24",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0",
-    "eslint": "^8.57.0",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-complexity": "^1.0.2",
+    "globals": "^14.0.0",
     "prettier": "^3.6.2",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.2"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.0",
-    "@google/genai": "^1.29.1",
-    "boxen": "^5.1.2",
-    "chalk": "^4.1.2",
-    "cli-spinners": "^2.9.2",
-    "gradient-string": "^2.0.2",
+    "@anthropic-ai/sdk": "^0.70.0",
+    "@google/genai": "^1.30.0",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
+    "cli-spinners": "^3.3.0",
+    "gradient-string": "^3.0.0",
     "nanospinner": "^1.1.0",
-    "openai": "^4.77.3",
-    "ora": "^5.4.1",
-    "typescript": "^5.3.3"
+    "openai": "^6.9.1",
+    "ora": "^9.0.0",
+    "vitest": "^4.0.13"
   }
 }

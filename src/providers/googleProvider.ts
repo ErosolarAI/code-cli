@@ -17,6 +17,7 @@ import type {
   ToolCallRequest,
   ToolMessage,
 } from '../core/types.js';
+import { withExponentialBackoff } from '../utils/errorUtils.js';
 
 interface GoogleGenAIProviderOptions {
   apiKey: string;
@@ -65,11 +66,19 @@ export class GoogleGenAIProvider implements LLMProvider {
       config.tools = mappedTools;
     }
 
-    const response = await this.client.models.generateContent({
-      model: this.model,
-      contents: contents.length ? contents : createEmptyUserContent(),
-      config: Object.keys(config).length ? config : undefined,
-    });
+    const response = await withExponentialBackoff(
+      () =>
+        this.client.models.generateContent({
+          model: this.model,
+          contents: contents.length ? contents : createEmptyUserContent(),
+          config: Object.keys(config).length ? config : undefined,
+        }),
+      {
+        initialDelayMs: 500,
+        maxDelayMs: 8000,
+        maxRetries: 3,
+      },
+    );
 
     const usage = mapUsage(response.usageMetadata);
     const toolCalls = mapFunctionCalls(response.functionCalls ?? []);
@@ -258,13 +267,16 @@ function toRecord(value: unknown): Record<string, unknown> {
     }
     try {
       const parsed = JSON.parse(trimmed);
-      return isPlainRecord(parsed) ? parsed : {};
-    } catch {
-      // ignore parse errors
-      return {};
+      if (isPlainRecord(parsed)) {
+        return parsed;
+      }
+    } catch (error) {
+      throw new Error(`Failed to parse JSON string: ${value}`, {
+        cause: error,
+      });
     }
   }
-  return {};
+  throw new Error(`Unsupported value type for toRecord: ${typeof value}`);
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {

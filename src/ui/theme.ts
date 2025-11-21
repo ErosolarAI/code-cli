@@ -3,6 +3,17 @@ import gradientString from 'gradient-string';
 
 type Colorize = (value: string) => string;
 
+interface GradientTheme {
+  primary: Colorize;
+  cool: Colorize;
+  warm: Colorize;
+  horizon: Colorize;
+  success: Colorize;
+  aurora: Colorize;
+  plasma: Colorize;
+  ember: Colorize;
+}
+
 /**
  * Theme system matching the Bo CLI aesthetics
  */
@@ -29,7 +40,7 @@ export const theme = {
     aurora: gradientString(['#0EA5E9', '#22D3EE', '#A855F7', '#F472B6']),
     plasma: gradientString(['#0EA5E9', '#6366F1', '#F59E0B']),
     ember: gradientString(['#FB923C', '#F43F5E', '#A855F7']),
-  },
+  } as GradientTheme,
 
   ui: {
     border: chalk.hex('#1F2937'),

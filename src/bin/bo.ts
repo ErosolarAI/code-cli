@@ -1,20 +1,33 @@
 #!/usr/bin/env node
-import { launchShell } from '../shell/shellApp.js';
-import { runHeadlessApp } from '../headless/headlessApp.js';
-import { BRAND_CODE_PROFILE } from '../core/brand.js';
+import { getPackageVersion } from '../utils/packageMetadata.js';
 
 const argv = process.argv.slice(2);
 
-if (argv.includes('--json')) {
-  runHeadlessApp({ argv }).catch((error) => {
-    console.error(error instanceof Error ? error.message : error);
-    process.exit(1);
-  });
-} else {
-  launchShell(BRAND_CODE_PROFILE, { enableProfileSelection: true }).catch(
-    (error) => {
-      console.error(error instanceof Error ? error.message : error);
-      process.exit(1);
-    },
-  );
+async function main(): Promise<void> {
+  if (hasVersionFlag(argv)) {
+    console.log(getPackageVersion());
+    return;
+  }
+
+  if (argv.includes('--json')) {
+    const { runHeadlessApp } = await import('../headless/headlessApp.js');
+    await runHeadlessApp({ argv });
+    return;
+  }
+
+  const [{ launchShell }, { BRAND_CODE_PROFILE }] = await Promise.all([
+    import('../shell/shellApp.js'),
+    import('../core/brand.js'),
+  ]);
+
+  await launchShell(BRAND_CODE_PROFILE, { enableProfileSelection: true });
 }
+
+function hasVersionFlag(args: string[]): boolean {
+  return args.some((arg) => arg === '--version' || arg === '-v');
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+});

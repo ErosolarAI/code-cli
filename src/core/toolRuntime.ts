@@ -11,28 +11,71 @@ import {
 import { ContextManager } from './contextManager.js';
 import type { ToolPolicy, ToolPolicyDecision } from './policyEngine.js';
 import type { TimelineRecorder } from './timeline.js';
+import { withRetry, FAST_RETRY_CONFIG } from './retryStrategy.js';
+import { classifyError } from './errorClassification.js';
+import type {
+  MetricsCollector,
+  PerformanceMonitor,
+} from './observability.js';
+import { CacheMetrics, getSharedCacheMetrics } from './observability.js';
 
+/**
+ * Context information about the current tool execution environment.
+ * Provides metadata about the active profile, provider, and workspace.
+ */
 export interface ToolExecutionContext {
+  /** Name of the active profile (e.g., 'bo', 'general') */
   profileName: string;
+  /** Provider ID (e.g., 'anthropic', 'openai') */
   provider: ProviderId;
+  /** Model identifier (e.g., 'claude-3-sonnet') */
   model: string;
+  /** Optional workspace context snapshot */
   workspaceContext?: string | null;
 }
 
+/**
+ * Observer interface for monitoring tool execution lifecycle events.
+ * Useful for logging, metrics collection, and debugging.
+ */
 export interface ToolRuntimeObserver {
+  /** Called when a tool execution starts */
   onToolStart?(call: ToolCallRequest): void;
+  /** Called when a tool execution completes successfully */
   onToolResult?(call: ToolCallRequest, output: string): void;
+  /** Called when a tool execution fails */
   onToolError?(call: ToolCallRequest, error: string): void;
+  /** Called when a cached result is returned */
   onCacheHit?(call: ToolCallRequest): void;
 }
 
+/**
+ * Configuration options for the ToolRuntime.
+ * All options are optional and have sensible defaults.
+ */
 interface ToolRuntimeOptions {
+  /** Observer for tool execution lifecycle events */
   observer?: ToolRuntimeObserver;
+  /** Context manager for token budget management and output truncation */
   contextManager?: ContextManager;
+  /** Enable caching of idempotent tool results (default: true) */
   enableCache?: boolean;
+  /** Cache time-to-live in milliseconds (default: 5 minutes) */
   cacheTTLMs?: number;
+  /** Policy engine for access control and validation */
   policy?: ToolPolicy;
+  /** Timeline recorder for execution history */
   timeline?: TimelineRecorder;
+  /** Metrics collector for observability (optional) */
+  metricsCollector?: MetricsCollector;
+  /** Cache metrics tracker (defaults to shared instance) */
+  cacheMetrics?: CacheMetrics | null;
+  /** Performance monitor for system-level telemetry (optional) */
+  performanceMonitor?: PerformanceMonitor | null;
+  /** Maximum number of cache entries to retain (default: 200) */
+  maxCacheEntries?: number;
+  /** Minimum interval between cache sweeps in ms (default: 60s) */
+  cacheSweepIntervalMs?: number;
 }
 
 type ToolHandler = (args: Record<string, unknown>) => Promise<string> | string;
@@ -77,6 +120,33 @@ const CACHEABLE_TOOLS = new Set([
   'extract_exports',
 ]);
 
+/**
+ * ToolRuntime manages tool registration, execution, caching, and observability.
+ *
+ * Key Features:
+ * - Automatic retry with intelligent error classification
+ * - Result caching for idempotent operations
+ * - Policy enforcement and access control
+ * - Comprehensive metrics collection
+ * - Timeline recording for debugging
+ * - Output truncation for token budget management
+ *
+ * @example
+ * ```typescript
+ * const runtime = new ToolRuntime(baseTools, {
+ *   enableCache: true,
+ *   metricsCollector: collector,
+ *   timeline: recorder,
+ * });
+ *
+ * runtime.registerSuite({
+ *   id: 'my-tools',
+ *   tools: [myTool1, myTool2],
+ * });
+ *
+ * const result = await runtime.execute(toolCall);
+ * ```
+ */
 export class ToolRuntime {
   private readonly registry = new Map<string, ToolRecord>();
   private readonly registrationOrder: string[] = [];
@@ -87,7 +157,19 @@ export class ToolRuntime {
   private readonly cacheTTLMs: number;
   private readonly policy: ToolPolicy | null;
   private readonly timeline: TimelineRecorder | null;
+  private readonly metricsCollector: MetricsCollector | null;
+  private readonly cacheMetrics: CacheMetrics | null;
+  private readonly performanceMonitor: PerformanceMonitor | null;
+  private readonly maxCacheEntries: number;
+  private readonly cacheSweepIntervalMs: number;
+  private lastCacheSweep = 0;
 
+  /**
+   * Create a new ToolRuntime instance.
+   *
+   * @param baseTools - Initial tools to register (optional)
+   * @param options - Configuration options (all optional)
+   */
   constructor(
     baseTools: ToolDefinition[] = [],
     options: ToolRuntimeOptions = {},
@@ -98,6 +180,14 @@ export class ToolRuntime {
     this.cacheTTLMs = options.cacheTTLMs ?? 5 * 60 * 1000; // 5 minutes default
     this.policy = options.policy ?? null;
     this.timeline = options.timeline ?? null;
+    this.metricsCollector = options.metricsCollector ?? null;
+    this.cacheMetrics =
+      options.cacheMetrics === undefined
+        ? getSharedCacheMetrics()
+        : options.cacheMetrics;
+    this.performanceMonitor = options.performanceMonitor ?? null;
+    this.maxCacheEntries = Math.max(1, options.maxCacheEntries ?? 200);
+    this.cacheSweepIntervalMs = Math.max(1_000, options.cacheSweepIntervalMs ?? 60_000);
     if (baseTools.length) {
       this.registerSuite({
         id: 'runtime.core',
@@ -145,6 +235,30 @@ export class ToolRuntime {
       });
   }
 
+  /**
+   * Execute a tool call with automatic retry, caching, and observability.
+   *
+   * Execution Flow:
+   * 1. Validate tool exists and arguments are correct
+   * 2. Apply policy checks and sanitization
+   * 3. Check cache for existing result (if cacheable)
+   * 4. Execute tool handler with retry logic
+   * 5. Record metrics and timeline events
+   * 6. Cache result (if successful and cacheable)
+   * 7. Return result or error message
+   *
+   * @param call - Tool call request with name, arguments, and ID
+   * @returns Tool output as string, or error message on failure
+   *
+   * @example
+   * ```typescript
+   * const result = await runtime.execute({
+   *   id: 'call-123',
+   *   name: 'Read',
+   *   arguments: { file_path: '/path/to/file.ts' }
+   * });
+   * ```
+   */
   async execute(call: ToolCallRequest): Promise<string> {
     const record = this.registry.get(call.name);
     if (!record) {
@@ -190,6 +304,10 @@ export class ToolRuntime {
       ...(policyDecision?.sanitizedArguments ?? {}),
     };
 
+    if (this.enableCache) {
+      this.maybeSweepCache(Date.now());
+    }
+
     // Check if tool is cacheable
     const isCacheable =
       record.definition.cacheable ?? CACHEABLE_TOOLS.has(call.name);
@@ -202,11 +320,18 @@ export class ToolRuntime {
       });
       const cached = this.cache.get(cacheKey);
 
-      if (cached && Date.now() - cached.timestamp < this.cacheTTLMs) {
-        this.observer?.onCacheHit?.(normalizedExecutionCall);
-        this.observer?.onToolResult?.(normalizedExecutionCall, cached.result);
-        return cached.result;
+      if (cached) {
+        if (Date.now() - cached.timestamp < this.cacheTTLMs) {
+          this.cacheMetrics?.recordHit();
+          this.bumpCacheEntry(cacheKey, cached);
+          this.observer?.onCacheHit?.(normalizedExecutionCall);
+          this.observer?.onToolResult?.(normalizedExecutionCall, cached.result);
+          return cached.result;
+        }
+        this.deleteCacheEntry(cacheKey, cached);
       }
+
+      this.cacheMetrics?.recordMiss();
     }
 
     this.observer?.onToolStart?.(normalizedExecutionCall);
@@ -216,6 +341,11 @@ export class ToolRuntime {
       tool: normalizedExecutionCall.name,
       metadata: { toolCallId: normalizedExecutionCall.id, arguments: callArgs },
     });
+
+    const startTime = Date.now();
+    const trackedByMonitor = this.performanceMonitor !== null;
+    let monitorStarted = false;
+    let retryAttempts = 0;
 
     if (policyDecision?.action === 'dry-run') {
       const preview =
@@ -233,12 +363,48 @@ export class ToolRuntime {
     }
 
     try {
+      if (trackedByMonitor) {
+        this.performanceMonitor!.trackToolStart();
+        monitorStarted = true;
+      }
+
       validateToolArguments(
         record.definition.name,
         record.definition.parameters,
         callArgs,
       );
-      const result = await record.definition.handler(callArgs);
+
+      // Execute tool handler with retry logic for transient failures
+      const retryResult = await withRetry(
+        async () => {
+          return await record.definition.handler(callArgs);
+        },
+        (error: Error) => {
+          const classification = classifyError(error);
+          return classification.isRetryable;
+        },
+        FAST_RETRY_CONFIG,
+        (attempt, error, delayMs) => {
+          this.timeline?.record({
+            action: 'tool_execution',
+            status: 'retrying',
+            tool: normalizedExecutionCall.name,
+            message: `Retry attempt ${attempt}: ${error.message}`,
+            metadata: {
+              toolCallId: normalizedExecutionCall.id,
+              attempt,
+              delayMs,
+            },
+          });
+        }
+      );
+      retryAttempts = retryResult.attempts;
+
+      if (!retryResult.success || !retryResult.result) {
+        throw retryResult.error ?? new Error('Tool execution failed');
+      }
+
+      const result = retryResult.result;
       let output =
         typeof result === 'string' ? result : JSON.stringify(result, null, 2);
 
@@ -265,10 +431,15 @@ export class ToolRuntime {
           ...normalizedExecutionCall,
           arguments: callArgs,
         });
-        this.cache.set(cacheKey, {
+        const entry: CacheEntry = {
           result: output,
           timestamp: Date.now(),
-        });
+        };
+        // Move to the end of insertion order for LRU-like trimming
+        this.cache.delete(cacheKey);
+        this.cache.set(cacheKey, entry);
+        this.cacheMetrics?.recordWrite(Buffer.byteLength(output, 'utf8'));
+        this.trimCache();
       }
 
       this.timeline?.record({
@@ -276,8 +447,29 @@ export class ToolRuntime {
         status: 'succeeded',
         tool: normalizedExecutionCall.name,
         message: 'completed',
-        metadata: { toolCallId: normalizedExecutionCall.id },
+        metadata: {
+          toolCallId: normalizedExecutionCall.id,
+          attempts: retryResult.attempts,
+        },
       });
+
+      // Record metrics if collector is available
+      if (this.metricsCollector) {
+        this.metricsCollector.recordToolExecution({
+          toolName: normalizedExecutionCall.name,
+          startTime,
+          endTime: Date.now(),
+          durationMs: Date.now() - startTime,
+          success: true,
+          retryCount: retryResult.attempts - 1,
+          inputSizeBytes: JSON.stringify(callArgs).length,
+          outputSizeBytes: output.length,
+        });
+      }
+
+      if (monitorStarted) {
+        this.performanceMonitor!.trackToolEnd(true);
+      }
       this.observer?.onToolResult?.(normalizedExecutionCall, output);
       return output;
     } catch (error) {
@@ -293,8 +485,28 @@ export class ToolRuntime {
         status: 'failed',
         tool: normalizedExecutionCall.name,
         message: formatted,
-        metadata: { toolCallId: normalizedExecutionCall.id },
+        metadata: {
+          toolCallId: normalizedExecutionCall.id,
+          attempts: retryAttempts || 0,
+        },
       });
+
+      // Record metrics for failed execution
+      if (this.metricsCollector) {
+        this.metricsCollector.recordToolExecution({
+          toolName: normalizedExecutionCall.name,
+          startTime,
+          endTime: Date.now(),
+          durationMs: Date.now() - startTime,
+          success: false,
+          error: formatted,
+          retryCount: Math.max(0, retryAttempts - 1),
+        });
+      }
+
+      if (monitorStarted) {
+        this.performanceMonitor!.trackToolEnd(false);
+      }
       this.observer?.onToolError?.(normalizedExecutionCall, formatted);
       return formatted;
     }
@@ -302,6 +514,55 @@ export class ToolRuntime {
 
   private getCacheKey(call: ToolCallRequest): string {
     return `${call.name}:${JSON.stringify(call.arguments)}`;
+  }
+
+  private bumpCacheEntry(key: string, entry: CacheEntry): void {
+    // Reinsert entry to update insertion order without extending TTL
+    this.cache.delete(key);
+    this.cache.set(key, entry);
+  }
+
+  private deleteCacheEntry(key: string, entry?: CacheEntry): void {
+    const cached = entry ?? this.cache.get(key);
+    this.cache.delete(key);
+    if (cached) {
+      this.cacheMetrics?.recordEviction(
+        Buffer.byteLength(cached.result, 'utf8'),
+      );
+    }
+  }
+
+  private trimCache(): void {
+    while (this.cache.size > this.maxCacheEntries) {
+      const oldest = this.cache.entries().next().value as
+        | [string, CacheEntry]
+        | undefined;
+      if (!oldest) {
+        break;
+      }
+      const [key, entry] = oldest;
+      this.deleteCacheEntry(key, entry);
+    }
+  }
+
+  private evictExpiredEntries(referenceTime: number): void {
+    if (this.cache.size === 0) {
+      return;
+    }
+    for (const [key, entry] of this.cache.entries()) {
+      if (referenceTime - entry.timestamp >= this.cacheTTLMs) {
+        this.deleteCacheEntry(key, entry);
+      }
+    }
+  }
+
+  private maybeSweepCache(referenceTime: number): void {
+    if (referenceTime - this.lastCacheSweep < this.cacheSweepIntervalMs) {
+      return;
+    }
+    this.lastCacheSweep = referenceTime;
+    this.evictExpiredEntries(referenceTime);
+    this.trimCache();
   }
 
   private evaluatePolicy(
@@ -326,17 +587,44 @@ export class ToolRuntime {
   }
 
   clearCache(): void {
+    if (this.cacheMetrics && this.cache.size) {
+      for (const entry of this.cache.values()) {
+        this.cacheMetrics.recordEviction(
+          Buffer.byteLength(entry.result, 'utf8'),
+        );
+      }
+    }
     this.cache.clear();
   }
 
-  getCacheStats(): { size: number; entries: number } {
+  getCacheStats(): {
+    size: number;
+    entries: number;
+    hits: number;
+    misses: number;
+    hitRate: number;
+    writes: number;
+    evictions: number;
+    maxEntries: number;
+    ttlMs: number;
+    bytesStored: number;
+  } {
     let totalSize = 0;
     for (const entry of this.cache.values()) {
-      totalSize += entry.result.length;
+      totalSize += Buffer.byteLength(entry.result, 'utf8');
     }
+    const snapshot = this.cacheMetrics?.snapshot();
     return {
       size: totalSize,
       entries: this.cache.size,
+      hits: snapshot?.hits ?? 0,
+      misses: snapshot?.misses ?? 0,
+      hitRate: snapshot?.hitRate ?? 0,
+      writes: snapshot?.writes ?? 0,
+      evictions: snapshot?.evictions ?? 0,
+      maxEntries: this.maxCacheEntries,
+      ttlMs: this.cacheTTLMs,
+      bytesStored: snapshot?.bytesStored ?? totalSize,
     };
   }
 

@@ -9,7 +9,6 @@ import type {
   ProviderId,
   ProviderUsage,
   ReasoningEffortLevel,
-  ToolCallRequest,
 } from '../core/types.js';
 import type { ProfileName } from '../config.js';
 import type { AgentProfileBlueprint } from '../core/agentProfiles.js';
@@ -888,9 +887,6 @@ export class InteractiveShell {
       case '/doctor':
         this.runDoctor();
         break;
-      case '/checks':
-        await this.runRepoChecksCommand();
-        break;
       case '/feedback': {
         const [, pageArg] = input.trim().split(/\s+/);
         await this.showFeedbackPacket(pageArg);
@@ -1183,27 +1179,6 @@ export class InteractiveShell {
       }
     }
     display.showSystemMessage(lines.join('\n'));
-  }
-
-  private async runRepoChecksCommand(): Promise<void> {
-    if (this.isProcessing) {
-      display.showWarning(
-        'Wait for the active response to finish before running checks.',
-      );
-      return;
-    }
-
-    const call: ToolCallRequest = {
-      id: 'manual-run-repo-checks',
-      name: 'run_repo_checks',
-      arguments: {},
-    };
-
-    display.showInfo(
-      'Running repo checks (npm test/build/lint when available)...',
-    );
-    const output = await this.runtimeSession.toolRuntime.execute(call);
-    display.showSystemMessage(output);
   }
 
   private async refreshWorkspaceContextCommand(input: string): Promise<void> {

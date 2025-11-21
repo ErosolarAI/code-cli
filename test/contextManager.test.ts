@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { getContextWindowTokens } from '../src/core/contextWindow.js';
 import {
   createDefaultContextManager,
+  ContextManager,
   resolveContextManagerConfig,
 } from '../src/core/contextManager.js';
 
@@ -31,4 +32,21 @@ test('createDefaultContextManager respects overrides', () => {
   assert.strictEqual(stats.percentage, 50);
   assert.strictEqual(stats.isApproachingLimit, false);
   assert.strictEqual(stats.isOverLimit, false);
+});
+
+test('ContextManager recalibrates estimates using provider usage', () => {
+  const manager = new ContextManager({ estimatedCharsPerToken: 4 });
+  const message = { role: 'user' as const, content: 'a'.repeat(80) };
+  const before = manager.estimateTokens(message);
+
+  manager.reconcileWithUsage(
+    [message],
+    { totalTokens: 20, inputTokens: 10, outputTokens: 10 },
+    'b'.repeat(20),
+  );
+
+  const after = manager.estimateTokens(message);
+  // After calibrating against real usage, the model should estimate fewer tokens for the same content
+  assert.ok(after < before);
+  assert.ok(after > 0);
 });

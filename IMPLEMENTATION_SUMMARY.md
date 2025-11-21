@@ -8,6 +8,7 @@ Successfully implemented comprehensive software engineering capabilities and eff
 - Complexity analysis now uses TypeScript AST traversal for accurate metrics and safe output when files contain no functions.
 - Parallel execution has concurrency limits, fail-fast skipping, and richer diagnostics (exit codes, signals, stdout/stderr capture).
 - New automated tests cover the complexity analyzer and parallel executor to prevent regressions.
+- Repository engineering snapshot maps stack signals (package manager, frameworks, scripts) and recommends the fastest validation commands to run.
 
 ## 🎯 Key Achievements
 

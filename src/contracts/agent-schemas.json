@@ -250,16 +250,21 @@
       "description": "Check environment, secrets, and tool readiness",
       "category": "diagnostics"
     },
-    {
-      "command": "/checks",
-      "description": "Run repo checks (npm test / npm run build / npm run lint)",
-      "category": "diagnostics"
-    },
-    {
-      "command": "/context",
-      "description": "Refresh workspace snapshot (depth/excerpt overrides)",
-      "category": "workspace"
-    },
+  {
+    "command": "/checks",
+    "description": "Run repo checks (npm test / npm run build / npm run lint)",
+    "category": "diagnostics"
+  },
+  {
+    "command": "/metrics",
+    "description": "Show live metrics summary or save a snapshot for observability",
+    "category": "diagnostics"
+  },
+  {
+    "command": "/context",
+    "description": "Refresh workspace snapshot (depth/excerpt overrides)",
+    "category": "workspace"
+  },
     {
       "command": "/sessions",
       "description": "Manage saved conversations, autosave, and session history",

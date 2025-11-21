@@ -1,11 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import readline from 'node:readline';
 import { exit, stdin, stdout } from 'node:process';
+import '../config.js';
 import type { ProfileName } from '../config.js';
-import { hasAgentProfile, listAgentProfiles } from '../core/agentProfiles.js';
+import { listAgentProfiles } from '../core/agentProfiles.js';
 import type {
   AgentEventUnion,
   CapabilityManifest,
@@ -16,6 +14,8 @@ import {
   buildWorkspaceContext,
 } from '../workspace.js';
 import { BRAND_CODE_PROFILE, resolveProfileOverride } from '../core/brand.js';
+import { resolveLaunchProfile } from '../shell/launchOptions.js';
+import { getPackageVersion } from '../utils/packageMetadata.js';
 
 interface ParsedHeadlessArgs {
   profile?: string;
@@ -70,7 +70,15 @@ export async function runHeadlessApp(
   options: HeadlessLaunchOptions,
 ): Promise<void> {
   const parsed = parseHeadlessArgs(options.argv);
-  const profile = resolveProfile(parsed.profile);
+  const availableProfiles = listAgentProfiles();
+  const profile = resolveLaunchProfile({
+    defaultProfile: BRAND_CODE_PROFILE,
+    availableProfiles,
+    cliOverride: parsed.profile ?? null,
+    envOverride: resolveProfileOverride(),
+    savedProfile: null,
+    allowSavedProfile: false,
+  });
   const sessionId = parsed.sessionId ?? randomUUID();
   const workingDir = process.cwd();
   const workspaceOptions = resolveWorkspaceCaptureOptions(process.env);
@@ -83,6 +91,10 @@ export async function runHeadlessApp(
     env: process.env,
   });
 
+  const persistAndExit = (code: number): void => {
+    exit(code);
+  };
+
   const manifest = controller.getCapabilities();
   emitEvent({
     type: 'session',
@@ -91,7 +103,7 @@ export async function runHeadlessApp(
     manifest,
     workingDir,
     workspaceContext,
-    version: readPackageVersion(),
+    version: getPackageVersion(),
   });
 
   const queue: PromptWork[] = [];
@@ -126,7 +138,7 @@ export async function runHeadlessApp(
     }
     processing = false;
     if (stdinClosed) {
-      exit(0);
+      persistAndExit(0);
     }
   };
 
@@ -162,7 +174,7 @@ export async function runHeadlessApp(
     rl.on('close', () => {
       stdinClosed = true;
       if (!processing) {
-        exit(0);
+        persistAndExit(0);
       }
     });
   } else if (!parsed.initialPrompt) {
@@ -173,7 +185,7 @@ export async function runHeadlessApp(
       profile,
       message: 'Headless mode requires stdin or a prompt argument.',
     });
-    exit(1);
+    persistAndExit(1);
   }
 
   stdin.resume();
@@ -226,35 +238,6 @@ function parseHeadlessArgs(argv: string[]): ParsedHeadlessArgs {
   };
 }
 
-function resolveProfile(candidate?: string): ProfileName {
-  const envOverride = resolveProfileOverride();
-  const desired = candidate?.trim() || envOverride || BRAND_CODE_PROFILE;
-  if (hasAgentProfile(desired as ProfileName)) {
-    return desired as ProfileName;
-  }
-  const lower = desired.toLowerCase();
-  const match = listAgentProfiles().find(
-    (entry) => entry.name.toLowerCase() === lower,
-  );
-  if (match) {
-    return match.name as ProfileName;
-  }
-  throw new Error(`Unknown profile "${candidate ?? desired}".`);
-}
-
 function emitEvent(event: HeadlessStreamEvent): void {
   stdout.write(`${JSON.stringify(event)}\n`);
-}
-
-function readPackageVersion(): string {
-  try {
-    const filePath = fileURLToPath(import.meta.url);
-    const packagePath = resolve(dirname(filePath), '../../package.json');
-    const payload = JSON.parse(readFileSync(packagePath, 'utf8')) as {
-      version?: string;
-    };
-    return typeof payload.version === 'string' ? payload.version : '0.0.0';
-  } catch {
-    return '0.0.0';
-  }
 }

@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-push checks - more comprehensive than pre-commit
+echo "🚀 Running pre-push checks..."
+
+# 1. Full test suite
+echo "\n🧪 Running full test suite..."
+npm test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed! Fix all tests before pushing."
+  exit 1
+fi
+
+# 2. Health check
+echo "\n💊 Running health check..."
+npm run health-check
+if [ $? -ne 0 ]; then
+  echo "❌ Health check failed! System not ready to push."
+  exit 1
+fi
+
+# 3. Security audit (only high/critical)
+echo "\n🔒 Running security audit..."
+npm audit --audit-level=high
+if [ $? -ne 0 ]; then
+  echo "⚠️  Security vulnerabilities found!"
+  echo "Review and fix high/critical vulnerabilities before pushing."
+  echo "Run: npm audit fix"
+  exit 1
+fi
+
+# 4. Check for console.log (warning only, don't fail)
+echo "\n🔍 Checking for console.log statements..."
+console_logs=$(git diff --cached --name-only | grep '\.ts$' | xargs grep -n 'console\.log' 2>/dev/null || true)
+if [ -n "$console_logs" ]; then
+  echo "⚠️  Warning: Found console.log statements:"
+  echo "$console_logs"
+  echo "Consider using proper logging or removing debug statements."
+fi
+
+echo "\n✅ All pre-push checks passed!"
+echo "🚀 Safe to push.\n"

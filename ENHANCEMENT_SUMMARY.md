@@ -5,8 +5,11 @@
 This document summarizes the significant software engineering capabilities and efficiency improvements implemented in the Bo CLI repository. The enhancements focus on advanced tooling, performance optimization, and code intelligence features inspired by Claude Code's capabilities.
 
 ## Latest Engineering Upgrades
+- OpenAI and Google providers now share unified exponential-backoff retries (jittered, HTTP-aware) to smooth over transient rate limiting and network hiccups.
+- Context manager calibrates its token estimates using real provider usage to keep pruning decisions aligned with actual model costs.
 - Code complexity analysis now relies on the TypeScript AST with accurate cyclomatic/cognitive scoring, safer zero-function handling, and clearer hotspot output.
 - Parallel execution tooling gained concurrency limits, fail-fast skipping, working directory validation, and richer error context (exit codes, signals, stdout/stderr capture).
+- Repository engineering snapshot tool surfaces stack signals (package manager, frameworks, quality gates) and suggests the fastest validation commands to run.
 - Added automated tests around the complexity analyzer and parallel executor to guard regressions and document expected behaviors.
 
 ## New Capabilities Added
@@ -58,6 +61,15 @@ This document summarizes the significant software engineering capabilities and e
 - Cognitive Complexity (human understanding difficulty)
 - Maintainability Index (overall code quality)
 - Function length, parameter count, and nesting depth
+
+### 4. Repository Engineering Snapshot
+
+**Files: `src/tools/devTools.ts`, `src/utils/repoInsights.ts`**
+
+- **repo_engineering_snapshot**: Generates an onboarding-grade summary of the repo stack, workspace layout, quality gates, and prioritized commands to run
+- Automatically detects package manager, frameworks, workspaces, lint/test/type-check/coverage scripts, and key config files
+- Highlights gaps (missing tests/lint/format/coverage) so you know what to shore up next
+- Provides ready-to-run commands (npm/yarn/pnpm aware) to validate the project quickly
 
 ## Enhanced Capability Modules
 

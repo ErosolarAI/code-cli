@@ -28,6 +28,17 @@ import {
 } from '../core/contextManager.js';
 import type { ToolPolicy } from '../core/policyEngine.js';
 import type { TimelineRecorder } from '../core/timeline.js';
+import {
+  getSharedMetricsCollector,
+  getSharedPerformanceMonitor,
+} from '../core/orchestrationContext.js';
+import {
+  type CacheMetrics,
+  type MetricsCollector,
+  type PerformanceMonitor,
+  getSharedCacheMetrics,
+} from '../core/observability.js';
+import { instrumentProvider } from '../providers/providerInstrumentation.js';
 
 export interface AgentSessionOptions {
   profile: ProfileName;
@@ -36,6 +47,10 @@ export interface AgentSessionOptions {
   toolObserver?: ToolRuntimeObserver;
   policy?: ToolPolicy;
   timeline?: TimelineRecorder;
+  metricsCollector?: MetricsCollector;
+  performanceMonitor?: PerformanceMonitor;
+  cacheMetrics?: CacheMetrics | null;
+  startPerformanceMonitor?: boolean;
 }
 
 export interface ModelSelection {
@@ -59,6 +74,9 @@ interface AgentSessionState {
   readonly contextManager: ContextManager;
   readonly policy?: ToolPolicy;
   readonly timeline?: TimelineRecorder;
+  readonly metricsCollector: MetricsCollector;
+  readonly performanceMonitor: PerformanceMonitor;
+  readonly cacheMetrics: CacheMetrics | null;
 }
 
 export class AgentSession {
@@ -82,12 +100,25 @@ export class AgentSession {
       resolveContextManagerConfig(profileConfig.model),
     );
 
+    const cacheMetrics = options.cacheMetrics ?? getSharedCacheMetrics();
+    const metricsCollector =
+      options.metricsCollector ?? getSharedMetricsCollector();
+    const performanceMonitor =
+      options.performanceMonitor ?? getSharedPerformanceMonitor();
+
+    if (options.startPerformanceMonitor !== false) {
+      performanceMonitor.startMonitoring();
+    }
+
     const toolSuites = options.toolSuites ? [...options.toolSuites] : [];
     const toolRuntime = createDefaultToolRuntime(toolContext, toolSuites, {
       observer: options.toolObserver,
       contextManager, // Pass context manager for output truncation
       policy: options.policy,
       timeline: options.timeline,
+      metricsCollector,
+      cacheMetrics,
+      performanceMonitor,
     });
 
     this.state = {
@@ -101,6 +132,9 @@ export class AgentSession {
       contextManager,
       policy: options.policy,
       timeline: options.timeline,
+      metricsCollector,
+      performanceMonitor,
+      cacheMetrics,
     };
   }
 
@@ -124,11 +158,25 @@ export class AgentSession {
     return this.state.toolContext;
   }
 
+  get metricsCollector(): MetricsCollector {
+    return this.state.metricsCollector;
+  }
+
+  get performanceMonitor(): PerformanceMonitor {
+    return this.state.performanceMonitor;
+  }
+
   createAgent(
     selection: ModelSelection,
     callbacks?: AgentCallbacks,
   ): AgentRuntime {
-    const provider = createProvider(asProviderConfig(selection));
+    const provider = instrumentProvider(
+      createProvider(asProviderConfig(selection)),
+      {
+        metricsCollector: this.state.metricsCollector,
+        performanceMonitor: this.state.performanceMonitor,
+      },
+    );
     const systemPrompt = (
       selection.systemPrompt ?? this.state.profileConfig.systemPrompt
     ).trim();
@@ -169,6 +217,9 @@ export class AgentSession {
         contextManager: this.state.contextManager, // Preserve context manager
         policy: this.state.policy,
         timeline: this.state.timeline,
+        metricsCollector: this.state.metricsCollector,
+        cacheMetrics: this.state.cacheMetrics,
+        performanceMonitor: this.state.performanceMonitor,
       },
     );
     return this.state.profileConfig;

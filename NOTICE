@@ -1,6 +1,6 @@
 Bo CLI
 Copyright (C) 2025 APT AI
-Licensed under the GNU Affero General Public License v3.0 or later.
+Licensed under the MIT License.
 
 This distribution depends on third-party components under their own licenses (see package.json/package-lock.json).
 The `claude-code/` directory is subject to Anthropic PBC's Commercial Terms and is excluded from packaged releases.

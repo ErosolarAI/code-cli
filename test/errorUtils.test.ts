@@ -4,7 +4,9 @@ import {
   createErrorDetails,
   formatErrorForLogging,
   isRetryableError,
+  isRetryableHttpError,
   withRetry,
+  withExponentialBackoff,
 } from '../src/utils/errorUtils.js';
 
 test('createErrorDetails creates proper error details from Error', () => {
@@ -98,4 +100,39 @@ test('withRetry does not retry non-retryable errors', async () => {
     assert.ok(error instanceof Error);
     assert.equal(attempts, 1); // no retries for non-retryable errors
   }
+});
+
+test('isRetryableHttpError detects retryable HTTP statuses', () => {
+  assert.equal(isRetryableHttpError({ status: 429 }), true);
+  assert.equal(isRetryableHttpError({ statusCode: 503 }), true);
+  assert.equal(isRetryableHttpError({ response: { status: 500 } }), true);
+  assert.equal(isRetryableHttpError({ status: 404 }), false);
+  assert.equal(isRetryableHttpError(new Error('no status here')), false);
+});
+
+test('withExponentialBackoff retries transient failures using jittered delays', async () => {
+  let attempts = 0;
+  const observedDelays: number[] = [];
+
+  const operation = async () => {
+    attempts++;
+    if (attempts < 3) {
+      const error: any = new Error('Rate limited');
+      error.status = 429;
+      throw error;
+    }
+    return 'success';
+  };
+
+  const result = await withExponentialBackoff(operation, {
+    maxRetries: 4,
+    initialDelayMs: 5,
+    maxDelayMs: 25,
+    onRetry: (_error, _attempt, delayMs) => observedDelays.push(delayMs),
+  });
+
+  assert.equal(result, 'success');
+  assert.equal(attempts, 3);
+  assert.equal(observedDelays.length, 2);
+  assert.ok(observedDelays.every((delay) => delay >= 0 && delay <= 25));
 });

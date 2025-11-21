@@ -86,6 +86,7 @@ export class AgentRuntime {
         this.providerTools,
       );
       const usage = response.usage ?? null;
+      this.reconcileUsage(usage, response.content ?? '');
       const contextStats = this.getContextStats();
 
       if (response.type === 'tool_calls') {
@@ -152,6 +153,7 @@ export class AgentRuntime {
         }
       }
 
+      this.reconcileUsage(usage, fullContent);
       const contextStats = this.getContextStats();
 
       // Check if we got tool calls
@@ -290,6 +292,20 @@ export class AgentRuntime {
       return null;
     }
     return this.contextManager.getStats(this.messages);
+  }
+
+  private reconcileUsage(
+    usage: ProviderUsage | null | undefined,
+    additionalContent: string,
+  ): void {
+    if (!this.contextManager || !usage) {
+      return;
+    }
+    this.contextManager.reconcileWithUsage(
+      this.messages,
+      usage,
+      additionalContent ?? '',
+    );
   }
 
   /**

@@ -5,7 +5,8 @@ export type TimelineStatus =
   | 'succeeded'
   | 'failed'
   | 'blocked'
-  | 'skipped';
+  | 'skipped'
+  | 'retrying';
 
 export interface TimelineEvent {
   eventId: string;

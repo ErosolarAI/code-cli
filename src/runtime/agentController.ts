@@ -23,6 +23,7 @@ import {
   getSharedPolicyEngine,
   getSharedTimeline,
 } from '../core/orchestrationContext.js';
+import type { MetricsCollector } from '../core/observability.js';
 
 interface EventSinkRef {
   current: EventStream<AgentEventUnion> | null;
@@ -451,8 +452,12 @@ export class AgentController implements IAgentController {
   }
 
   clearHistory(): void {
-    this.cachedHistory = [];
-    this.agent?.clearHistory();
+   this.cachedHistory = [];
+   this.agent?.clearHistory();
+  }
+
+  getMetricsCollector(): MetricsCollector {
+    return this.session.metricsCollector;
   }
 
   private toModelConfig(selection: ModelSelection): ModelConfig {

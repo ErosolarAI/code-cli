@@ -72,7 +72,7 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
             description: 'The content to write to the file',
           },
         },
-        required: ['path', 'content'],
+        required: ['path'],
         additionalProperties: false,
       },
       handler: async (args) => {
@@ -87,10 +87,9 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
             mkdirSync(dir, { recursive: true });
           }
 
-          const nextContent =
-            typeof args['content'] === 'string'
-              ? (args['content'] as string)
-              : '';
+          const rawContent = args['content'];
+          const hasContent = typeof rawContent === 'string';
+          const nextContent = hasContent ? (rawContent as string) : '';
           const filePreviouslyExisted = existsSync(filePath);
           const previousContent = filePreviouslyExisted
             ? readFileSync(filePath, 'utf-8')
@@ -99,12 +98,15 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
 
           writeFileSync(filePath, nextContent, 'utf-8');
 
-          return buildWriteSummary(
+          const summary = buildWriteSummary(
             filePath,
             diffSegments,
             workingDir,
             filePreviouslyExisted,
           );
+          return hasContent
+            ? summary
+            : `Warning: write_file called without content; wrote an empty file instead.\n\n${summary}`;
         } catch (error: any) {
           return buildError('writing file', error, {
             path: requestedPath,

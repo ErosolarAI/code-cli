@@ -159,13 +159,9 @@ export class AnthropicMessagesProvider implements LLMProvider {
       } else if (event.type === 'content_block_stop') {
         if (currentToolCall && toolCallId) {
           if (currentToolCallInput.trim()) {
-            try {
-              currentToolCall.arguments = toRecord(
-                JSON.parse(currentToolCallInput),
-              );
-            } catch {
-              currentToolCall.arguments = {};
-            }
+            currentToolCall.arguments = toRecord(
+              JSON.parse(currentToolCallInput),
+            );
           }
           yield {
             type: 'tool_call',
@@ -335,12 +331,16 @@ function toRecord(value: unknown): Record<string, unknown> {
     }
     try {
       const parsed = JSON.parse(trimmed);
-      return isPlainRecord(parsed) ? parsed : {};
-    } catch {
-      return {};
+      if (isPlainRecord(parsed)) {
+        return parsed;
+      }
+    } catch (error) {
+      throw new Error(`Failed to parse JSON string: ${value}`, {
+        cause: error,
+      });
     }
   }
-  return {};
+  throw new Error(`Unsupported value type for toRecord: ${typeof value}`);
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {

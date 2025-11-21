@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Bo CLI Pre-commit Quality Gates
+echo "🔍 Running pre-commit quality checks..."
+
+# 1. Type Check
+echo "\n📝 TypeScript type checking..."
+npm run type-check
+if [ $? -ne 0 ]; then
+  echo "❌ Type check failed! Fix errors before committing."
+  exit 1
+fi
+
+# 2. Linting
+echo "\n🔧 ESLint checking..."
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed! Run 'npm run lint:fix' to auto-fix or fix manually."
+  exit 1
+fi
+
+# 3. Run tests (fast ones only)
+echo "\n🧪 Running tests..."
+npm test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed! Fix test failures before committing."
+  exit 1
+fi
+
+# 4. Build check
+echo "\n🏗️  Build check..."
+npm run build
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed! Fix build errors before committing."
+  exit 1
+fi
+
+echo "\n✅ All pre-commit checks passed!"
+echo "📦 Ready to commit.\n"

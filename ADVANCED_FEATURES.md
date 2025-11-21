@@ -106,6 +106,8 @@ const CACHEABLE_TOOLS = new Set([
 new ToolRuntime(baseTools, {
   enableCache: true, // Default: true
   cacheTTLMs: 5 * 60 * 1000, // Default: 5 minutes
+  maxCacheEntries: 200, // New: bounded cache to prevent unbounded growth
+  cacheSweepIntervalMs: 60_000, // New: periodic stale entry eviction
 });
 ```
 
@@ -113,14 +115,14 @@ new ToolRuntime(baseTools, {
 
 ```typescript
 toolRuntime.clearCache(); // Clear all cache
-toolRuntime.getCacheStats(); // Get cache statistics
+toolRuntime.getCacheStats(); // Get cache statistics (hits/misses/evictions/limit/TTL)
 ```
 
 ### Benefits
 
 - ⚡ **Instant responses** for repeated operations
 - 💰 **Cost savings**: Avoid redundant file I/O
-- 🎯 **Smart invalidation**: 5-minute TTL by default
+- 🎯 **Smart invalidation**: 5-minute TTL + bounded cache by default
 
 ### Cache Hit Example
 
@@ -378,7 +380,9 @@ Monitor cache hits:
 ```typescript
 setInterval(() => {
   const stats = toolRuntime.getCacheStats();
-  console.log(`Cache: ${stats.entries} entries, ${stats.size} bytes`);
+  console.log(
+    `Cache: ${stats.entries}/${stats.maxEntries} entries, ${stats.size} bytes, evictions=${stats.evictions}`,
+  );
 }, 10000);
 ```
 
