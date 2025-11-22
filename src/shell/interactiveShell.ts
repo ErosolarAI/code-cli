@@ -83,6 +83,7 @@ import {
   getSharedTimeline,
 } from '../core/orchestrationContext.js';
 import { existsSync, readFileSync } from 'node:fs';
+import { copyToClipboard } from '../utils/clipboard.js';
 
 export interface ShellConfig {
   profile: ProfileName;
@@ -602,12 +603,31 @@ export class InteractiveShell {
     }
 
     readline.emitKeypressEvents(inputStream, this.rl);
-    inputStream.on('keypress', (_str: string, key: any) => {
+    inputStream.on('keypress', (str: string, key: any) => {
       this.handleSlashCommandPreviewChange();
 
       // Handle Shift+Tab for profile switching
       if (key && key.name === 'tab' && key.shift && this.agentMenu) {
         this.showProfileSwitcher();
+      }
+
+      // Handle 'c' key for quick copy of recent boxes
+      if (
+        str === 'c' &&
+        !key.ctrl &&
+        !key.meta &&
+        !this.pendingInteraction &&
+        !this.awaitingPasteConfirmation &&
+        !this.isProcessing &&
+        display.hasRecentCopyableBox()
+      ) {
+        // Check if input line is empty (not in the middle of typing)
+        const currentLine = this.rl.line || '';
+        if (currentLine.trim() === '') {
+          // Clear the 'c' that was just typed
+          this.rl.write('', { ctrl: true, name: 'u' }); // Clear line
+          this.handleQuickCopy();
+        }
       }
     });
   }
@@ -925,6 +945,9 @@ export class InteractiveShell {
         break;
       case '/thinking':
         this.handleThinkingCommand(input);
+        break;
+      case '/copy':
+        await this.handleCopyCommand(input);
         break;
       default:
         if (!(await this.tryCustomSlashCommand(command, input))) {
@@ -1342,6 +1365,70 @@ export class InteractiveShell {
     display.showInfo(
       `Thinking mode set to ${theme.info(value)} – ${descriptions[this.thinkingMode]}`,
     );
+  }
+
+  private async handleCopyCommand(input: string): Promise<void> {
+    const args = input.slice('/copy'.length).trim();
+    const content = display.getLastClipboardContent();
+
+    if (!content) {
+      display.showWarning(
+        'No copyable content available. Use this command after a THINKING or RESPONSE block appears.',
+      );
+      return;
+    }
+
+    // Check if user wants to see history
+    if (args === 'history' || args === 'list') {
+      const history = display.getClipboardHistory();
+      if (history.length === 0) {
+        display.showInfo('Clipboard history is empty.');
+        return;
+      }
+      display.showInfo(
+        `Clipboard history (${history.length} items):\n${history.map((item, i) => `${i + 1}. ${item.slice(0, 60)}...`).join('\n')}`,
+      );
+      return;
+    }
+
+    // Copy to clipboard
+    await this.performCopy(content);
+  }
+
+  /**
+   * Handle quick copy when 'c' key is pressed
+   */
+  private handleQuickCopy(): void {
+    const content = display.getLastClipboardContent();
+    if (!content) {
+      return;
+    }
+
+    // Perform copy asynchronously but don't await
+    this.performCopy(content).then(() => {
+      this.rl.prompt();
+    });
+  }
+
+  /**
+   * Perform the actual clipboard copy operation
+   */
+  private async performCopy(content: string): Promise<void> {
+    display.showInfo('📋 Copying to clipboard...');
+    const result = await copyToClipboard(content);
+
+    if (result.success) {
+      const charCount = theme.info(`${content.length} chars`);
+      const preview =
+        content.length > 80 ? content.slice(0, 80) + '...' : content;
+      display.showInfo(
+        `✓ Copied ${charCount} to clipboard\n\n${theme.ui.muted(preview)}`,
+      );
+    } else {
+      display.showError(
+        `Failed to copy to clipboard: ${result.error}\n\nYou can manually copy this content:\n${content}`,
+      );
+    }
   }
 
   private showSessionList(): void {

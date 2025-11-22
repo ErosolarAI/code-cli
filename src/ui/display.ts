@@ -1,10 +1,10 @@
 import { createSpinner } from 'nanospinner';
 import { cursorTo, moveCursor } from 'node:readline';
 import { theme, icons, pickProviderAccent } from './theme.js';
-import { formatRichContent, renderMessagePanel } from './richText.js';
+import { formatRichContent } from './richText.js';
 import { getTerminalColumns, wrapPreformatted } from './layout.js';
 import type { ProviderUsage } from '../core/types.js';
-import { renderCallout, renderSectionHeading } from './designSystem.js';
+import { renderSectionHeading } from './designSystem.js';
 
 type WriteFn = typeof process.stdout.write;
 type WriteChunk = string | Uint8Array;
@@ -216,6 +216,10 @@ export class Display {
   private readonly stdoutTracker = StdoutLineTracker.getInstance();
   private activeSpinner: ReturnType<typeof createSpinner> | null = null;
   private readonly outputInterceptors = new Set<OutputInterceptor>();
+  private lastClipboardContent: string = '';
+  private clipboardHistory: string[] = [];
+  private copyBoxShortcut: string = 'c';
+  private lastBoxTimestamp: number = 0;
 
   registerOutputInterceptor(interceptor: OutputInterceptor): () => void {
     if (!interceptor) {
@@ -522,38 +526,23 @@ export class Display {
   }
 
   showError(message: string) {
-    const callout = renderCallout(message, {
-      tone: 'danger',
-      icon: icons.error,
-      title: 'Error',
-      width: this.getBannerWidth(),
-    });
+    const box = this.buildCleanCopyBox(message, 'ERROR', theme.error);
     this.withOutput(() => {
-      console.error(`\n${callout}\n`);
+      console.error(`\n${box}\n`);
     });
   }
 
   showWarning(message: string) {
-    const callout = renderCallout(message, {
-      tone: 'warning',
-      icon: icons.warning,
-      title: 'Warning',
-      width: this.getBannerWidth(),
-    });
+    const box = this.buildCleanCopyBox(message, 'WARNING', theme.warning);
     this.withOutput(() => {
-      console.warn(`${callout}`);
+      console.warn(`${box}`);
     });
   }
 
   showInfo(message: string) {
-    const callout = renderCallout(message, {
-      tone: 'info',
-      icon: icons.info,
-      title: 'Info',
-      width: this.getBannerWidth(),
-    });
+    const box = this.buildCleanCopyBox(message, 'INFO', theme.info);
     this.withOutput(() => {
-      console.log(callout);
+      console.log(box);
     });
   }
 
@@ -803,6 +792,7 @@ export class Display {
     if (!normalized) {
       return '';
     }
+    // Use clean copy box for all assistant messages
     const providerAccent = this.bannerState
       ? pickProviderAccent(this.bannerState.provider)
       : null;
@@ -812,37 +802,15 @@ export class Display {
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.assistant ??
       theme.primary;
-    const width = this.resolveMessageWidth();
-    const tagline = this.bannerState
-      ? `${this.formatModelLabel(this.bannerState.model)} • ${this.bannerState.provider}`
-      : 'neon response stream';
-    const panel = renderMessagePanel(normalized, {
-      width,
-      title: 'Assistant',
-      icon: icons.assistant,
-      tagline,
-      accentColor: accent,
-      borderColor:
-        providerAccent?.edge ?? theme.ui.panelEdge ?? theme.ui.border,
-      halo: true,
-    });
+
+    const box = this.buildCleanCopyBox(normalized, 'ASSISTANT', accent);
     const telemetry = this.formatTelemetryLine(metadata);
     if (!telemetry) {
-      return panel;
+      return box;
     }
-    return `${panel}\n${telemetry}`;
+    return `${box}\n${telemetry}`;
   }
 
-  private resolveMessageWidth(): number {
-    const columns = getTerminalColumns();
-    return Math.max(
-      DISPLAY_CONSTANTS.MIN_MESSAGE_WIDTH,
-      Math.min(
-        columns - DISPLAY_CONSTANTS.MESSAGE_PADDING,
-        DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH,
-      ),
-    );
-  }
 
   /**
    * Legacy method for appending thought blocks with tree-like formatting.
@@ -1144,118 +1112,25 @@ export class Display {
       (theme.gradient?.primary as ((value: string) => string) | undefined) ??
       theme.primary;
     const dim = theme.ui.muted;
-    const fillSurface =
-      (theme.ui.haze as ((value: string) => string) | undefined) ??
-      (theme.ui.background as ((value: string) => string) | undefined) ??
-      ((value: string) => value);
-    const glass =
-      (theme.ui.glass as ((value: string) => string) | undefined) ??
-      (theme.ui.surface as ((value: string) => string) | undefined);
-    const crestColor =
-      (theme.gradient?.aurora as ((value: string) => string) | undefined) ??
-      border;
-    const crestBase = 'BO';
-    const crest = `${theme.bold(crestColor(crestBase))} ${theme.secondary('CODE')}`;
-    const ritual = `${dim('craft')} ${dim('•')} ${dim('debug')} ${dim('•')} ${dim('ship')}`;
-    const modelChip = this.decorateChip(
-      this.formatModelLabel(model),
-      theme.info,
-      glass,
-    );
-    const providerChip = this.decorateChip(
-      provider,
-      providerAccent.text ?? theme.secondary,
-      glass,
-    );
-    const profileChip = profileLabel?.trim()
-      ? this.decorateChip(profileLabel.trim(), theme.secondary, glass)
-      : dim('No profile loaded');
-    const shortPath = this.decorateChip(
-      this.abbreviatePath(workingDir, width - 10),
-      dim,
-      glass,
-    );
-    const motifColor =
-      providerAccent.motif ??
-      (theme.gradient?.primary as ((value: string) => string) | undefined) ??
-      theme.secondary;
-    const motif = motifColor('✶   ✦   ✶   ✦   ✶');
-    const signal = this.buildSignalBar(width - 6, motifColor);
-    const fill = fillSurface(' '.repeat(width));
-    const halo = motifColor(`╭${'┈'.repeat(width)}╮`);
-    const lowerHalo = motifColor(`╰${'┈'.repeat(width)}╯`);
-    const lines: string[] = [];
 
-    lines.push(halo);
-    lines.push(border(`╔${'═'.repeat(width)}╗`));
-    lines.push(border('║') + fill + border('║'));
-    lines.push(this.centerLine(crest, width, border));
-    lines.push(this.centerLine(ritual, width, border, dim));
-    lines.push(border(`╟${'═'.repeat(width)}╢`));
-    lines.push(
-      this.centerLine(
-        `${modelChip}${dim('  ⟡  ')}${providerChip}`,
-        width,
-        border,
-      ),
-    );
-    lines.push(this.centerLine(profileChip, width, border));
-    lines.push(
-      this.centerLine(`${theme.ui.muted('↳')} ${shortPath}`, width, border),
-    );
-    lines.push(border(`╟${'┄'.repeat(width)}╢`));
-    lines.push(this.centerLine(signal, width, border));
-    lines.push(this.centerLine(motif, width, border));
-    lines.push(border(`╚${'═'.repeat(width)}╝`));
-    lines.push(lowerHalo);
+    // Simplified banner - just essential info
+    const title = `${theme.bold('BO CODE')}`;
+    const modelInfo = `${this.formatModelLabel(model)} • ${provider}`;
+    const profileInfo = profileLabel?.trim() || 'No profile';
+    const pathInfo = this.abbreviatePath(workingDir, width - 10);
+
+    const lines: string[] = [];
+    lines.push(border(`┌${'─'.repeat(width)}┐`));
+    lines.push(this.centerLine(title, width, border));
+    lines.push(border(`├${'─'.repeat(width)}┤`));
+    lines.push(this.centerLine(modelInfo, width, border, dim));
+    lines.push(this.centerLine(profileInfo, width, border, dim));
+    lines.push(this.centerLine(pathInfo, width, border, dim));
+    lines.push(border(`└${'─'.repeat(width)}┘`));
 
     return lines.join('\n');
   }
 
-  private decorateChip(
-    value: string,
-    tint: (val: string) => string,
-    surface?: (val: string) => string,
-  ): string {
-    const clean = value.trim();
-    if (!clean) {
-      return '';
-    }
-    const framed = ` ${clean} `;
-    const highlighted = tint(theme.bold(framed));
-    return surface ? surface(highlighted) : highlighted;
-  }
-
-  private buildSignalBar(
-    width: number,
-    colorize: (value: string) => string,
-  ): string {
-    const ramp = [
-      '▁',
-      '▂',
-      '▃',
-      '▄',
-      '▅',
-      '▆',
-      '▇',
-      '█',
-      '▇',
-      '▆',
-      '▅',
-      '▄',
-      '▃',
-      '▂',
-    ];
-    const target = Math.max(
-      16,
-      Math.min(width, DISPLAY_CONSTANTS.MAX_BANNER_WIDTH),
-    );
-    let bar = '';
-    for (let index = 0; index < target; index += 1) {
-      bar += ramp[index % ramp.length];
-    }
-    return colorize(bar);
-  }
 
   private centerLine(
     text: string,
@@ -1491,7 +1366,8 @@ export class Display {
 
   private formatActionIcon(status: ActionStatus): string {
     const colorize = this.resolveStatusColor(status);
-    return colorize(`${icons.action}`);
+    // Use simple prefix for better copy/paste
+    return colorize('▸');
   }
 
   private buildClaudeStyleThought(content: string): string {
@@ -1514,6 +1390,9 @@ export class Display {
     label: string,
     accentColor: (value: string) => string,
   ): string {
+    // Store the clean content for clipboard
+    this.storeClipboardContent(content);
+
     const width = Math.max(
       DISPLAY_CONSTANTS.MIN_MESSAGE_WIDTH,
       Math.min(getTerminalColumns() - 4, DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH),
@@ -1546,7 +1425,11 @@ export class Display {
     const topBorder = accentColor(
       `╭${'─'.repeat(leftDash)}${labelPart}${'─'.repeat(rightDash)}╮`,
     );
-    const bottomBorder = accentColor(`╰${'─'.repeat(boxWidth)}╯`);
+
+    // Interactive copy hint with keyboard shortcut
+    const shortcutKey = theme.bold(theme.info('c'));
+    const copyHint = theme.ui.muted(`  [Press ${shortcutKey} to copy] or use ${theme.info('/copy')}`);
+    const bottomBorder = accentColor(`╰${'─'.repeat(boxWidth)}╯`) + copyHint;
 
     // Format content lines with padding
     const contentLines = lines.map((line) => {
@@ -1559,22 +1442,64 @@ export class Display {
     return [topBorder, ...contentLines, bottomBorder].join('\n');
   }
 
+  /**
+   * Store content for clipboard access
+   */
+  private storeClipboardContent(content: string): void {
+    this.lastClipboardContent = content;
+    this.clipboardHistory.push(content);
+    this.lastBoxTimestamp = Date.now();
+    // Keep only last 10 items in history
+    if (this.clipboardHistory.length > 10) {
+      this.clipboardHistory.shift();
+    }
+  }
+
+  /**
+   * Get the last copyable content
+   */
+  getLastClipboardContent(): string {
+    return this.lastClipboardContent;
+  }
+
+  /**
+   * Get clipboard history
+   */
+  getClipboardHistory(): string[] {
+    return [...this.clipboardHistory];
+  }
+
+  /**
+   * Check if there's a recent box that can be copied with keyboard shortcut
+   */
+  hasRecentCopyableBox(): boolean {
+    // Consider box "recent" if shown within last 60 seconds
+    return Date.now() - this.lastBoxTimestamp < 60000;
+  }
+
+  /**
+   * Get the keyboard shortcut for copying
+   */
+  getCopyShortcut(): string {
+    return this.copyBoxShortcut;
+  }
+
   // @ts-ignore - Legacy method kept for compatibility
   // Keep legacy method to avoid breaking changes
 
   private buildSubActionPrefixes(status: ActionStatus, isLast: boolean) {
     if (isLast) {
       const colorize = this.resolveStatusColor(status);
-      // Use ⎿ for sub-action result/detail prefix
+      // Use simple prefix for better copy/paste
       return {
-        prefix: `  ${colorize(icons.subaction)} `,
+        prefix: `  ${colorize('└')} `,
         continuation: '    ',
       };
     }
-    const branch = theme.ui.muted('│');
+    // Use simple vertical bar for continuation
     return {
-      prefix: `  ${branch} `,
-      continuation: `  ${branch} `,
+      prefix: `  ${theme.ui.muted('|')} `,
+      continuation: `  ${theme.ui.muted('|')} `,
     };
   }
 
