@@ -387,9 +387,26 @@ export class Display {
       return;
     }
     const isThought = metadata?.isFinal === false;
-    const body = isThought
-      ? this.buildClaudeStyleThought(content)
-      : this.buildChatBox(content, metadata);
+
+    // Detect if content is a structured response block (starts with <response> or has phase markers)
+    const isStructuredResponse =
+      content.trim().startsWith('<response>') ||
+      /###\s+(Phase|Planned|Analysis|Planning)/i.test(content);
+
+    let body: string;
+    if (isThought) {
+      body = this.buildClaudeStyleThought(content);
+    } else if (isStructuredResponse) {
+      // Remove XML tags if present
+      const cleaned = content
+        .replace(/^<response>\s*/i, '')
+        .replace(/\s*<\/response>$/i, '')
+        .trim();
+      body = this.buildCleanCopyBox(cleaned, 'RESPONSE', theme.secondary);
+    } else {
+      body = this.buildChatBox(content, metadata);
+    }
+
     if (!body.trim()) {
       return;
     }
@@ -1478,12 +1495,68 @@ export class Display {
   }
 
   private buildClaudeStyleThought(content: string): string {
-    // Compact ⏺ prefix for thoughts/reasoning
-    const accent =
-      (theme.gradient?.primary as ((value: string) => string) | undefined) ??
-      theme.ui.muted;
-    const prefix = `${accent('⏺')} `;
-    return this.wrapWithPrefix(content, prefix);
+    // Advanced UI/UX: Boxed thinking block with clean copyable content
+    // Remove XML tags if present
+    const cleaned = content
+      .replace(/^<thinking>\s*/i, '')
+      .replace(/\s*<\/thinking>$/i, '')
+      .trim();
+    return this.buildCleanCopyBox(cleaned, 'THINKING', theme.info);
+  }
+
+  /**
+   * Creates a boxed display for content with a label in the border.
+   * The content inside is plain text for clean copying, while UI elements
+   * are in the border/header area.
+   */
+  private buildCleanCopyBox(
+    content: string,
+    label: string,
+    accentColor: (value: string) => string,
+  ): string {
+    const width = Math.max(
+      DISPLAY_CONSTANTS.MIN_MESSAGE_WIDTH,
+      Math.min(getTerminalColumns() - 4, DISPLAY_CONSTANTS.MAX_MESSAGE_WIDTH),
+    );
+
+    // Format the content with proper wrapping
+    const lines = content.split('\n').flatMap((line) => {
+      if (!line.trim()) return [''];
+      return this.wrapLine(line.trim(), width - 4); // Account for box borders + padding
+    });
+
+    // Remove trailing empty lines
+    while (lines.length && !lines[lines.length - 1]?.trim()) {
+      lines.pop();
+    }
+
+    const maxLineWidth = Math.max(
+      ...lines.map((line) => this.visibleLength(line)),
+      label.length + 4,
+    );
+    const boxWidth = Math.min(maxLineWidth + 4, width);
+
+    // Create box with label embedded in top border
+    const labelPart = ` ${label} `;
+    const labelLen = labelPart.length;
+    const remainingWidth = Math.max(0, boxWidth - labelLen - 2);
+    const leftDash = Math.floor(remainingWidth / 2);
+    const rightDash = remainingWidth - leftDash;
+
+    const topBorder = accentColor(
+      `╭${'─'.repeat(leftDash)}${labelPart}${'─'.repeat(rightDash)}╮`,
+    );
+    const bottomBorder = accentColor(`╰${'─'.repeat(boxWidth)}╯`);
+
+    // Format content lines with padding
+    const contentLines = lines.map((line) => {
+      const visibleLen = this.visibleLength(line);
+      const padding = ' '.repeat(Math.max(0, boxWidth - visibleLen - 2));
+      // Content is plain text (no color), borders are colored
+      return `${accentColor('│')} ${theme.ui.text(line)}${padding} ${accentColor('│')}`;
+    });
+
+    return [topBorder, ...contentLines, bottomBorder].join('\n');
   }
 
   // @ts-ignore - Legacy method kept for compatibility

@@ -63,6 +63,19 @@ export const FAST_RETRY_CONFIG: RetryConfig = {
 };
 
 /**
+ * Retry configuration for bash/shell commands
+ * Longer timeout to accommodate test suites and builds
+ */
+export const BASH_RETRY_CONFIG: RetryConfig = {
+  maxAttempts: 1, // Don't retry bash commands by default
+  initialDelayMs: 0,
+  maxDelayMs: 0,
+  backoffMultiplier: 1,
+  jitterFactor: 0,
+  timeoutMs: 600000, // 10 minutes for long-running commands like npm test
+};
+
+/**
  * Retry configuration for LLM provider calls
  */
 export const PROVIDER_RETRY_CONFIG: RetryConfig = {

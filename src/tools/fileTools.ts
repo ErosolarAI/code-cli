@@ -11,7 +11,7 @@ import type { ToolDefinition } from '../core/toolRuntime.js';
 import { buildError } from '../core/errors.js';
 import {
   buildDiffSegments,
-  formatDiffLines,
+  formatBoxedDiff,
   type DiffSegment,
 } from './diffUtils.js';
 
@@ -103,6 +103,7 @@ export function createFileTools(workingDir: string): ToolDefinition[] {
             diffSegments,
             workingDir,
             filePreviouslyExisted,
+            nextContent,
           );
           return hasContent
             ? summary
@@ -339,6 +340,7 @@ function buildWriteSummary(
   diffSegments: DiffSegment[],
   workingDir: string,
   filePreviouslyExisted: boolean,
+  newContent?: string,
 ): string {
   const readablePath = formatRelativeFilePath(filePath, workingDir);
   const addedLines = diffSegments.filter(
@@ -355,14 +357,43 @@ function buildWriteSummary(
       : 'Updated';
   const header = `#### ${actionLabel} ${readablePath}`;
 
+  // For new files, show a preview of the content instead of a diff
+  if (!filePreviouslyExisted && newContent) {
+    const lines = newContent.split('\n');
+    const totalLines = lines.length;
+    const maxPreviewLines = 50;
+    const preview = lines.slice(0, maxPreviewLines).join('\n');
+    const truncated = totalLines > maxPreviewLines;
+
+    const fileExt = filePath.split('.').pop() || '';
+    const sections = [
+      header,
+      `Total lines: ${totalLines}`,
+      '',
+      'File preview:',
+      `\`\`\`${fileExt}`,
+      preview,
+      truncated ? '\n... (truncated)' : '',
+      '```',
+    ];
+    return sections.join('\n').trimEnd();
+  }
+
   if (!hasChanges) {
     return `${header}\nNo textual changes.`;
   }
 
   const statsLine = `Lines changed: +${addedLines} / -${removedLines}`;
-  const diffLines = formatDiffLines(diffSegments);
-  const diffBlock = ['```diff', ...diffLines, '```'].join('\n');
-  const sections = [header, statsLine, '', 'Diff preview:', diffBlock];
+
+  // Add git-style file headers for better context
+  const fileHeaders = [
+    `--- a/${readablePath}`,
+    `+++ b/${readablePath}`,
+  ];
+
+  const diffBlock = formatBoxedDiff(diffSegments, fileHeaders);
+
+  const sections = [header, statsLine, '', diffBlock];
   return sections.join('\n').trimEnd();
 }
 

@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { ToolDefinition } from '../core/toolRuntime.js';
 import { buildError } from '../core/errors.js';
-import { buildDiffSegments, formatDiffLines } from './diffUtils.js';
+import { buildDiffSegments, formatBoxedDiff } from './diffUtils.js';
 
 /**
  * Creates the Edit tool for surgical file modifications using exact string replacement.
@@ -121,17 +121,21 @@ export function createEditTools(workingDir: string): ToolDefinition[] {
             ? ` (${occurrences} occurrence${occurrences > 1 ? 's' : ''})`
             : '';
 
-          const diffLines = formatDiffLines(diffSegments);
+          // Add git-style file headers for better context
+          const fileHeaders = [
+            `--- a/${displayPath}`,
+            `+++ b/${displayPath}`,
+          ];
+
           const diffBlock =
-            diffLines.length > 0
-              ? ['```diff', ...diffLines, '```'].join('\n')
+            diffSegments.length > 0
+              ? formatBoxedDiff(diffSegments, fileHeaders)
               : '(No visual diff - whitespace or formatting changes only)';
 
           return [
             `✓ Edited ${displayPath}${occurrencesText}`,
             `Lines changed: +${addedLines} / -${removedLines}`,
             '',
-            'Diff preview:',
             diffBlock,
           ].join('\n');
         } catch (error: any) {

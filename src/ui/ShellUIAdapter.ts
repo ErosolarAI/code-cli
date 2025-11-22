@@ -609,13 +609,16 @@ export class ShellUIAdapter {
       case 'Write':
       case 'write_file': {
         const writePath = this.abbreviatePathForDisplay(args.path || '');
-        return `⏺ Write(${writePath})\n  ⎿  File written`;
+        // Show the full diff output from the Write tool
+        const header = `⏺ Write(${writePath})`;
+        return output.trim() ? `${header}\n\n${output}` : `${header}\n  ⎿  File written`;
       }
       case 'Edit':
       case 'edit_file': {
         const editPath = this.abbreviatePathForDisplay(args.path || '');
-        const separator = '─'.repeat(59);
-        return `⏺ Edit(${editPath})\n${separator}\n  Changes applied\n${separator}`;
+        // Show the full diff output from the Edit tool
+        const header = `⏺ Edit(${editPath})`;
+        return output.trim() ? `${header}\n\n${output}` : `${header}\n  ⎿  Changes applied`;
       }
       case 'Bash':
       case 'bash':

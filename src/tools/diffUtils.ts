@@ -2,9 +2,10 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { theme } from '../ui/theme.js';
 
 export interface DiffSegment {
-  type: 'added' | 'removed';
+  type: 'added' | 'removed' | 'context';
   lineNumber: number;
   content: string;
 }
@@ -28,7 +29,10 @@ export function buildDiffSegments(
   return buildNaiveDiff(before, after);
 }
 
-export function formatDiffLines(diff: DiffSegment[]): string[] {
+export function formatDiffLines(
+  diff: DiffSegment[],
+  options?: { colorize?: boolean },
+): string[] {
   if (!diff.length) {
     return [];
   }
@@ -36,14 +40,72 @@ export function formatDiffLines(diff: DiffSegment[]): string[] {
     1,
     ...diff.map((entry) => Math.max(1, entry.lineNumber).toString().length),
   );
+  const colorize = options?.colorize ?? false;
 
   return diff.map((entry) => {
-    const prefix = entry.type === 'added' ? '+' : '-';
+    const prefix =
+      entry.type === 'added' ? '+' : entry.type === 'removed' ? '-' : ' ';
     const lineNumber = Math.max(1, entry.lineNumber);
     const body = entry.content.length > 0 ? entry.content : '[empty line]';
     const paddedNumber = lineNumber.toString().padStart(width, ' ');
-    return `${prefix} L${paddedNumber} | ${body}`;
+    const line = `${prefix} L${paddedNumber} | ${body}`;
+
+    if (!colorize) {
+      return line;
+    }
+
+    // Apply colors based on type
+    if (entry.type === 'added') {
+      return theme.diff.added(line);
+    } else if (entry.type === 'removed') {
+      return theme.diff.removed(line);
+    } else {
+      return theme.ui.muted(line);
+    }
   });
+}
+
+/**
+ * Creates a boxed diff display with colored additions (green) and removals (red)
+ */
+export function formatBoxedDiff(
+  diff: DiffSegment[],
+  fileHeaders: string[],
+): string {
+  if (!diff.length) {
+    return '';
+  }
+
+  const colorizedLines = formatDiffLines(diff, { colorize: true });
+  const allLines = [...fileHeaders.map((h) => theme.diff.meta(h)), ...colorizedLines];
+
+  // Calculate the maximum visible width for the box
+  const maxWidth = Math.max(
+    ...allLines.map((line) => stripAnsi(line).length),
+    60,
+  );
+
+  // Create box with border
+  const topBorder = theme.ui.muted(`╭${'─'.repeat(maxWidth + 2)}╮`);
+  const bottomBorder = theme.ui.muted(`╰${'─'.repeat(maxWidth + 2)}╯`);
+
+  const boxedLines = allLines.map((line) => {
+    const visibleLen = stripAnsi(line).length;
+    const padding = ' '.repeat(Math.max(0, maxWidth - visibleLen));
+    return `${theme.ui.muted('│')} ${line}${padding} ${theme.ui.muted('│')}`;
+  });
+
+  return [topBorder, ...boxedLines, bottomBorder].join('\n');
+}
+
+/**
+ * Removes ANSI escape codes from a string to get the visible text
+ */
+function stripAnsi(value: string): string {
+  if (!value) {
+    return '';
+  }
+  return value.replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, '');
 }
 
 function tryBuildWithGit(before: string, after: string): DiffSegment[] | null {
@@ -61,7 +123,7 @@ function tryBuildWithGit(before: string, after: string): DiffSegment[] | null {
         '--no-pager',
         'diff',
         '--no-index',
-        '--unified=0',
+        '--unified=3',
         '--color=never',
         '--',
         originalPath,
@@ -154,6 +216,11 @@ function parseUnifiedDiff(output: string): DiffSegment[] {
     }
 
     if (line.startsWith(' ')) {
+      segments.push({
+        type: 'context',
+        lineNumber: oldLine,
+        content: line.slice(1),
+      });
       oldLine += 1;
       newLine += 1;
       continue;

@@ -11,7 +11,12 @@ import {
 import { ContextManager } from './contextManager.js';
 import type { ToolPolicy, ToolPolicyDecision } from './policyEngine.js';
 import type { TimelineRecorder } from './timeline.js';
-import { withRetry, FAST_RETRY_CONFIG } from './retryStrategy.js';
+import {
+  withRetry,
+  FAST_RETRY_CONFIG,
+  BASH_RETRY_CONFIG,
+  type RetryConfig,
+} from './retryStrategy.js';
 import { classifyError } from './errorClassification.js';
 import type {
   MetricsCollector,
@@ -197,6 +202,20 @@ export class ToolRuntime {
     }
   }
 
+  /**
+   * Determine the appropriate retry configuration for a tool.
+   * Bash commands get longer timeouts to accommodate test suites and builds.
+   */
+  private getRetryConfig(toolName: string): RetryConfig {
+    const isBashTool =
+      toolName === 'Bash' ||
+      toolName === 'bash' ||
+      toolName === 'execute_bash' ||
+      toolName === 'execute_bash_stream';
+
+    return isBashTool ? BASH_RETRY_CONFIG : FAST_RETRY_CONFIG;
+  }
+
   registerSuite(suite: ToolSuite): void {
     if (!suite?.id?.trim()) {
       throw new Error('Tool suite id cannot be blank.');
@@ -375,6 +394,8 @@ export class ToolRuntime {
       );
 
       // Execute tool handler with retry logic for transient failures
+      // Use bash-specific retry config for shell commands (longer timeout)
+      const retryConfig = this.getRetryConfig(normalizedExecutionCall.name);
       const retryResult = await withRetry(
         async () => {
           return await record.definition.handler(callArgs);
@@ -383,7 +404,7 @@ export class ToolRuntime {
           const classification = classifyError(error);
           return classification.isRetryable;
         },
-        FAST_RETRY_CONFIG,
+        retryConfig,
         (attempt, error, delayMs) => {
           this.timeline?.record({
             action: 'tool_execution',
