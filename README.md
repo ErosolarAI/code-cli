@@ -1,6 +1,13 @@
 # bo-cli (minimal)
 > A focused, diff-aware CLI for shipping code with only the essentials: local file work, fast search, and sandboxed shell execution. No fluff, no hidden network calls.
 
+# first edit!
+
+![IMG_8625](https://github.com/user-attachments/assets/6af5efc0-ed72-409d-8521-e61113d83baa)
+
+![IMG_8626](https://github.com/user-attachments/assets/bea939a7-8b23-4e6a-94b6-27e500644307)
+
+
 ## Contents
 - [At a Glance](#at-a-glance)
 - [Quickstart](#quickstart)
