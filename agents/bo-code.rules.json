@@ -72,6 +72,11 @@
       "id": "guardrail.git_safety",
       "summary": "Only create git commits when explicitly requested. Never update config, run destructive commands, skip hooks, or force push to main without explicit request. Always check authorship before amending.",
       "severity": "critical"
+    },
+    {
+      "id": "guardrail.working_directory",
+      "summary": "Respect the working directory specified in the workspace context (cwd: <path>). Never use 'cd' commands or try to navigate to different directories. All tools execute in the current project root. If asked to work on a different project, inform the user to restart in that directory.",
+      "severity": "critical"
     }
   ],
   "phases": [

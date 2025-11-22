@@ -137,7 +137,7 @@ function globSearch(baseDir: string, pattern: string): string[] {
           }
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // Silently ignore permission errors
     }
   }

@@ -1,15 +1,11 @@
 #!/usr/bin/env node
 import {
   existsSync,
-  lstatSync,
-  readFileSync,
-  readlinkSync,
   rmSync,
 } from 'node:fs';
 import { join } from 'node:path';
 
 const BIN_NAMES = ['bo', 'apt'];
-const OWNERSHIP_MARKERS = ['bo', 'apt', 'codex runtime ready', 'launchCli'];
 
 const isGlobalInstall = process.env.npm_config_global === 'true';
 const prefix = process.env.npm_config_prefix;

@@ -321,6 +321,10 @@ function mapTool(definition: ProviderToolDefinition): Tool {
 }
 
 function toRecord(value: unknown): Record<string, unknown> {
+  // Handle null/undefined by returning empty object
+  if (value === null || value === undefined) {
+    return {};
+  }
   if (isPlainRecord(value)) {
     return value;
   }

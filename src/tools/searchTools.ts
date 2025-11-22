@@ -164,11 +164,11 @@ function searchInFiles(
               });
             }
           });
-        } catch (error) {
+        } catch (_error) {
             // ignore errors
           }
       }
-    } catch (error) {
+    } catch (_error) {
             // ignore errors
           }
   }

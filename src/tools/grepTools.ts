@@ -399,7 +399,7 @@ function searchFiles(
           });
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // Silently ignore permission errors
     }
   }

@@ -288,7 +288,7 @@ function listFilesRecursive(
         results.push(`${indent}${entry.name} ${size}`);
       }
     }
-  } catch (error) {
+  } catch (_error) {
         // ignore errors
       }
 
@@ -325,7 +325,7 @@ function searchFilesGlob(dir: string, pattern: string): string[] {
           results.push(fullPath);
         }
       }
-    } catch (error) {
+    } catch (_error) {
         // ignore errors
       }
   }

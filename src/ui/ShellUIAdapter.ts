@@ -602,34 +602,40 @@ export class ShellUIAdapter {
     // Compact style: ⏺ ToolName(args)\n  ⎿  Details
     switch (call.name) {
       case 'Read':
-      case 'read_file':
+      case 'read_file': {
         const readPath = this.abbreviatePathForDisplay(args.path || '');
         return `⏺ Read(${readPath})\n  ⎿  Read ${lineCount} lines`;
+      }
       case 'Write':
-      case 'write_file':
+      case 'write_file': {
         const writePath = this.abbreviatePathForDisplay(args.path || '');
         return `⏺ Write(${writePath})\n  ⎿  File written`;
+      }
       case 'Edit':
-      case 'edit_file':
+      case 'edit_file': {
         const editPath = this.abbreviatePathForDisplay(args.path || '');
         const separator = '─'.repeat(59);
         return `⏺ Edit(${editPath})\n${separator}\n  Changes applied\n${separator}`;
+      }
       case 'Bash':
       case 'bash':
-      case 'execute_bash':
+      case 'execute_bash': {
         const cmd = this.truncateCommand(args.command, 40);
         return `⏺ Bash(${cmd})\n  ⎿  Completed`;
+      }
       case 'Grep':
-      case 'grep_search':
+      case 'grep_search': {
         const pattern = args.pattern || args.query || '';
         return `⏺ Grep("${pattern}")\n  ⎿  Found matches`;
+      }
       case 'Glob':
       case 'list_files':
         return `⏺ Glob(${args.pattern || args.path || '.'})\n  ⎿  Listed files`;
       case 'WebFetch':
-      case 'web_fetch':
+      case 'web_fetch': {
         const url = this.truncateUrl(args.url || '', 35);
         return `⏺ WebFetch(${url})\n  ⎿  Content fetched`;
+      }
       default:
         return `⏺ ${this.formatToolName(call.name)}\n  ⎿  Completed`;
     }

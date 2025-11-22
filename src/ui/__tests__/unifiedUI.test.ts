@@ -11,7 +11,7 @@ import {
   afterEach,
   jest,
 } from '@jest/globals';
-import { EventEmitter, Writable } from 'stream';
+import { Writable } from 'stream';
 import { OverlayManager } from '../overlay/OverlayManager.js';
 import { StatusOrchestrator } from '../orchestration/StatusOrchestrator.js';
 import { AnimationScheduler } from '../animation/AnimationScheduler.js';
@@ -30,7 +30,7 @@ class MockWriteStream extends Writable {
   public columns: number = 80;
   public rows: number = 24;
 
-  _write(chunk: any, encoding: string, callback: Function): void {
+  _write(chunk: any, encoding: string, callback: (error?: Error | null) => void): void {
     this.output.push(chunk.toString());
     callback();
   }
@@ -278,19 +278,19 @@ describe('InterruptManager', () => {
   });
 
   test('should queue interrupts by priority', () => {
-    const lowId = manager.queue({
+    const _lowId = manager.queue({
       type: 'hint',
       priority: InterruptPriority.LOW,
       message: 'Low priority',
     });
 
-    const highId = manager.queue({
+    const _highId = manager.queue({
       type: 'alert',
       priority: InterruptPriority.HIGH,
       message: 'High priority',
     });
 
-    const normalId = manager.queue({
+    const _normalId = manager.queue({
       type: 'confirmation',
       priority: InterruptPriority.NORMAL,
       message: 'Normal priority',
@@ -326,7 +326,7 @@ describe('InterruptManager', () => {
 
   test('should handle interrupt completion', () => {
     let handlerCalled = false;
-    const id = manager.queue({
+    const _id = manager.queue({
       type: 'confirmation',
       priority: InterruptPriority.NORMAL,
       message: 'Confirm action',
@@ -573,7 +573,7 @@ describe('ShellUIAdapter', () => {
     adapter.updateContextUsage(75);
 
     // Should show warning tone for high usage
-    const state = adapter.getState();
+    const _state = adapter.getState();
     // Context usage is shown in overlay
   });
 

@@ -1,1 +1,1 @@
-const value = 42;
+const _value = 42;

@@ -44,6 +44,12 @@
         { "label": "README", "file": "README.md" },
         { "label": "package.json", "file": "package.json" }
       ]
+    },
+    {
+      "id": "guardrail.working_directory",
+      "summary": "Respect the working directory specified in the workspace context (cwd: <path>). Never use 'cd' commands or try to navigate to different directories.",
+      "detail": "All tools execute in the current project root. If asked to work on a different project, inform the user to restart in that directory.",
+      "severity": "critical"
     }
   ],
   "phases": [

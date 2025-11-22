@@ -140,7 +140,7 @@ const IDENTIFIER_START_C = /[A-Za-z_$]/;
 const IDENTIFIER_PART_C = /[A-Za-z0-9_$]/;
 const IDENTIFIER_START_ALPHA = /[A-Za-z_]/;
 const IDENTIFIER_PART_ALPHA = /[A-Za-z0-9_]/;
-const IDENTIFIER_PART_SHELL = /[A-Za-z0-9_\-]/;
+const IDENTIFIER_PART_SHELL = /[A-Za-z0-9_-]/;
 
 const COMMON_C_KEYWORDS = [
   'const',

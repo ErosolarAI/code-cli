@@ -5,8 +5,9 @@
  * Provides automated development workflows and quality checks
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execSync } from 'node:child_process';
+import { join } from 'node:path';
 
 class DevUtils {
   constructor() {
@@ -144,17 +145,14 @@ class DevUtils {
    */
   findFiles(dir, ext) {
     const files = [];
-    
+
     try {
-      const { readdirSync, statSync } = await import('node:fs');
-      const { join } = await import('node:path');
-      
       const entries = readdirSync(dir);
-      
+
       for (const entry of entries) {
         const fullPath = join(dir, entry);
         const stat = statSync(fullPath);
-        
+
         if (stat.isDirectory()) {
           files.push(...this.findFiles(fullPath, ext));
         } else if (entry.endsWith(ext)) {
@@ -164,7 +162,7 @@ class DevUtils {
     } catch (error) {
       // Directory might not exist
     }
-    
+
     return files;
   }
 

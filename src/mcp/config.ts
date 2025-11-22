@@ -262,7 +262,7 @@ function expandTemplate(
     return replaced;
   }
 
-  const tokenMatch = value.match(/^\$\{\s*([^\}]+)\s*\}$/);
+  const tokenMatch = value.match(/^\$\{\s*([^}]+)\s*\}$/);
   if (tokenMatch) {
     const key = (tokenMatch[1] ?? '').trim();
     const direct =

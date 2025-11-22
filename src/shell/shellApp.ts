@@ -1,5 +1,6 @@
 import { exit } from 'node:process';
-import { relative } from 'node:path';
+import { relative, join, dirname } from 'node:path';
+import { existsSync } from 'node:fs';
 import '../config.js';
 import type { ProfileName } from '../config.js';
 import {
@@ -46,6 +47,27 @@ export interface LaunchShellOptions {
 }
 
 /**
+ * Traverses up from startDir to find a directory containing .git or the brand-specific project file.
+ * Falls back to startDir if no project is found.
+ */
+function findProjectRoot(startDir: string): string {
+  let currentDir = startDir;
+  while (true) {
+    const gitDir = join(currentDir, '.git');
+    const boProjectFile = join(currentDir, 'bo.project.json');
+    if (existsSync(gitDir) || existsSync(boProjectFile)) {
+      return currentDir;
+    }
+    const parentDir = dirname(currentDir);
+    if (parentDir === currentDir) {
+      // Reached the root of the filesystem
+      return startDir;
+    }
+    currentDir = parentDir;
+  }
+}
+
+/**
  * Launch the interactive shell with full capability awareness for the selected profile.
  */
 export async function launchShell(
@@ -76,10 +98,11 @@ export async function launchShell(
     });
 
     const workingDir = process.cwd();
+    const projectRoot = findProjectRoot(workingDir);
 
     const workspaceOptions = resolveWorkspaceCaptureOptions(process.env);
     const workspaceContext = buildWorkspaceContext(
-      workingDir,
+      projectRoot,
       workspaceOptions,
     );
 
@@ -107,7 +130,7 @@ export async function launchShell(
     const runtime = await createNodeRuntime({
       profile,
       workspaceContext,
-      workingDir,
+      workingDir: projectRoot, // <--- Note: using projectRoot here
       toolObserver,
       policy,
       timeline,
@@ -146,7 +169,7 @@ export async function launchShell(
       profile,
       initialModel.model,
       initialModel.provider,
-      workingDir,
+      projectRoot, // <--- Note: using projectRoot here
       version,
     );
 
@@ -172,7 +195,7 @@ export async function launchShell(
     const shell = new InteractiveShell({
       profile,
       profileLabel: profileConfig.label,
-      workingDir,
+      workingDir: projectRoot, // <--- Note: using projectRoot here
       session,
       baseSystemPrompt: enhancedSystemPrompt,
       initialModel,
@@ -207,7 +230,7 @@ function reportSkippedTools(entries: ToolLoadWarning[]): void {
  * which provides unified UI integration. Kept for backward compatibility.
  */
 // @ts-expect-error - Legacy function kept for reference, not currently used
-function createToolObserver(
+function _createToolObserver(
   root: string,
   statusTracker: LiveStatusTracker,
 ): ToolRuntimeObserver {

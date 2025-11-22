@@ -2,7 +2,6 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   withRetry,
-  DEFAULT_RETRY_CONFIG,
   FAST_RETRY_CONFIG,
   RetryMetricsTracker,
   CircuitBreaker,

@@ -27,7 +27,7 @@ function logWarning(message) {
   console.log(`${colors.yellow}⚠️${colors.reset} ${message}`);
 }
 
-function logInfo(message) {
+function _logInfo(message) {
   console.log(`${colors.blue}ℹ️${colors.reset} ${message}`);
 }
 

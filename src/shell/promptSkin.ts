@@ -109,6 +109,7 @@ export class PromptSkin {
 
   private patch(): void {
     const original = this.originalRefresh;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     this.rl._refreshLine = function patchedRefresh(this: readline.Interface) {
       self.withSuppressedOutput(() => {
@@ -124,6 +125,7 @@ export class PromptSkin {
       return;
     }
     const original = stream.write;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const skin = this;
     stream.write = function patchedWrite(
       this: typeof stream,

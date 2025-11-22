@@ -200,7 +200,9 @@ function parseToolResponse(content: string): Record<string, unknown> {
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
-  } catch {}
+  } catch (_error) {
+    // Ignore JSON parsing errors
+  }
 
   return { output: content };
 }
@@ -257,6 +259,10 @@ function mapUsage(
 }
 
 function toRecord(value: unknown): Record<string, unknown> {
+  // Handle null/undefined by returning empty object
+  if (value === null || value === undefined) {
+    return {};
+  }
   if (isPlainRecord(value)) {
     return value;
   }

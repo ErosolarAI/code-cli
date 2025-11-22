@@ -106,7 +106,7 @@ export function listMetricsSnapshots(
       };
     })
     .sort((a, b) => b.mtimeMs - a.mtimeMs)
-    .map(({ mtimeMs, ...entry }) => entry);
+    .map(({ mtimeMs: _mtimeMs, ...entry }) => entry);
 
   return entries;
 }

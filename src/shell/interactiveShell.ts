@@ -351,11 +351,17 @@ export class InteractiveShell {
     if (this.autosaveEnabled) {
       const autosave = loadAutosaveSnapshot(this.profile);
       if (autosave) {
-        this.cachedHistory = autosave.messages;
-        this.pendingHistoryLoad = autosave.messages;
-        this.activeSessionId = null;
-        this.activeSessionTitle = autosave.title;
-        this.sessionResumeNotice = 'Restored last autosaved session.';
+        // Check if the autosaved session is from a different workspace
+        if (autosave.workspaceRoot && autosave.workspaceRoot !== this.workingDir) {
+          clearAutosaveSnapshot(this.profile);
+          this.sessionResumeNotice = `Autosaved session was from a different directory (${autosave.workspaceRoot}). Starting fresh in ${this.workingDir}.`;
+        } else {
+          this.cachedHistory = autosave.messages;
+          this.pendingHistoryLoad = autosave.messages;
+          this.activeSessionId = null;
+          this.activeSessionTitle = autosave.title;
+          this.sessionResumeNotice = 'Restored last autosaved session.';
+        }
       }
     }
   }
